@@ -1,0 +1,111 @@
+@extends('layouts.admin')
+
+@section('content')
+<div class="max-w-[800px] mx-auto mb-12">
+    <div class="flex items-center justify-between relative">
+        <div class="absolute top-1/2 left-0 w-full h-1 bg-surface-container -translate-y-1/2 -z-10"></div>
+        <div class="flex flex-col items-center gap-3 bg-surface">
+            <div class="w-10 h-10 rounded-full bg-solar-gold text-deep-navy flex items-center justify-center font-bold ring-4 ring-surface shadow-sm">1</div>
+            <span class="text-sm font-bold text-on-surface">Detail Proyek</span>
+        </div>
+        <div class="flex flex-col items-center gap-3 bg-surface">
+            <div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold ring-4 ring-surface">2</div>
+            <span class="text-sm font-medium text-on-surface-variant">Pilih Penyedia</span>
+        </div>
+        <div class="flex flex-col items-center gap-3 bg-surface">
+            <div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold ring-4 ring-surface">3</div>
+            <span class="text-sm font-medium text-on-surface-variant">Review & Simpan</span>
+        </div>
+    </div>
+</div>
+
+<form action="{{ route('proyek.save.step1') }}" method="POST" enctype="multipart/form-data" class="max-w-[800px] mx-auto">
+    @csrf
+    @if($proyek)
+        <input type="hidden" name="draft_id" value="{{ $proyek->id }}">
+    @endif
+
+    <div class="bg-surface-container-lowest rounded-xl shadow-[0_32px_64px_-12px_rgba(24,28,28,0.06)] overflow-hidden border border-slate-100">
+        <div class="p-8 border-b border-surface-container-low">
+            <h2 class="text-2xl font-extrabold text-deep-navy font-headline mb-2">Informasi Dasar Proyek</h2>
+            <p class="text-on-surface-variant leading-relaxed">Berikan detail lengkap mengenai lokasi dan tujuan proyek energi terbarukan Anda.</p>
+        </div>
+        
+        <div class="p-8 space-y-8">
+
+            @if ($errors->any())
+                <div class="p-4 bg-red-100 text-red-700 rounded-lg">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="space-y-3">
+                <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Pilih Desa Target</label>
+                <select name="desa_id" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
+                    <option value="">Pilih Desa</option>
+                    @foreach($desas as $desa)
+                        <option value="{{ $desa->id }}" {{ (old('desa_id', $proyek->desa_id ?? '') == $desa->id) ? 'selected' : '' }}>
+                            {{ $desa->nama }} - {{ $desa->provinsi }} ({{ $desa->jenis_energi }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="space-y-3">
+                <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Judul Proyek</label>
+                <input name="judul" value="{{ old('judul', $proyek->judul ?? '') }}" required class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface" placeholder="Contoh: Instalasi Panel Surya Desa X" type="text"/>
+            </div>
+
+            <div class="space-y-3">
+                <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Jenis Energi</label>
+                <select name="jenis_energi" required class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
+                    <option value="solar" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'solar' ? 'selected' : '' }}>Solar</option>
+                    <option value="mikro_hidro" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'mikro_hidro' ? 'selected' : '' }}>Mikro Hidro</option>
+                    <option value="lainnya" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
+                </select>
+            </div>
+
+            <div class="space-y-3">
+                <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Deskripsi Proyek</label>
+                <textarea name="deskripsi" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface resize-none" placeholder="Ceritakan tujuan proyek..." rows="6">{{ old('deskripsi', $proyek->deskripsi ?? '') }}</textarea>
+            </div>
+
+            <div class="space-y-3">
+                <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Upload Foto Proyek (Maks 5)</label>
+                <input type="file" name="fotos[]" multiple accept="image/*" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
+                @if($proyek && $proyek->fotos->count() > 0)
+                    <p class="text-sm font-bold mt-2">Uploaded Images:</p>
+                    <div class="flex gap-2">
+                        @foreach($proyek->fotos as $foto)
+                            <img src="{{ Storage::url($foto->path) }}" class="w-16 h-16 object-cover rounded shadow">
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tanggal Mulai</label>
+                    <input name="estimasi_mulai" value="{{ old('estimasi_mulai', $proyek->estimasi_mulai ? $proyek->estimasi_mulai->format('Y-m-d') : '') }}" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface" type="date"/>
+                </div>
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tanggal Berakhir</label>
+                    <input name="estimasi_selesai" value="{{ old('estimasi_selesai', $proyek->estimasi_selesai ? $proyek->estimasi_selesai->format('Y-m-d') : '') }}" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface" type="date"/>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="p-8 bg-surface-container-low/50">
+            <button type="submit" class="w-full bg-solar-gold py-5 rounded-lg text-deep-navy font-bold text-lg shadow-lg hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                Lanjut Pilih Penyedia
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+    </div>
+</form>
+@endsection
