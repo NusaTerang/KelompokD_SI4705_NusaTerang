@@ -90,11 +90,11 @@
             <div class="grid grid-cols-2 gap-6">
                 <div class="space-y-3">
                     <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tanggal Mulai</label>
-                    <input name="estimasi_mulai" value="{{ old('estimasi_mulai', $proyek->estimasi_mulai ? $proyek->estimasi_mulai->format('Y-m-d') : '') }}" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface" type="date"/>
+                    <input name="estimasi_mulai" value="{{ old('estimasi_mulai', ($proyek && $proyek->estimasi_mulai) ? $proyek->estimasi_mulai->format('Y-m-d') : '') }}" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface" type="date"/>
                 </div>
                 <div class="space-y-3">
                     <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tanggal Berakhir</label>
-                    <input name="estimasi_selesai" value="{{ old('estimasi_selesai', $proyek->estimasi_selesai ? $proyek->estimasi_selesai->format('Y-m-d') : '') }}" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface" type="date"/>
+                    <input name="estimasi_selesai" value="{{ old('estimasi_selesai', ($proyek && $proyek->estimasi_selesai) ? $proyek->estimasi_selesai->format('Y-m-d') : '') }}" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface" type="date"/>
                 </div>
             </div>
 
