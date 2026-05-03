@@ -51,7 +51,7 @@ return new class extends Migration
             $table->string('email', 100)->unique();
             $table->string('password', 255);
             $table->string('no_telepon', 20)->nullable();
-            $table->enum('role', ['admin', 'penyedia', 'user'])->default('user');
+            $table->enum('role', ['admin', 'penyedia', 'donatur'])->default('donatur');
             $table->unsignedBigInteger('penyedia_id')->nullable();
             $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
@@ -70,7 +70,7 @@ return new class extends Migration
                     'email' => $a['email'],
                     'password' => $a['password'],
                     'no_telepon' => $a['no_telepon'] ?? $a['phone'] ?? null,
-                    'role' => $a['role'] ?? 'user',
+                    'role' => $a['role'] ?? 'donatur',
                     'penyedia_id' => $a['penyedia_id'] ?? null,
                     'created_at' => $a['created_at'] ?? now(),
                 ]);

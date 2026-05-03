@@ -8,6 +8,12 @@ use App\Services\PenyediaRecommendationService;
 
 class PenyediaController extends Controller
 {
+    public function index()
+    {
+        $providers = \App\Models\PenyediaEnergi::all();
+        return view('penyedia.index', compact('providers'));
+    }
+
     public function getRekomendasi(Request $request, PenyediaRecommendationService $service)
     {
         $desa_id = $request->query('desa_id');

@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             DesaDummySeeder::class,
             PenyediaDummySeeder::class,
+            ProyekDummySeeder::class,
         ]);
     }
 }

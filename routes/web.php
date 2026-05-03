@@ -10,7 +10,8 @@ use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
 
 Route::get('/', function () {
-    return view('welcome');
+    $projects = \App\Models\Proyek::with(['desa', 'fotos'])->paginate(6);
+    return view('welcome', compact('projects'));
 });
 
 Route::middleware('guest')->group(function () {
@@ -69,6 +70,8 @@ Route::prefix('desa')->name('desa.')->group(function () {
     Route::get('kelola', [DesaController::class, 'kelola'])->name('kelola');
     Route::get('daftar', [DesaController::class, 'index'])->name('daftar');
 });
+
+Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('penyedia.daftar');
 
 Route::get('/profil-preview', [ProfileController::class, 'edit']);
 

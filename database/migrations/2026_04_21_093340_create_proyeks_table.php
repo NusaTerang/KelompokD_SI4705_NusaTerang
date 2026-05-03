@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('proyeks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('desa_id')->constrained('desas')->cascadeOnDelete();
+            $table->foreignId('desa_id')->constrained('desa', 'id_desa')->cascadeOnDelete();
             $table->foreignId('penyedia_id')->nullable()->constrained('penyedia_energis')->nullOnDelete();
             $table->string('judul');
             $table->text('deskripsi')->nullable();
             $table->enum('jenis_energi', ['solar', 'mikro_hidro', 'lainnya'])->nullable();
             $table->date('estimasi_mulai')->nullable();
             $table->date('estimasi_selesai')->nullable();
+            $table->decimal('target_dana', 15, 2)->default(0);
+            $table->decimal('dana_terkumpul', 15, 2)->default(0);
             $table->enum('status', [
                 'draft',
                 'menunggu_konfirmasi_penyedia',
