@@ -24,7 +24,7 @@ class Proyek extends Model
 
     public function desa()
     {
-        return $this->belongsTo(Desa::class);
+        return $this->belongsTo(Desa::class, 'desa_id', 'id_desa');
     }
 
     public function penyedia()

@@ -32,7 +32,7 @@ class ProyekController extends Controller
     public function createStep1(Request $request)
     {
         $validated = $request->validate([
-            'desa_id' => 'required|exists:desas,id',
+            'desa_id' => 'required|exists:desa,id_desa',
             'judul' => 'required|string|min:10|max:255',
             'deskripsi' => 'required|string|min:50',
             'jenis_energi' => 'nullable|in:solar,mikro_hidro,lainnya',
