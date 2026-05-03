@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DesaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -13,11 +14,49 @@ Route::get('/', function () {
 });
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'show'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+    // Register
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store']);
+
+    // Login
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
 });
 
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    // Generic dashboard fallback
+    Route::get('/dashboard', function () {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        return match ($user->role) {
+            'admin'    => redirect('/admin/dashboard'),
+            'penyedia' => redirect('/penyedia/dashboard'),
+            'donatur'  => redirect('/donatur/dashboard'),
+            default    => redirect('/'),
+        };
+    })->name('dashboard');
+
+    Route::prefix('admin')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
+    });
+
+    Route::prefix('penyedia')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('penyedia.dashboard');
+        })->name('penyedia.dashboard');
+    });
+
+    Route::prefix('donatur')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('donatur.dashboard');
+        })->name('donatur.dashboard');
+    });
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profil.edit');

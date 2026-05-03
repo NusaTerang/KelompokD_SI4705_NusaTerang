@@ -20,9 +20,10 @@ class User extends Authenticatable
     public const UPDATED_AT = null;
 
     protected $fillable = [
-        'name',
+        'nama',
         'email',
         'password',
+        'no_telepon',
         'role',
         'penyedia_id',
     ];
@@ -47,5 +48,37 @@ class User extends Authenticatable
     public function penyedia()
     {
         return $this->belongsTo(PenyediaEnergi::class, 'penyedia_id');
+    }
+
+    /**
+     * Check if the user has a specific role.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Check if the user is a penyedia.
+     */
+    public function isPenyedia(): bool
+    {
+        return $this->hasRole('penyedia');
+    }
+
+    /**
+     * Check if the user is a donatur.
+     */
+    public function isDonatur(): bool
+    {
+        return $this->hasRole('donatur');
     }
 }
