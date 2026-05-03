@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('proyeks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('desa_id')->constrained('desas');
+            $table->foreignId('desa_id')->constrained('desas')->cascadeOnDelete();
             $table->foreignId('penyedia_id')->nullable()->constrained('penyedia_energis')->nullOnDelete();
             $table->string('judul');
             $table->text('deskripsi')->nullable();
@@ -32,6 +35,9 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('proyeks');

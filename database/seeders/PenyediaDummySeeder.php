@@ -2,14 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\PenyediaEnergi;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PenyediaDummySeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $penyedias = [
+        $data = [
             ['nama' => 'SolarNusa Indonesia', 'spesialisasi' => 'solar',
              'provinsi_operasi' => 'Jawa Barat', 'kisaran_harga_min' => 100000000,
              'kisaran_harga_max' => 200000000, 'rating' => 4.8, 'status' => 'aktif'],
@@ -31,8 +34,8 @@ class PenyediaDummySeeder extends Seeder
              'kisaran_harga_max' => 250000000, 'rating' => 3.9, 'status' => 'aktif'],
         ];
 
-        foreach ($penyedias as $penyedia) {
-            PenyediaEnergi::create($penyedia);
+        foreach ($data as $penyedia) {
+            \App\Models\PenyediaEnergi::create($penyedia);
         }
     }
 }

@@ -2,14 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Desa;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DesaDummySeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $desas = [
+        $data = [
             ['nama' => 'Desa Cikaret', 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Bogor',
              'lat' => -6.5971, 'lng' => 106.8160, 'jenis_energi' => 'solar',
              'estimasi_biaya' => 150000000, 'status' => 'terverifikasi'],
@@ -23,8 +26,8 @@ class DesaDummySeeder extends Seeder
              'estimasi_biaya' => 120000000, 'status' => 'terverifikasi'],
         ];
 
-        foreach ($desas as $desa) {
-            Desa::create($desa);
+        foreach ($data as $desa) {
+            \App\Models\Desa::create($desa);
         }
     }
 }

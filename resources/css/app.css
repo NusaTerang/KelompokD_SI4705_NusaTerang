@@ -8,4 +8,11 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-nt-navy: #003366;
+    --color-nt-navy-dark: #002244;
+    --color-nt-navy-light: #1a4d80;
+    --color-nt-accent: #f5c518;
+    --color-nt-accent-hover: #e6b800;
+    --color-nt-surface: #f4f6f9;
 }

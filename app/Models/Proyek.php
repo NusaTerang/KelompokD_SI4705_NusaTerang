@@ -6,12 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class Proyek extends Model
 {
-    protected $guarded = [];
+    protected $table = 'proyek';
+    protected $primaryKey = 'id_proyek';
+    public $timestamps = false;
+
+    protected $fillable = [
+        'id_desa', 'id_admin', 'judul', 'deskripsi',
+        'target_dana', 'dana_terkumpul', 'status_proyek',
+        'estimasi_mulai', 'estimasi_selesai', 'penyedia_id', 'created_by',
+    ];
 
     protected $casts = [
         'estimasi_mulai' => 'date',
         'estimasi_selesai' => 'date',
     ];
+
+    public function penugasan()
+    {
+        return $this->hasMany(PenugasanProyek::class, 'id_proyek');
+    }
 
     public function desa()
     {
