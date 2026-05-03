@@ -6,13 +6,79 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-headline: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-label: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-    --color-nt-navy: #003366;
-    --color-nt-navy-dark: #002244;
-    --color-nt-navy-light: #1a4d80;
-    --color-nt-accent: #f5c518;
-    --color-nt-accent-hover: #e6b800;
-    --color-nt-surface: #f4f6f9;
+    --color-background:                #f7faf9;
+    --color-surface:                   #f7faf9;
+    --color-surface-bright:            #f7faf9;
+    --color-surface-dim:               #d7dbda;
+    --color-surface-container-lowest:  #ffffff;
+    --color-surface-container-low:     #f1f4f3;
+    --color-surface-container:         #ebeeed;
+    --color-surface-container-high:    #e6e9e8;
+    --color-surface-container-highest: #e0e3e2;
+    --color-on-surface:                #181c1c;
+    --color-on-surface-variant:        #4c4733;
+    --color-outline:                   #7e7760;
+    --color-outline-variant:           #cfc6ac;
+
+    --color-primary:                   #6f5d00;
+    --color-primary-fixed:             #ffe16a;
+    --color-primary-fixed-dim:         #e8c404;
+    --color-primary-container:         #f9d423;
+    --color-on-primary:                #ffffff;
+    --color-on-primary-fixed:          #221b00;
+    --color-on-primary-fixed-variant:  #544600;
+    --color-on-primary-container:      #6d5b00;
+    --color-inverse-primary:           #e8c404;
+
+    --color-secondary:                 #0F4C81;
+    --color-secondary-container:       #92c1fe;
+    --color-secondary-fixed:           #d2e4ff;
+    --color-secondary-fixed-dim:       #a0c9ff;
+    --color-on-secondary:              #ffffff;
+    --color-on-secondary-container:    #144f84;
+    --color-on-secondary-fixed:        #001c37;
+    --color-on-secondary-fixed-variant:#07497d;
+
+    --color-tertiary:                  #006d37;
+    --color-tertiary-fixed:            #7efba4;
+    --color-tertiary-fixed-dim:        #61de8a;
+    --color-tertiary-container:        #72ef99;
+    --color-on-tertiary:               #ffffff;
+    --color-on-tertiary-container:     #006b36;
+    --color-on-tertiary-fixed:         #00210c;
+    --color-on-tertiary-fixed-variant: #005228;
+
+    --color-error:                     #ba1a1a;
+    --color-error-container:           #ffdad6;
+    --color-on-error:                  #ffffff;
+    --color-on-error-container:        #93000a;
+
+    --color-surface-tint:              #6f5d00;
+    --color-inverse-surface:           #2d3131;
+    --color-inverse-on-surface:        #eef1f0;
+
+    /* Legacy aliases — keep old pages working */
+    --color-deep-navy:                 #0F4C81;
+    --color-solar-gold:                #f9d423;
+}
+
+.solar-gradient {
+    background: linear-gradient(135deg, #F9D423 0%, #6f5d00 100%);
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
 }

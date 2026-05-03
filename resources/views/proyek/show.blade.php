@@ -1,69 +1,208 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
 @section('content')
 
-@if(session('success'))
-<div class="bg-sustainability-green/10 text-sustainability-green border border-sustainability-green/20 p-4 rounded-lg mb-8 max-w-[1000px] mx-auto flex items-center gap-3">
-    <span class="material-symbols-outlined">check_circle</span>
-    <span class="font-bold">{{ session('success') }}</span>
-</div>
-@endif
+@php
+    $progress  = $proyek->target_dana > 0 ? round(($proyek->dana_terkumpul / $proyek->target_dana) * 100) : 0;
+    $daysLeft  = $proyek->estimasi_selesai ? max(0, now()->diffInDays($proyek->estimasi_selesai, false)) : 0;
+    $imageUrl  = $proyek->fotos->first()
+        ? asset('storage/' . $proyek->fotos->first()->path)
+        : asset('images/default-project.svg');
+    $location  = $proyek->desa
+        ? $proyek->desa->nama_desa . ', ' . $proyek->desa->provinsi
+        : 'Lokasi tidak diketahui';
 
-<div class="max-w-[1000px] mx-auto">
-    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-        <div class="p-8 border-b border-surface-container-low flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-extrabold text-deep-navy font-headline mb-2">{{ $proyek->judul }}</h1>
-                <p class="text-on-surface-variant flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">location_on</span>
-                    {{ $proyek->desa->nama }}, {{ $proyek->desa->provinsi }}
-                </p>
-            </div>
-            <div class="text-right">
-                <span class="bg-sustainability-green text-white text-[10px] font-bold px-3 py-1.5 rounded-full inline-block mb-2">{{ strtoupper(str_replace('_', ' ', $proyek->status)) }}</span>
-                <p class="text-xs text-on-surface-variant">Dibuat pada {{ $proyek->created_at->format('d M Y') }}</p>
+    $statusMap = [
+        'draft'                          => ['text' => 'DRAFT',              'bg' => 'bg-surface-container',    'color' => 'text-on-surface-variant'],
+        'menunggu_konfirmasi_penyedia'   => ['text' => 'MENUNGGU PENYEDIA',  'bg' => 'bg-yellow-100',           'color' => 'text-yellow-800'],
+        'diterima_penyedia'              => ['text' => 'DITERIMA PENYEDIA',  'bg' => 'bg-secondary-fixed',      'color' => 'text-on-secondary-fixed'],
+        'menunggu_review_admin'          => ['text' => 'MENUNGGU REVIEW',    'bg' => 'bg-yellow-100',           'color' => 'text-yellow-800'],
+        'aktif_funding'                  => ['text' => 'SEDANG BERJALAN',    'bg' => 'bg-primary-container',    'color' => 'text-on-primary-fixed'],
+        'eksekusi'                       => ['text' => 'DALAM EKSEKUSI',     'bg' => 'bg-secondary-container',  'color' => 'text-on-secondary-fixed'],
+        'selesai'                        => ['text' => 'SELESAI',            'bg' => 'bg-tertiary-container',   'color' => 'text-on-tertiary-fixed'],
+        'ditolak'                        => ['text' => 'DITOLAK',            'bg' => 'bg-error-container',      'color' => 'text-on-error-container'],
+    ];
+    $status = $statusMap[$proyek->status] ?? ['text' => strtoupper($proyek->status), 'bg' => 'bg-surface-container', 'color' => 'text-on-surface-variant'];
+@endphp
+
+<div class="w-full max-w-[1216px] mx-auto px-4 py-12 flex flex-col lg:flex-row gap-12 items-start">
+
+    {{-- Left Column --}}
+    <div class="w-full lg:flex-1 flex flex-col gap-8">
+
+        {{-- Hero Image --}}
+        <div class="w-full relative rounded-xl overflow-hidden shadow-md h-[300px]">
+            <img src="{{ $imageUrl }}" alt="{{ $proyek->judul }}" class="w-full h-full object-cover" />
+            <div class="absolute top-6 left-6 {{ $status['bg'] }} px-4 py-1.5 rounded-full shadow-sm">
+                <span class="{{ $status['color'] }} text-xs font-bold font-headline tracking-wider uppercase">
+                    {{ $status['text'] }}
+                </span>
             </div>
         </div>
-        
-        <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="md:col-span-2 space-y-8">
-                <section>
-                    <h3 class="text-lg font-bold text-deep-navy border-b-2 border-solar-gold inline-block pb-1 mb-4">Deskripsi</h3>
-                    <p class="text-on-surface-variant leading-relaxed">{{ $proyek->deskripsi ?: 'Belum ada deskripsi.' }}</p>
-                </section>
-                
-                @if($proyek->fotos->count() > 0)
-                <section>
-                    <h3 class="text-lg font-bold text-deep-navy border-b-2 border-solar-gold inline-block pb-1 mb-4">Galeri Dokumentasi</h3>
-                    <div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-                        @foreach($proyek->fotos as $foto)
-                        <img src="{{ Storage::url($foto->path) }}" class="h-32 rounded-lg shrink-0 border border-surface-container-low" alt="Proyek foto">
-                        @endforeach
-                    </div>
-                </section>
-                @endif
+
+        {{-- Title & Location --}}
+        <div class="flex flex-col gap-3">
+            <h1 class="text-on-surface text-3xl md:text-4xl font-headline font-semibold leading-tight">
+                {{ $proyek->judul }}
+            </h1>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px] text-on-surface-variant">location_on</span>
+                <span class="text-on-surface-variant text-base font-medium">{{ $location }}</span>
             </div>
-            
-            <div class="space-y-6">
-                <div class="bg-surface p-6 rounded-xl border border-surface-container-high/50">
-                    <h3 class="font-bold text-deep-navy mb-4">Informasi Operasional</h3>
-                    <ul class="space-y-4">
-                        <li>
-                            <p class="text-[10px] uppercase font-bold text-on-surface-variant">Jenis Energi</p>
-                            <p class="font-bold text-deep-navy">{{ ucfirst(str_replace('_', ' ', $proyek->jenis_energi)) }}</p>
-                        </li>
-                        <li>
-                            <p class="text-[10px] uppercase font-bold text-on-surface-variant">Penyedia Energi Terpilih</p>
-                            <p class="font-bold text-deep-navy">{{ $proyek->penyedia ? $proyek->penyedia->nama : 'Belum dipilih' }}</p>
-                        </li>
-                        <li>
-                            <p class="text-[10px] uppercase font-bold text-on-surface-variant">Estimasi Mulai</p>
-                            <p class="font-medium text-deep-navy">{{ $proyek->estimasi_mulai ? $proyek->estimasi_mulai->format('d M Y') : '-' }}</p>
-                        </li>
-                    </ul>
+        </div>
+
+        {{-- Stats Grid --}}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+            <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-primary flex flex-col gap-1">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">TERKUMPUL</p>
+                <p class="text-on-surface text-lg font-bold">Rp {{ number_format($proyek->dana_terkumpul / 1000000, 1) }}jt</p>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-outline-variant flex flex-col gap-1">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">TARGET</p>
+                <p class="text-on-surface text-lg font-bold">Rp {{ number_format($proyek->target_dana / 1000000, 1) }}jt</p>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-secondary-container flex flex-col gap-1">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">DONATUR</p>
+                <p class="text-on-surface text-lg font-bold">0</p>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-tertiary-container flex flex-col gap-1">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">SISA HARI</p>
+                <p class="text-on-surface text-lg font-bold">{{ $daysLeft }} Hari</p>
+            </div>
+        </div>
+
+        {{-- Progress Bar --}}
+        <div class="flex flex-col gap-2 w-full">
+            <div class="flex justify-between items-end">
+                <p class="text-on-surface-variant text-sm font-bold">Kemajuan Pendanaan</p>
+                <p class="text-primary text-2xl font-bold">{{ $progress }}%</p>
+            </div>
+            <div class="w-full h-4 bg-surface-container rounded-full overflow-hidden">
+                <div class="h-full solar-gradient rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+            </div>
+        </div>
+
+        {{-- About --}}
+        <div class="flex flex-col gap-4 w-full">
+            <h2 class="text-secondary text-2xl font-headline font-semibold">Tentang Proyek</h2>
+            @if($proyek->deskripsi)
+                <div class="text-on-surface-variant text-lg leading-relaxed whitespace-pre-line">{{ $proyek->deskripsi }}</div>
+            @else
+                <p class="text-on-surface-variant italic">Belum ada deskripsi proyek.</p>
+            @endif
+        </div>
+
+        {{-- Photo Gallery --}}
+        @if($proyek->fotos->count() > 1)
+            <div class="flex flex-col gap-4 w-full">
+                <h2 class="text-secondary text-2xl font-headline font-semibold">Galeri</h2>
+                <div class="flex gap-4 overflow-x-auto pb-2 hide-scrollbar">
+                    @foreach($proyek->fotos as $foto)
+                        <img
+                            src="{{ asset('storage/' . $foto->path) }}"
+                            alt="Foto proyek"
+                            class="h-40 w-64 rounded-xl object-cover shrink-0 border border-surface-container"
+                        />
+                    @endforeach
                 </div>
             </div>
+        @endif
+
+        {{-- Project Info Details --}}
+        <div class="flex flex-col gap-4 w-full">
+            <h2 class="text-secondary text-2xl font-headline font-semibold">Informasi Proyek</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-1">
+                    <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">JENIS ENERGI</p>
+                    <p class="text-on-surface font-semibold capitalize">{{ str_replace('_', ' ', $proyek->jenis_energi ?? '-') }}</p>
+                </div>
+                <div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-1">
+                    <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">PENYEDIA</p>
+                    <p class="text-on-surface font-semibold">{{ $proyek->penyedia ? $proyek->penyedia->nama : 'Belum ditentukan' }}</p>
+                </div>
+                @if($proyek->estimasi_mulai)
+                    <div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-1">
+                        <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">ESTIMASI MULAI</p>
+                        <p class="text-on-surface font-semibold">{{ $proyek->estimasi_mulai->format('d M Y') }}</p>
+                    </div>
+                @endif
+                @if($proyek->estimasi_selesai)
+                    <div class="bg-surface-container-low p-4 rounded-xl flex flex-col gap-1">
+                        <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">ESTIMASI SELESAI</p>
+                        <p class="text-on-surface font-semibold">{{ $proyek->estimasi_selesai->format('d M Y') }}</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Timeline Placeholder --}}
+        <div class="flex flex-col gap-6 w-full py-6">
+            <h2 class="text-secondary text-2xl font-headline font-semibold">Update Progress</h2>
+            <div class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
+                <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">update</span>
+                <p class="text-on-surface-variant text-sm">Belum ada update progress untuk proyek ini.</p>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- Right Column - Donation Card --}}
+    <div class="w-full lg:w-[420px] flex flex-col sticky top-24 shrink-0">
+        <div class="bg-white rounded-2xl p-8 border border-surface-container shadow-xl flex flex-col gap-6 w-full">
+
+            <h2 class="text-secondary text-2xl font-headline font-semibold">Dukung Proyek Ini</h2>
+
+            <div class="flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                    <p class="text-on-surface-variant text-xs font-bold uppercase">TERKUMPUL</p>
+                    <p class="text-tertiary text-2xl font-bold">Rp {{ number_format($proyek->dana_terkumpul, 0, ',', '.') }}</p>
+                </div>
+                <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden my-1">
+                    <div class="h-full solar-gradient rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+                </div>
+                <div class="flex gap-1 text-xs">
+                    <span class="text-on-surface-variant">Dari target</span>
+                    <span class="text-on-surface font-bold">Rp {{ number_format($proyek->target_dana, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 w-full">
+                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
+                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
+                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
+                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
+            </div>
+
+            <div class="flex flex-col gap-2 w-full">
+                <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                <div class="relative w-full">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
+                    <input
+                        type="text"
+                        placeholder="0"
+                        class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none"
+                    />
+                </div>
+            </div>
+
+            <a href="{{ route('login') }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
+                Donasi Sekarang
+            </a>
+
+            <div class="flex items-center gap-6 pt-2 border-t border-surface-container">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px] text-tertiary">verified_user</span>
+                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">TRANSAKSI AMAN</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px] text-tertiary">eco</span>
+                    <span class="text-[10px] font-bold text-on-surface-variant uppercase">100% BERKELANJUTAN</span>
+                </div>
+            </div>
+
         </div>
     </div>
+
 </div>
+
 @endsection

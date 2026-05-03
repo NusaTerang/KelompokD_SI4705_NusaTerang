@@ -10,7 +10,27 @@ use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
 
 Route::get('/', function () {
-    $projects = \App\Models\Proyek::with(['desa', 'fotos'])->paginate(6);
+    $query = \App\Models\Proyek::with(['desa', 'fotos']);
+
+    if (request()->filled('search')) {
+        $search = request('search');
+        $query->where(function ($q) use ($search) {
+            $q->where('judul', 'like', "%{$search}%")
+              ->orWhereHas('desa', fn ($dq) => $dq->where('nama_desa', 'like', "%{$search}%"));
+        });
+    }
+
+    $statusMap = [
+        'berlangsung' => 'aktif_funding',
+        'terpenuhi'   => 'eksekusi',
+        'selesai'     => 'selesai',
+    ];
+
+    if (request()->filled('status') && isset($statusMap[request('status')])) {
+        $query->where('status', $statusMap[request('status')]);
+    }
+
+    $projects = $query->latest()->paginate(6)->withQueryString();
     return view('welcome', compact('projects'));
 });
 
