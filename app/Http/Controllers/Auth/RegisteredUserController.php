@@ -70,8 +70,7 @@ class RegisteredUserController extends Controller
         return match ($user->role) {
             'admin'    => '/admin/dashboard',
             'penyedia' => '/penyedia/dashboard',
-            'donatur'  => '/donatur/dashboard',
-            default    => '/dashboard',
+            default    => '/',
         };
     }
 }

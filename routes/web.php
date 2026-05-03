@@ -55,7 +55,6 @@ Route::middleware('auth')->group(function () {
         return match ($user->role) {
             'admin'    => redirect('/admin/dashboard'),
             'penyedia' => redirect('/penyedia/dashboard'),
-            'donatur'  => redirect('/donatur/dashboard'),
             default    => redirect('/'),
         };
     })->name('dashboard');

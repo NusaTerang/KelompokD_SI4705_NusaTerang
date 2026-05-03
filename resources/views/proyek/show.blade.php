@@ -5,8 +5,9 @@
 @php
     $progress  = $proyek->target_dana > 0 ? round(($proyek->dana_terkumpul / $proyek->target_dana) * 100) : 0;
     $daysLeft  = $proyek->estimasi_selesai ? max(0, now()->diffInDays($proyek->estimasi_selesai, false)) : 0;
-    $imageUrl  = $proyek->fotos->first()
-        ? asset('storage/' . $proyek->fotos->first()->path)
+    $firstFoto = $proyek->fotos->first();
+    $imageUrl  = $firstFoto
+        ? (str_starts_with($firstFoto->path, 'http') ? $firstFoto->path : asset('storage/' . $firstFoto->path))
         : asset('images/default-project.svg');
     $location  = $proyek->desa
         ? $proyek->desa->nama_desa . ', ' . $proyek->desa->provinsi
@@ -99,7 +100,7 @@
                 <div class="flex gap-4 overflow-x-auto pb-2 hide-scrollbar">
                     @foreach($proyek->fotos as $foto)
                         <img
-                            src="{{ asset('storage/' . $foto->path) }}"
+                            src="{{ str_starts_with($foto->path, 'http') ? $foto->path : asset('storage/' . $foto->path) }}"
                             alt="Foto proyek"
                             class="h-40 w-64 rounded-xl object-cover shrink-0 border border-surface-container"
                         />
