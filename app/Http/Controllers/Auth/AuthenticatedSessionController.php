@@ -73,8 +73,8 @@ class AuthenticatedSessionController extends Controller
     protected function redirectByRole($user): string
     {
         return match ($user->role) {
-            'admin'    => '/admin/dashboard',
-            'penyedia' => '/penyedia/dashboard',
+            'admin'    => route('desa.daftar'),
+            'penyedia' => route('penyedia.dashboard'),
             default    => '/',
         };
     }

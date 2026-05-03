@@ -15,7 +15,7 @@ class ProyekController extends Controller
         $draft_id = request()->query('draft_id');
         $proyek = $draft_id ? Proyek::find($draft_id) : null;
 
-        return view('proyek.create_step1', compact('desas', 'proyek'));
+        return view('admin.proyek.create_step1', compact('desas', 'proyek'));
     }
 
     public function saveStep1(Request $request)
@@ -23,7 +23,7 @@ class ProyekController extends Controller
         $validated = $request->validate([
             'draft_id' => 'nullable|exists:proyeks,id',
             'judul' => 'required|string|max:255',
-            'desa_id' => 'required|exists:desas,id',
+            'desa_id' => 'required|exists:desas,id_desa',
             'jenis_energi' => 'required|in:solar,mikro_hidro,lainnya',
             'deskripsi' => 'nullable|string',
             'estimasi_mulai' => 'nullable|date',
@@ -69,7 +69,7 @@ class ProyekController extends Controller
         $desa = $proyek->desa;
         $recommendations = $service->getRecommendations($desa);
 
-        return view('proyek.create_step2', compact('proyek', 'recommendations'));
+        return view('admin.proyek.create_step2', compact('proyek', 'recommendations'));
     }
 
     public function saveStep2(Request $request, $id)
@@ -89,7 +89,7 @@ class ProyekController extends Controller
     public function review($id)
     {
         $proyek = Proyek::with(['desa', 'penyedia', 'fotos'])->findOrFail($id);
-        return view('proyek.create_step3', compact('proyek'));
+        return view('admin.proyek.create_step3', compact('proyek'));
     }
 
     public function kirimKePenyedia(Request $request, $id)

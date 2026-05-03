@@ -1,43 +1,50 @@
 @extends('layouts.admin')
 
+@section('breadcrumbs')
+    <span>Dashboard</span>
+    <span class="mx-1 text-slate-400">/</span>
+    <span>Proyek Energi</span>
+    <span class="mx-1 text-slate-400">/</span>
+    <span class="font-medium text-slate-700">Buat Proyek — Step 1</span>
+@endsection
+
+@section('page_heading', 'Buat Proyek Baru')
+
 @section('content')
     <div class="max-w-[800px] mx-auto mb-12">
         <div class="flex items-center justify-between relative">
             <div class="absolute top-1/2 left-0 w-full h-1 bg-surface-container -translate-y-1/2 -z-10"></div>
             <div class="flex flex-col items-center gap-3 bg-surface">
-                <div
-                    class="w-10 h-10 rounded-full bg-solar-gold text-deep-navy flex items-center justify-center font-bold ring-4 ring-surface shadow-sm">
-                    1</div>
+                <div class="w-10 h-10 rounded-full bg-solar-gold text-deep-navy flex items-center justify-center font-bold ring-4 ring-surface shadow-sm">
+                    1
+                </div>
                 <span class="text-sm font-bold text-on-surface">Detail Proyek</span>
             </div>
             <div class="flex flex-col items-center gap-3 bg-surface">
-                <div
-                    class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold ring-4 ring-surface">
-                    2</div>
+                <div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold ring-4 ring-surface">
+                    2
+                </div>
                 <span class="text-sm font-medium text-on-surface-variant">Pilih Penyedia</span>
             </div>
             <div class="flex flex-col items-center gap-3 bg-surface">
-                <div
-                    class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold ring-4 ring-surface">
-                    3</div>
+                <div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold ring-4 ring-surface">
+                    3
+                </div>
                 <span class="text-sm font-medium text-on-surface-variant">Review & Simpan</span>
             </div>
         </div>
     </div>
 
-    <form action="{{ route('proyek.save.step1') }}" method="POST" enctype="multipart/form-data"
-        class="max-w-[800px] mx-auto">
+    <form action="{{ route('proyek.save.step1') }}" method="POST" enctype="multipart/form-data" class="max-w-[800px] mx-auto">
         @csrf
         @if($proyek)
             <input type="hidden" name="draft_id" value="{{ $proyek->id }}">
         @endif
 
-        <div
-            class="bg-surface-container-lowest rounded-xl shadow-[0_32px_64px_-12px_rgba(24,28,28,0.06)] overflow-hidden border border-slate-100">
+        <div class="bg-surface-container-lowest rounded-xl shadow-[0_32px_64px_-12px_rgba(24,28,28,0.06)] overflow-hidden border border-slate-100">
             <div class="p-8 border-b border-surface-container-low">
-                <h2 class="text-2xl font-extrabold text-deep-navy font-headline mb-2">Informasi Dasar Proyek </h2>
-                <p class="text-on-surface-variant leading-relaxed">Berikan detail lengkap mengenai lokasi dan tujuan proyek
-                    energi terbarukan Anda.</p>
+                <h2 class="text-2xl font-extrabold text-deep-navy font-headline mb-2">Informasi Dasar Proyek</h2>
+                <p class="text-on-surface-variant leading-relaxed">Berikan detail lengkap mengenai lokasi dan tujuan proyek energi terbarukan Anda.</p>
             </div>
 
             <div class="p-8 space-y-8">
@@ -54,12 +61,11 @@
 
                 <div class="space-y-3">
                     <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Pilih Desa Target</label>
-                    <select name="desa_id"
-                        class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
+                    <select name="desa_id" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
                         <option value="">Pilih Desa</option>
                         @foreach($desas as $desa)
-                            <option value="{{ $desa->id }}" {{ (old('desa_id', $proyek->desa_id ?? '') == $desa->id) ? 'selected' : '' }}>
-                                {{ $desa->nama }} - {{ $desa->provinsi }} ({{ $desa->jenis_energi }})
+                            <option value="{{ $desa->id_desa }}" {{ (old('desa_id', $proyek->desa_id ?? '') == $desa->id_desa) ? 'selected' : '' }}>
+                                {{ $desa->nama_desa }} - {{ $desa->provinsi }}
                             </option>
                         @endforeach
                     </select>
@@ -74,8 +80,7 @@
 
                 <div class="space-y-3">
                     <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Jenis Energi</label>
-                    <select name="jenis_energi" required
-                        class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
+                    <select name="jenis_energi" required class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
                         <option value="solar" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'solar' ? 'selected' : '' }}>Solar</option>
                         <option value="mikro_hidro" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'mikro_hidro' ? 'selected' : '' }}>Mikro Hidro</option>
                         <option value="lainnya" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
@@ -91,15 +96,14 @@
                 </div>
 
                 <div class="space-y-3">
-                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Upload Foto Proyek (Maks
-                        5)</label>
+                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Upload Foto Proyek (Maks 5)</label>
                     <input type="file" name="fotos[]" multiple accept="image/*"
                         class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
                     @if($proyek && $proyek->fotos->count() > 0)
-                        <p class="text-sm font-bold mt-2">Uploaded Images:</p>
-                        <div class="flex gap-2">
+                        <p class="text-sm font-bold mt-2">Foto Terunggah:</p>
+                        <div class="flex gap-2 flex-wrap">
                             @foreach($proyek->fotos as $foto)
-                                <img src="{{ Storage::url($foto->path) }}" class="w-16 h-16 object-cover rounded shadow">
+                                <img src="{{ str_starts_with($foto->path, 'http') ? $foto->path : asset('storage/' . $foto->path) }}" class="w-16 h-16 object-cover rounded shadow">
                             @endforeach
                         </div>
                     @endif

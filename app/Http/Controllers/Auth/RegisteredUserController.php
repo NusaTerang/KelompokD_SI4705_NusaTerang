@@ -68,8 +68,8 @@ class RegisteredUserController extends Controller
     protected function redirectByRole(User $user): string
     {
         return match ($user->role) {
-            'admin'    => '/admin/dashboard',
-            'penyedia' => '/penyedia/dashboard',
+            'admin'    => route('desa.daftar'),
+            'penyedia' => route('penyedia.dashboard'),
             default    => '/',
         };
     }

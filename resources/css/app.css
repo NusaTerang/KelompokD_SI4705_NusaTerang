@@ -65,6 +65,15 @@
     /* Legacy aliases — keep old pages working */
     --color-deep-navy:                 #0F4C81;
     --color-solar-gold:                #f9d423;
+    --color-sustainability-green:      #27AE60;
+
+    /* Admin sidebar tokens */
+    --color-nt-navy:                   #0F4C81;
+    --color-nt-navy-light:             #1a5d96;
+    --color-nt-navy-dark:              #0a3a61;
+    --color-nt-accent:                 #f9d423;
+    --color-nt-accent-hover:           #e8c404;
+    --color-nt-surface:                #f7faf9;
 }
 
 .solar-gradient {

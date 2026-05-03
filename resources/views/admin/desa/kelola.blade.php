@@ -1,4 +1,4 @@
-@extends('layouts.nusaterang')
+@extends('layouts.admin')
 
 @section('title', 'Desa Prioritas')
 

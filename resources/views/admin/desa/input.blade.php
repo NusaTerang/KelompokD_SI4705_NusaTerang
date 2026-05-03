@@ -1,4 +1,4 @@
-@extends('layouts.nusaterang')
+@extends('layouts.admin')
 
 @section('title', 'Input Data Desa')
 
@@ -182,7 +182,7 @@
                     </div>
                 </section>
 
-                {{-- Section C: Kebutuhan Energi + ERD enums --}}
+                {{-- Section C: Kebutuhan Energi --}}
                 <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div class="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
                         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
@@ -254,11 +254,6 @@
                     </button>
                 </div>
             </form>
-
-            {{-- Panel Import Excel (placeholder) --}}
-            <div class="hidden rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-                Unggah file Excel sesuai template. (Hubungkan ke controller pada langkah berikutnya.)
-            </div>
         </div>
 
         {{-- Right column --}}
