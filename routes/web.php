@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PenugasanController;
 
 use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
@@ -8,6 +9,11 @@ use App\Http\Controllers\PenyediaController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::post('/assign', [PenugasanController::class, 'assign']);
+Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
+Route::post('/detail', [PenugasanController::class, 'isiDetail']);
 
 Route::prefix('proyek')->name('proyek.')->group(function () {
     Route::get('/buat', [ProyekController::class, 'create'])->name('create');
