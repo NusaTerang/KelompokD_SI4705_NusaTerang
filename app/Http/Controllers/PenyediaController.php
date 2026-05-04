@@ -8,6 +8,26 @@ use App\Services\PenyediaRecommendationService;
 
 class PenyediaController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = \App\Models\PenyediaEnergi::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('provinsi_operasi', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status') && in_array($request->status, ['aktif', 'nonaktif'])) {
+            $query->where('status', $request->status);
+        }
+
+        $providers = $query->paginate(6)->withQueryString();
+        return view('penyedia.index', compact('providers'));
+    }
+
     public function getRekomendasi(Request $request, PenyediaRecommendationService $service)
     {
         $desa_id = $request->query('desa_id');

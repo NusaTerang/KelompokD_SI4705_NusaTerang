@@ -17,15 +17,31 @@ return new class extends Migration
             return;
         }
 
+        // Drop FK on desa.id_admin -> users
         if (Schema::hasTable('desa')) {
             Schema::table('desa', function (Blueprint $table) {
                 $table->dropForeign(['id_admin']);
             });
         }
 
+        // Drop FK on donasi.user_id -> users
         if (Schema::hasTable('donasi')) {
             Schema::table('donasi', function (Blueprint $table) {
                 $table->dropForeign(['user_id']);
+            });
+        }
+
+        // Drop FK on proyeks.created_by -> users
+        if (Schema::hasTable('proyeks')) {
+            Schema::table('proyeks', function (Blueprint $table) {
+                $table->dropForeign(['created_by']);
+            });
+        }
+
+        // Drop FK on users.penyedia_id -> penyedia_energis (must be done before dropping users)
+        if (Schema::hasTable('users') && Schema::hasColumn('users', 'penyedia_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropForeign(['penyedia_id']);
             });
         }
 
@@ -35,7 +51,13 @@ return new class extends Migration
             $table->string('email', 100)->unique();
             $table->string('password', 255);
             $table->string('no_telepon', 20)->nullable();
+            $table->enum('role', ['admin', 'penyedia', 'donatur'])->default('donatur');
+            $table->unsignedBigInteger('penyedia_id')->nullable();
+            $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->nullable();
+
+            $table->foreign('penyedia_id')->references('id')->on('penyedia_energis')->nullOnDelete();
         });
 
         if (Schema::hasTable('users')) {
@@ -44,10 +66,12 @@ return new class extends Migration
                 $a = (array) $u;
                 DB::table('donatur')->insert([
                     'id_donatur' => $a['id'],
-                    'nama' => $a['name'],
+                    'nama' => $a['name'] ?? $a['nama'],
                     'email' => $a['email'],
                     'password' => $a['password'],
                     'no_telepon' => $a['no_telepon'] ?? $a['phone'] ?? null,
+                    'role' => $a['role'] ?? 'donatur',
+                    'penyedia_id' => $a['penyedia_id'] ?? null,
                     'created_at' => $a['created_at'] ?? now(),
                 ]);
             }

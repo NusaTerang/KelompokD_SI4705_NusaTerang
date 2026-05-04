@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -42,7 +44,7 @@ class PenugasanController extends Controller
         return response()->json(['message' => 'Respon berhasil']);
     }
 
-    / Vendor isi detail proyek
+    // Vendor isi detail proyek
     public function isiDetail(Request $request)
     {
         $request->validate([

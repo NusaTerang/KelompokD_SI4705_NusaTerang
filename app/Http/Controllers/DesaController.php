@@ -12,7 +12,7 @@ class DesaController extends Controller
 {
     public function create(): View
     {
-        return view('desa.input');
+        return view('admin.desa.input');
     }
 
     public function store(StoreDesaRequest $request): RedirectResponse
@@ -73,14 +73,14 @@ class DesaController extends Controller
             })
             ->all();
 
-        return view('desa.kelola', compact('desaPrioritas'));
+        return view('admin.desa.kelola', compact('desaPrioritas'));
     }
 
     public function index(): View
     {
         $desas = Desa::query()->orderByDesc('created_at')->get();
 
-        return view('desa.daftar', compact('desas'));
+        return view('admin.desa.daftar', compact('desas'));
     }
 
     private function gabungKondisiDesa(StoreDesaRequest $request, string $teksUtama): string

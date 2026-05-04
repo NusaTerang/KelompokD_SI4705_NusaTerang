@@ -13,17 +13,17 @@ class DesaDummySeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ['nama' => 'Desa Cikaret', 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Bogor', 
-             'lat' => -6.5971, 'lng' => 106.8160, 'jenis_energi' => 'solar', 
-             'estimasi_biaya' => 150000000, 'status' => 'terverifikasi'],
-          
-            ['nama' => 'Desa Sumber Makmur', 'provinsi' => 'Jawa Tengah', 'kabupaten' => 'Banjarnegara',
-             'lat' => -7.3606, 'lng' => 109.6946, 'jenis_energi' => 'mikro_hidro', 
-             'estimasi_biaya' => 200000000, 'status' => 'terverifikasi'],
-          
-            ['nama' => 'Desa Lembah Hijau', 'provinsi' => 'Sumatera Barat', 'kabupaten' => 'Solok',
-             'lat' => -0.7893, 'lng' => 100.6500, 'jenis_energi' => 'solar', 
-             'estimasi_biaya' => 120000000, 'status' => 'terverifikasi'],
+            ['nama_desa' => 'Desa Cikaret', 'provinsi' => 'Jawa Barat', 'kabupaten' => 'Bogor',
+             'koordinat' => '-6.5971, 106.8160', 'sumber' => 'solar_panel',
+             'status_verifikasi' => 'terverifikasi'],
+
+            ['nama_desa' => 'Desa Sumber Makmur', 'provinsi' => 'Jawa Tengah', 'kabupaten' => 'Banjarnegara',
+             'koordinat' => '-7.3606, 109.6946', 'sumber' => 'mikro_hidro',
+             'status_verifikasi' => 'terverifikasi'],
+
+            ['nama_desa' => 'Desa Lembah Hijau', 'provinsi' => 'Sumatera Barat', 'kabupaten' => 'Solok',
+             'koordinat' => '-0.7893, 100.6500', 'sumber' => 'solar_panel',
+             'status_verifikasi' => 'terverifikasi'],
         ];
 
         foreach ($data as $desa) {

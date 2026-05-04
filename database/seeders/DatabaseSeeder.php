@@ -1,9 +1,12 @@
 <?php
+
 namespace Database\Seeders;
+
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
@@ -17,9 +20,12 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $user->forceFill(['created_at' => Carbon::parse('2023-01-15 08:00:00')])->saveQuietly();
+
         $this->call([
+            AdminSeeder::class,
             DesaDummySeeder::class,
             PenyediaDummySeeder::class,
+            ProyekDummySeeder::class,
         ]);
     }
 }

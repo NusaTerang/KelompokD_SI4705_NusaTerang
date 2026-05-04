@@ -1,100 +1,147 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'NusaTerang') — {{ config('app.name', 'NusaTerang') }}</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, .font-headline { font-family: 'Plus+Jakarta+Sans', sans-serif; }
-        .glass-header { backdrop-filter: blur(20px); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        :root {
-            --solar-gold: #F9D423;
-            --deep-navy: #0F4C81;
-            --sustainability-green: #27AE60;
-        }
-    </style>
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#0F4C81",
-                        "primary-container": "#F9D423",
-                        "on-primary": "#ffffff",
-                        "on-primary-container": "#0F4C81",
-                        "secondary": "#0F4C81",
-                        "secondary-container": "#92c1fe",
-                        "on-secondary": "#ffffff",
-                        "tertiary": "#27AE60",
-                        "tertiary-container": "#72ef99",
-                        "surface": "#f7faf9",
-                        "surface-container-lowest": "#ffffff",
-                        "surface-container-low": "#f1f4f3",
-                        "surface-container": "#ebeeed",
-                        "surface-container-high": "#e6e9e8",
-                        "surface-container-highest": "#e0e3e2",
-                        "on-surface": "#181c1c",
-                        "on-surface-variant": "#4c4733",
-                        "outline": "#7e7760",
-                        "outline-variant": "#cfc6ac",
-                        "solar-gold": "#F9D423",
-                        "deep-navy": "#0F4C81",
-                        "sustainability-green": "#27AE60"
-                    },
-                    fontFamily: {
-                        "headline": ["Plus Jakarta Sans"],
-                        "body": ["Inter"],
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
+    @stack('head')
 </head>
-<body class="bg-surface text-on-surface">
+<body class="min-h-screen bg-nt-surface font-sans text-slate-800 antialiased">
+    @php
+        $dataDesaOpen  = request()->routeIs('desa.*');
+        $proyekAdminOpen = request()->routeIs('proyek.create') ||
+                           request()->routeIs('proyek.step2') ||
+                           request()->routeIs('proyek.save.*') ||
+                           request()->routeIs('proyek.review');
+    @endphp
 
-<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-[#0F4C81] flex flex-col py-6 px-4 z-40 no-scrollbar">
-    <div class="mb-10 px-4">
-        <h1 class="text-xl font-black text-white font-headline tracking-tight">NusaTerang</h1>
-        <p class="text-[10px] uppercase tracking-widest text-white/50 font-bold">Renewable Energy</p>
+    <div class="flex min-h-screen">
+        {{-- Sidebar --}}
+        <aside class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-nt-navy text-white lg:flex">
+            <div class="border-b border-white/10 px-5 py-6">
+                <p class="text-lg font-bold leading-tight tracking-tight">NusaTerang</p>
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-white/60">Renewable Energy</p>
+            </div>
+
+            <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-4">
+                <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+                    </span>
+                    Dashboard
+                </a>
+                <div class="mt-0.5">
+                    <a href="{{ route('proyek.create') }}" class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ $proyekAdminOpen ? 'bg-nt-navy-light text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }}">
+                        @if ($proyekAdminOpen)
+                            <span class="absolute left-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-r bg-nt-accent" aria-hidden="true"></span>
+                        @endif
+                        <span class="relative ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                        </span>
+                        <span class="relative flex-1">Proyek Energi</span>
+                    </a>
+                    <div class="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-3">
+                        <a href="{{ route('proyek.create') }}" class="block rounded-md py-1.5 pl-2 text-xs font-medium {{ request()->routeIs('proyek.create') || request()->routeIs('proyek.save.step1') ? 'bg-white/10 text-nt-accent' : 'text-white/70 hover:text-white' }}">Buat Proyek</a>
+                    </div>
+                </div>
+
+                <div class="mt-0.5">
+                    <div class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ $dataDesaOpen ? 'bg-nt-navy-light text-white' : 'text-white/80' }}">
+                        @if ($dataDesaOpen)
+                            <span class="absolute left-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-r bg-nt-accent" aria-hidden="true"></span>
+                        @endif
+                        <span class="relative ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12M9 3v2.25m0 4.5V21" /></svg>
+                        </span>
+                        <span class="relative flex-1">Data Desa</span>
+                    </div>
+                    <div class="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-3">
+                        <a href="{{ route('desa.input') }}" class="block rounded-md py-1.5 pl-2 text-xs font-medium {{ request()->routeIs('desa.input') ? 'bg-white/10 text-nt-accent' : 'text-white/70 hover:text-white' }}">Input Data</a>
+                        <a href="{{ route('desa.kelola') }}" class="block rounded-md py-1.5 pl-2 text-xs font-medium {{ request()->routeIs('desa.kelola') ? 'bg-white/10 text-nt-accent' : 'text-white/70 hover:text-white' }}">Desa Prioritas</a>
+                        <a href="{{ route('desa.daftar') }}" class="block rounded-md py-1.5 pl-2 text-xs font-medium {{ request()->routeIs('desa.daftar') ? 'bg-white/10 text-nt-accent' : 'text-white/70 hover:text-white' }}">Kelola Data (Tabel)</a>
+                    </div>
+                </div>
+
+                <a href="#" class="mt-0.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h5.25M9 3v18M9.75 3h5.25m0 0H21m-5.25 0V9m0 0H9.75m5.25 0V21" /></svg>
+                    </span>
+                    Penyedia Energi
+                </a>
+                <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+                    </span>
+                    Donasi
+                </a>
+                <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                    </span>
+                    Notifikasi
+                </a>
+            </nav>
+
+            <div class="mt-auto border-t border-white/10 px-3 py-4">
+                <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/80 hover:bg-white/10 hover:text-white">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-md bg-white/10">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </span>
+                    Settings
+                </a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/80 hover:bg-white/10 hover:text-white">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-md bg-white/10">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+                        </span>
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <div class="flex min-h-screen flex-1 flex-col lg:pl-64">
+            {{-- Topbar --}}
+            <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <nav class="text-xs text-slate-500" aria-label="Breadcrumb">
+                            @hasSection('breadcrumbs')
+                                @yield('breadcrumbs')
+                            @else
+                                <span>Dashboard</span>
+                            @endif
+                        </nav>
+                    </div>
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <button type="button" class="rounded-full p-2 text-slate-600 hover:bg-slate-100" aria-label="Pengaturan">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        </button>
+                        <button type="button" class="rounded-full p-2 text-slate-600 hover:bg-slate-100" aria-label="Bantuan">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
+                        </button>
+                        @auth
+                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-nt-navy text-xs font-semibold text-white">
+                                {{ strtoupper(substr(auth()->user()->nama ?? 'U', 0, 2)) }}
+                            </span>
+                        @endauth
+                    </div>
+                </div>
+                @hasSection('page_heading')
+                    <h1 class="mt-2 text-2xl font-bold text-nt-navy">@yield('page_heading')</h1>
+                @endif
+            </header>
+
+            <main class="flex-1 p-4 sm:p-6 lg:p-8">
+                @yield('content')
+            </main>
+        </div>
     </div>
-    <nav class="flex-1 space-y-2">
-        <a class="flex items-center gap-3 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200" href="#">
-            <span class="material-symbols-outlined text-xl">dashboard</span>
-            <span class="text-sm font-headline tracking-wide">Dashboard</span>
-        </a>
-        <a class="flex items-center gap-3 px-4 py-3 bg-white/10 text-white rounded-lg font-bold transition-all duration-200" href="{{ route('proyek.create') }}">
-            <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
-            <span class="text-sm font-headline tracking-wide">Proyek Energi</span>
-        </a>
-        <!-- Add others as needed -->
-    </nav>
-</aside>
-
-<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-30 bg-white/80 backdrop-blur-md shadow-sm flex justify-between items-center px-8 h-16">
-    <div class="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-        <span class="hover:text-primary cursor-pointer">Dashboard</span>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <span class="hover:text-primary cursor-pointer">Proyek Energi</span>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <span class="text-[#0F4C81] font-bold">Admin</span>
-    </div>
-</header>
-
-<main class="ml-64 pt-24 pb-12 px-8 min-h-screen">
-    @yield('content')
-</main>
-
-@stack('scripts')
+    @stack('scripts')
 </body>
 </html>
