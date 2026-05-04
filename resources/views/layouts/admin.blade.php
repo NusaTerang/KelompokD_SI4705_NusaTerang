@@ -12,11 +12,12 @@
 </head>
 <body class="min-h-screen bg-nt-surface font-sans text-slate-800 antialiased">
     @php
-        $dataDesaOpen  = request()->routeIs('desa.*');
+        $dataDesaOpen    = request()->routeIs('desa.*');
         $proyekAdminOpen = request()->routeIs('proyek.create') ||
                            request()->routeIs('proyek.step2') ||
                            request()->routeIs('proyek.save.*') ||
                            request()->routeIs('proyek.review');
+        $vendorOpen      = request()->routeIs('admin.vendors.*');
     @endphp
 
     <div class="flex min-h-screen">
@@ -66,11 +67,15 @@
                     </div>
                 </div>
 
-                <a href="#" class="mt-0.5 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+                <a href="{{ route('admin.vendors.index') }}"
+                   class="mt-0.5 relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ $vendorOpen ? 'bg-nt-navy-light text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }}">
+                    @if($vendorOpen)
+                        <span class="absolute left-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-r bg-nt-accent" aria-hidden="true"></span>
+                    @endif
+                    <span class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h5.25M9 3v18M9.75 3h5.25m0 0H21m-5.25 0V9m0 0H9.75m5.25 0V21" /></svg>
                     </span>
-                    Penyedia Energi
+                    <span class="relative flex-1">Penyedia Energi</span>
                 </a>
                 <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">

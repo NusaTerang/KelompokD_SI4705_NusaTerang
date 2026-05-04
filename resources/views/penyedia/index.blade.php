@@ -146,44 +146,9 @@
             </div>
 
             {{-- Pagination --}}
-            @if($providers->hasPages())
-                <div class="mt-8 flex justify-center items-center gap-2">
-                    @if($providers->onFirstPage())
-                        <span class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-outline-variant">
-                            <span class="material-symbols-outlined">chevron_left</span>
-                        </span>
-                    @else
-                        <a href="{{ $providers->previousPageUrl() }}" class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-secondary hover:text-white transition-all">
-                            <span class="material-symbols-outlined">chevron_left</span>
-                        </a>
-                    @endif
-
-                    @foreach($providers->elements() as $element)
-                        @if(is_string($element))
-                            <span class="w-10 h-10 flex items-center justify-center text-on-surface-variant">{{ $element }}</span>
-                        @endif
-                        @if(is_array($element))
-                            @foreach($element as $page => $url)
-                                @if($page == $providers->currentPage())
-                                    <span class="w-10 h-10 rounded-lg flex items-center justify-center bg-secondary text-white font-bold">{{ $page }}</span>
-                                @else
-                                    <a href="{{ $url }}" class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-secondary hover:text-white transition-all">{{ $page }}</a>
-                                @endif
-                            @endforeach
-                        @endif
-                    @endforeach
-
-                    @if($providers->hasMorePages())
-                        <a href="{{ $providers->nextPageUrl() }}" class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-secondary hover:text-white transition-all">
-                            <span class="material-symbols-outlined">chevron_right</span>
-                        </a>
-                    @else
-                        <span class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-outline-variant">
-                            <span class="material-symbols-outlined">chevron_right</span>
-                        </span>
-                    @endif
-                </div>
-            @endif
+            <div class="mt-8 flex justify-center">
+                {{ $providers->links() }}
+            </div>
 
         @else
             <div class="py-20 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-dashed border-outline-variant">

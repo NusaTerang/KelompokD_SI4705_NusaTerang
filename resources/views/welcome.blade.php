@@ -144,44 +144,9 @@
             </div>
 
             {{-- Pagination --}}
-            @if($projects->hasPages())
-                <div class="mt-16 flex justify-center items-center gap-2">
-                    @if($projects->onFirstPage())
-                        <span class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-outline-variant">
-                            <span class="material-symbols-outlined">chevron_left</span>
-                        </span>
-                    @else
-                        <a href="{{ $projects->previousPageUrl() }}" class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-secondary hover:text-white transition-all">
-                            <span class="material-symbols-outlined">chevron_left</span>
-                        </a>
-                    @endif
-
-                    @foreach($projects->elements() as $element)
-                        @if(is_string($element))
-                            <span class="w-10 h-10 flex items-center justify-center text-on-surface-variant">{{ $element }}</span>
-                        @endif
-                        @if(is_array($element))
-                            @foreach($element as $page => $url)
-                                @if($page == $projects->currentPage())
-                                    <span class="w-10 h-10 rounded-lg flex items-center justify-center bg-secondary text-white font-bold">{{ $page }}</span>
-                                @else
-                                    <a href="{{ $url }}" class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-secondary hover:text-white transition-all">{{ $page }}</a>
-                                @endif
-                            @endforeach
-                        @endif
-                    @endforeach
-
-                    @if($projects->hasMorePages())
-                        <a href="{{ $projects->nextPageUrl() }}" class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-on-surface-variant hover:bg-secondary hover:text-white transition-all">
-                            <span class="material-symbols-outlined">chevron_right</span>
-                        </a>
-                    @else
-                        <span class="w-10 h-10 rounded-lg flex items-center justify-center border border-outline-variant text-outline-variant">
-                            <span class="material-symbols-outlined">chevron_right</span>
-                        </span>
-                    @endif
-                </div>
-            @endif
+            <div class="mt-16 flex justify-center">
+                {{ $projects->links() }}
+            </div>
 
         @else
             <div class="py-20 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-dashed border-outline-variant">

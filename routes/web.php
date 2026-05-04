@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PenugasanController;
 use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
+use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 
 // ─── Public ──────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,16 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
         Route::get('{id}/review', [ProyekController::class, 'review'])->name('review');
         Route::post('{id}/kirim', [ProyekController::class, 'kirimKePenyedia'])->name('kirim');
+    });
+
+    // Vendor / Penyedia Energi CRUD
+    Route::prefix('vendors')->name('admin.vendors.')->group(function () {
+        Route::get('/', [AdminPenyediaController::class, 'index'])->name('index');
+        Route::get('/create', [AdminPenyediaController::class, 'create'])->name('create');
+        Route::post('/', [AdminPenyediaController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [AdminPenyediaController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AdminPenyediaController::class, 'update'])->name('update');
+        Route::patch('/{id}/toggle', [AdminPenyediaController::class, 'toggleStatus'])->name('toggleStatus');
     });
 });
 
