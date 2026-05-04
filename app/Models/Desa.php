@@ -15,6 +15,7 @@ class Desa extends Model
         'nama_desa',
         'provinsi',
         'kabupaten',
+        'jumlah_penduduk',
         'koordinat',
         'kondisi_desa',
         'sumber',
