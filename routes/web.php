@@ -39,6 +39,7 @@ Route::get('/', function () {
 
 Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
 Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('penyedia.daftar');
+Route::get('/penyedia/{id}', [PenyediaController::class, 'show'])->name('penyedia.show');
 Route::get('/api/penyedia/rekomendasi', [PenyediaController::class, 'getRekomendasi'])->name('api.penyedia.rekomendasi');
 
 // ─── Auth (guest only) ────────────────────────────────────────────────────────

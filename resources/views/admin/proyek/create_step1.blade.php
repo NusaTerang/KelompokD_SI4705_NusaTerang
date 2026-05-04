@@ -81,9 +81,10 @@
                 <div class="space-y-3">
                     <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Jenis Energi</label>
                     <select name="jenis_energi" required class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
-                        <option value="solar" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'solar' ? 'selected' : '' }}>Solar</option>
-                        <option value="mikro_hidro" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'mikro_hidro' ? 'selected' : '' }}>Mikro Hidro</option>
-                        <option value="lainnya" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
+                        <option value="panel_surya"          {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'panel_surya'          ? 'selected' : '' }}>Panel Surya</option>
+                        <option value="mikro_hidro"          {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'mikro_hidro'          ? 'selected' : '' }}>Mikro Hidro</option>
+                        <option value="biogas"               {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'biogas'               ? 'selected' : '' }}>Biogas</option>
+                        <option value="hybrid_solar_baterai" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'hybrid_solar_baterai' ? 'selected' : '' }}>Hybrid Solar + Baterai</option>
                     </select>
                 </div>
 

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama');
             $table->string('email')->unique()->nullable();
             $table->string('no_telepon', 20)->nullable();
-            $table->enum('spesialisasi', ['solar', 'mikro_hidro', 'lainnya']);
+            $table->enum('spesialisasi', ['panel_surya', 'mikro_hidro', 'biogas', 'hybrid_solar_baterai']);
             $table->string('provinsi_operasi', 100)->nullable();
             $table->bigInteger('kisaran_harga_min')->nullable();
             $table->bigInteger('kisaran_harga_max')->nullable();

@@ -63,6 +63,13 @@
             </div>
         @endif
 
+        @if($recommendations->isEmpty())
+            <div class="text-center py-16 bg-white rounded-2xl border border-surface-container mb-8">
+                <span class="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-3 block">search_off</span>
+                <p class="text-on-surface-variant font-medium">Tidak ada penyedia yang memenuhi kriteria.</p>
+                <p class="text-sm text-on-surface-variant/70 mt-1">Coba ubah jenis energi atau pastikan data desa sudah lengkap.</p>
+            </div>
+        @else
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             @foreach($recommendations as $index => $penyedia)
                 <label class="relative block cursor-pointer group">
@@ -95,20 +102,30 @@
                                 </div>
                                 <p class="text-sm text-on-surface-variant font-medium flex items-center gap-1 mb-4">
                                     <span class="w-2 h-2 rounded-full bg-sustainability-green"></span>
-                                    {{ ucfirst($penyedia->spesialisasi) }} Spesialis
+                                    {{ ucfirst(str_replace('_', ' ', $penyedia->spesialisasi)) }} Spesialis
                                 </p>
 
-                                <div class="grid grid-cols-2 gap-4">
+                                <div class="grid grid-cols-3 gap-3">
                                     <div>
-                                        <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Total Skor AI</p>
+                                        <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Skor</p>
                                         <div class="flex items-end gap-1">
-                                            <span class="text-xl font-black text-sustainability-green leading-none">{{ $penyedia->match_score }}</span>
+                                            <span class="text-xl font-black text-sustainability-green leading-none">{{ round($penyedia->match_score) }}</span>
                                             <span class="text-xs font-medium text-on-surface-variant pb-0.5">/100</span>
                                         </div>
                                     </div>
                                     <div>
-                                        <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Estimasi Budget</p>
-                                        <p class="font-bold text-deep-navy text-sm">Rp {{ number_format($penyedia->kisaran_harga_min, 0, ',', '.') }} - {{ number_format($penyedia->kisaran_harga_max, 0, ',', '.') }}</p>
+                                        <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Jarak</p>
+                                        <p class="font-bold text-deep-navy text-sm">
+                                            @if($penyedia->distance_km !== null)
+                                                {{ $penyedia->distance_km }} km
+                                            @else
+                                                <span class="text-on-surface-variant/50">—</span>
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Budget</p>
+                                        <p class="font-bold text-deep-navy text-sm">Rp {{ number_format($penyedia->kisaran_harga_min, 0, ',', '.') }}+</p>
                                     </div>
                                 </div>
                             </div>
@@ -117,6 +134,7 @@
                 </label>
             @endforeach
         </div>
+        @endif
 
         <div class="flex justify-between items-center pt-6 border-t border-surface-container relative z-10">
             <a href="{{ route('proyek.create', ['draft_id' => $proyek->id]) }}"

@@ -24,7 +24,7 @@ class ProyekController extends Controller
             'draft_id' => 'nullable|exists:proyeks,id',
             'judul' => 'required|string|max:255',
             'desa_id' => 'required|exists:desa,id_desa',
-            'jenis_energi' => 'required|in:solar,mikro_hidro,lainnya',
+            'jenis_energi' => 'required|in:panel_surya,mikro_hidro,biogas,hybrid_solar_baterai',
             'deskripsi' => 'nullable|string',
             'estimasi_mulai' => 'nullable|date',
             'estimasi_selesai' => 'nullable|date|after_or_equal:estimasi_mulai',
@@ -65,14 +65,13 @@ class ProyekController extends Controller
     public function step2($id, PenyediaRecommendationService $service)
     {
         $proyek = Proyek::with('desa')->findOrFail($id);
-        $desa = $proyek->desa;
 
-        if (!$desa) {
+        if (!$proyek->desa) {
             return redirect()->route('proyek.create', ['draft_id' => $proyek->id])
                 ->withErrors(['desa_id' => 'Desa tidak ditemukan. Pilih desa terlebih dahulu.']);
         }
 
-        $recommendations = $service->getRecommendations($desa);
+        $recommendations = $service->getRecommendations($proyek);
 
         return view('admin.proyek.create_step2', compact('proyek', 'recommendations'));
     }

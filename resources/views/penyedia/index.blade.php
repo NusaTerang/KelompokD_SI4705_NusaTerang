@@ -37,23 +37,11 @@
             </div>
 
             <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-
-                <div class="flex items-center bg-surface-container-low p-1 rounded-xl w-full sm:w-auto shrink-0">
-                    <a href="{{ url('/penyedia/daftar') }}{{ request('search') ? '?search='.e(request('search')) : '' }}"
-                       class="{{ !request('status') ? 'flex-1 sm:flex-none px-6 py-2.5 bg-white text-secondary text-sm font-bold rounded-lg shadow-sm' : 'flex-1 sm:flex-none px-6 py-2.5 text-on-surface-variant text-sm font-medium rounded-lg hover:text-on-surface transition-colors' }}">
-                        Semua
-                    </a>
-                    <a href="{{ url('/penyedia/daftar') }}?status=aktif{{ request('search') ? '&search='.e(request('search')) : '' }}"
-                       class="{{ request('status') == 'aktif' ? 'flex-1 sm:flex-none px-6 py-2.5 bg-white text-secondary text-sm font-bold rounded-lg shadow-sm' : 'flex-1 sm:flex-none px-6 py-2.5 text-on-surface-variant text-sm font-medium rounded-lg hover:text-on-surface transition-colors' }}">
-                        Aktif
-                    </a>
-                </div>
-
-                <a href="{{ route('proyek.create') }}"
-                   class="flex items-center justify-center gap-2 w-full sm:w-auto bg-primary-container text-on-primary-fixed px-6 py-3.5 rounded-xl font-headline font-bold hover:opacity-90 transition-all shadow-sm shrink-0">
-                    <span class="material-symbols-outlined text-[20px]">add_circle</span>
-                    Mulai Proyek Baru
-                </a>
+                <button type="submit"
+                        class="flex items-center justify-center gap-2 w-full sm:w-auto bg-secondary text-white px-6 py-3.5 rounded-xl font-headline font-bold hover:opacity-90 transition-all shadow-sm shrink-0">
+                    <span class="material-symbols-outlined text-[20px]">search</span>
+                    Cari
+                </button>
             </div>
         </form>
 
@@ -123,22 +111,10 @@
 
                         {{-- Actions --}}
                         <div class="flex flex-col gap-3 w-full mt-auto pt-2">
-                            <a href="#" class="w-full py-3 rounded-xl border-2 border-secondary text-secondary font-headline font-bold hover:bg-secondary hover:text-white transition-all text-center">
-                                Lihat Profil
+                            <a href="{{ route('penyedia.show', $provider->id) }}"
+                               class="w-full py-3 rounded-xl border-2 border-secondary text-secondary font-headline font-bold hover:bg-secondary hover:text-white transition-all text-center">
+                                Lihat Detail
                             </a>
-
-                            @if($isActive)
-                                <a href="{{ route('proyek.create') }}"
-                                   class="w-full py-3 rounded-xl bg-primary-container text-on-primary-fixed font-headline font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-sm">
-                                    <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-                                    Assign ke Proyek
-                                </a>
-                            @else
-                                <button disabled class="w-full py-3 rounded-xl bg-surface-container text-outline font-headline font-bold flex items-center justify-center gap-2 cursor-not-allowed">
-                                    <span class="material-symbols-outlined text-sm">cancel</span>
-                                    Tidak Tersedia
-                                </button>
-                            @endif
                         </div>
 
                     </div>

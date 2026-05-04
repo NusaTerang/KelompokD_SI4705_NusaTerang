@@ -39,9 +39,10 @@
                     <div class="relative">
                         <select id="spesialisasi" name="spesialisasi"
                                 class="w-full appearance-none bg-surface-container-highest border border-slate-200 rounded-lg px-4 py-3 text-sm text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all cursor-pointer @error('spesialisasi') border-error @enderror">
-                            <option value="solar"       {{ old('spesialisasi', $vendor->spesialisasi) === 'solar'       ? 'selected' : '' }}>Solar PV (Surya)</option>
-                            <option value="mikro_hidro" {{ old('spesialisasi', $vendor->spesialisasi) === 'mikro_hidro' ? 'selected' : '' }}>Tenaga Air (Mikrohidro)</option>
-                            <option value="lainnya"     {{ old('spesialisasi', $vendor->spesialisasi) === 'lainnya'     ? 'selected' : '' }}>Lainnya</option>
+                            <option value="panel_surya"          {{ old('spesialisasi', $vendor->spesialisasi) === 'panel_surya'          ? 'selected' : '' }}>Panel Surya</option>
+                            <option value="mikro_hidro"          {{ old('spesialisasi', $vendor->spesialisasi) === 'mikro_hidro'          ? 'selected' : '' }}>Mikrohidro</option>
+                            <option value="biogas"               {{ old('spesialisasi', $vendor->spesialisasi) === 'biogas'               ? 'selected' : '' }}>Biogas</option>
+                            <option value="hybrid_solar_baterai" {{ old('spesialisasi', $vendor->spesialisasi) === 'hybrid_solar_baterai' ? 'selected' : '' }}>Hybrid Solar + Baterai</option>
                         </select>
                         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">expand_more</span>
                     </div>

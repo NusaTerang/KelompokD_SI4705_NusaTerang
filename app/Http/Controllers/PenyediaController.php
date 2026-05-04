@@ -28,6 +28,12 @@ class PenyediaController extends Controller
         return view('penyedia.index', compact('providers'));
     }
 
+    public function show($id)
+    {
+        $provider = \App\Models\PenyediaEnergi::findOrFail($id);
+        return view('penyedia.show', compact('provider'));
+    }
+
     public function getRekomendasi(Request $request, PenyediaRecommendationService $service)
     {
         $desa_id = $request->query('desa_id');

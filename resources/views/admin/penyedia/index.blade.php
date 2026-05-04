@@ -45,9 +45,10 @@
         <select name="spesialisasi"
                 class="w-full appearance-none border border-slate-200 bg-surface-container-highest text-on-surface font-body text-sm py-2.5 pl-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer">
             <option value="">Semua Spesialisasi</option>
-            <option value="solar"      {{ request('spesialisasi') === 'solar'      ? 'selected' : '' }}>Solar PV</option>
-            <option value="mikro_hidro"{{ request('spesialisasi') === 'mikro_hidro'? 'selected' : '' }}>Mikro Hidro</option>
-            <option value="lainnya"    {{ request('spesialisasi') === 'lainnya'    ? 'selected' : '' }}>Lainnya</option>
+            <option value="panel_surya"          {{ request('spesialisasi') === 'panel_surya'          ? 'selected' : '' }}>Panel Surya</option>
+            <option value="mikro_hidro"          {{ request('spesialisasi') === 'mikro_hidro'          ? 'selected' : '' }}>Mikrohidro</option>
+            <option value="biogas"               {{ request('spesialisasi') === 'biogas'               ? 'selected' : '' }}>Biogas</option>
+            <option value="hybrid_solar_baterai" {{ request('spesialisasi') === 'hybrid_solar_baterai' ? 'selected' : '' }}>Hybrid Solar + Baterai</option>
         </select>
         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[18px]">expand_more</span>
     </div>
@@ -88,9 +89,11 @@
             @forelse($vendors as $vendor)
             @php
                 $spLabel = match($vendor->spesialisasi) {
-                    'solar'      => ['label' => 'Solar PV', 'icon' => 'solar_power', 'class' => 'bg-amber-50 text-amber-700'],
-                    'mikro_hidro'=> ['label' => 'Mikro Hidro', 'icon' => 'water_drop', 'class' => 'bg-blue-50 text-blue-700'],
-                    default      => ['label' => 'Lainnya', 'icon' => 'air', 'class' => 'bg-slate-100 text-slate-600'],
+                    'panel_surya'          => ['label' => 'Panel Surya',          'icon' => 'solar_power',  'class' => 'bg-amber-50 text-amber-700'],
+                    'mikro_hidro'          => ['label' => 'Mikrohidro',           'icon' => 'water_drop',   'class' => 'bg-blue-50 text-blue-700'],
+                    'biogas'               => ['label' => 'Biogas',               'icon' => 'eco',          'class' => 'bg-green-50 text-green-700'],
+                    'hybrid_solar_baterai' => ['label' => 'Hybrid Solar+Baterai', 'icon' => 'bolt',         'class' => 'bg-purple-50 text-purple-700'],
+                    default                => ['label' => $vendor->spesialisasi,  'icon' => 'energy_savings_leaf', 'class' => 'bg-slate-100 text-slate-600'],
                 };
             @endphp
             <tr class="hover:bg-surface-container-low/50 transition-colors">
