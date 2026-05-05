@@ -38,7 +38,6 @@
                             <th class="px-4 py-3">Kabupaten</th>
                             <th class="px-4 py-3">Koordinat</th>
                             <th class="px-4 py-3">Sumber</th>
-                            <th class="px-4 py-3">Status Verifikasi</th>
                             <th class="px-4 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -52,18 +51,6 @@
                                 <td class="max-w-[140px] truncate px-4 py-3 text-xs text-slate-500" title="{{ $d->koordinat ?? '—' }}">{{ $d->koordinat ?? '—' }}</td>
                                 <td class="px-4 py-3">
                                     <span class="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">{{ $d->sumber }}</span>
-                                </td>
-                                <td class="px-4 py-3">
-                                    @php
-                                        $sv = $d->status_verifikasi ?? 'menunggu_verifikasi';
-                                        $badge = match ($sv) {
-                                            'terverifikasi' => 'bg-emerald-100 text-emerald-800',
-                                            'ditolak' => 'bg-red-100 text-red-800',
-                                            'draft' => 'bg-slate-200 text-slate-800',
-                                            default => 'bg-amber-100 text-amber-900',
-                                        };
-                                    @endphp
-                                    <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $badge }}">{{ str_replace('_', ' ', $sv) }}</span>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
                                     <a href="{{ route('desa.edit', $d->id_desa) }}"
