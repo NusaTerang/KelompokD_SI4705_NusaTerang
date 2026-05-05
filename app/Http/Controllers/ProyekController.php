@@ -156,8 +156,16 @@ class ProyekController extends Controller
     public function kirimKePenyedia(Request $request, $id)
     {
         $proyek = Proyek::findOrFail($id);
-        $proyek->update([
-            'status' => 'menunggu_konfirmasi_penyedia'
+
+        if (!$proyek->penyedia_id) {
+            return redirect()->back()->withErrors(['penyedia' => 'Pilih penyedia terlebih dahulu sebelum mengirim.']);
+        }
+
+        $proyek->update(['status' => 'menunggu_konfirmasi_penyedia']);
+
+        \App\Models\PenugasanProyek::firstOrCreate([
+            'id_proyek'   => $proyek->id,
+            'id_penyedia' => $proyek->penyedia_id,
         ]);
 
         return redirect()->route('proyek.kelola')->with('success', 'Proyek berhasil dikirim ke penyedia!');
