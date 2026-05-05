@@ -96,6 +96,49 @@ class ProyekController extends Controller
         return view('admin.proyek.create_step3', compact('proyek'));
     }
 
+    public function kelola(Request $request)
+    {
+        $query = Proyek::with(['desa', 'penyedia', 'fotos']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhereHas('desa', fn ($dq) => $dq->where('nama_desa', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($request->filled('jenis_energi')) {
+            $query->where('jenis_energi', $request->jenis_energi);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $proyeks = $query->latest()->paginate(15)->withQueryString();
+
+        return view('admin.proyek.kelola', compact('proyeks'));
+    }
+
+    public function publish($id)
+    {
+        $proyek = Proyek::findOrFail($id);
+
+        if (in_array($proyek->status, ['eksekusi', 'selesai'])) {
+            abort(403, 'Proyek yang sedang berjalan atau selesai tidak dapat diubah statusnya.');
+        }
+
+        $newStatus = $proyek->status === 'aktif_funding' ? 'draft' : 'aktif_funding';
+        $proyek->update(['status' => $newStatus]);
+
+        $message = $newStatus === 'aktif_funding'
+            ? 'Proyek berhasil dipublikasikan.'
+            : 'Proyek berhasil dibatalkan publikasinya.';
+
+        return redirect()->route('proyek.kelola')->with('success', $message);
+    }
+
     public function kirimKePenyedia(Request $request, $id)
     {
         $proyek = Proyek::findOrFail($id);
@@ -103,7 +146,24 @@ class ProyekController extends Controller
             'status' => 'menunggu_konfirmasi_penyedia'
         ]);
 
-        return redirect()->route('proyek.show', $proyek->id)->with('success', 'Proyek berhasil dikirim ke penyedia!');
+        return redirect()->route('proyek.kelola')->with('success', 'Proyek berhasil dikirim ke penyedia!');
+    }
+
+    public function destroy($id)
+    {
+        $proyek = Proyek::findOrFail($id);
+
+        if ($proyek->status !== 'draft') {
+            abort(403, 'Hanya proyek berstatus draft yang dapat dihapus.');
+        }
+
+        $proyek->fotos()->each(function ($foto) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($foto->path);
+        });
+        $proyek->fotos()->delete();
+        $proyek->delete();
+
+        return redirect()->route('proyek.kelola')->with('success', 'Proyek berhasil dihapus.');
     }
 
     public function show($id)

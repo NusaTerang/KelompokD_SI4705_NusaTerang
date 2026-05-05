@@ -16,7 +16,8 @@
         $proyekAdminOpen = request()->routeIs('proyek.create') ||
                            request()->routeIs('proyek.step2') ||
                            request()->routeIs('proyek.save.*') ||
-                           request()->routeIs('proyek.review');
+                           request()->routeIs('proyek.review') ||
+                           request()->routeIs('proyek.kelola');
         $vendorOpen      = request()->routeIs('admin.vendors.*');
     @endphp
 
@@ -47,6 +48,7 @@
                     </a>
                     <div class="ml-4 mt-1 space-y-0.5 border-l border-white/15 pl-3">
                         <a href="{{ route('proyek.create') }}" class="block rounded-md py-1.5 pl-2 text-xs font-medium {{ request()->routeIs('proyek.create') || request()->routeIs('proyek.save.step1') ? 'bg-white/10 text-nt-accent' : 'text-white/70 hover:text-white' }}">Buat Proyek</a>
+                        <a href="{{ route('proyek.kelola') }}" class="block rounded-md py-1.5 pl-2 text-xs font-medium {{ request()->routeIs('proyek.kelola') ? 'bg-white/10 text-nt-accent' : 'text-white/70 hover:text-white' }}">Kelola Proyek</a>
                     </div>
                 </div>
 

@@ -109,6 +109,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::prefix('proyek')->name('proyek.')->group(function () {
         Route::get('buat', [ProyekController::class, 'create'])->name('create');
         Route::post('buat', [ProyekController::class, 'saveStep1'])->name('save.step1');
+        Route::get('kelola', [ProyekController::class, 'kelola'])->name('kelola');
+        Route::patch('{id}/publish', [ProyekController::class, 'publish'])->name('publish');
+        Route::delete('{id}', [ProyekController::class, 'destroy'])->name('destroy');
 
         Route::get('{id}/pilih-penyedia', [ProyekController::class, 'step2'])->name('step2');
         Route::post('{id}/pilih-penyedia', [ProyekController::class, 'saveStep2'])->name('save.step2');
