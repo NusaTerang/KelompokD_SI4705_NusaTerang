@@ -12,6 +12,10 @@
 
 @section('page_heading', 'Input Data Desa')
 
+@push('head')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+@endpush
+
 @section('content')
     <div class="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-start">
         <div class="min-w-0 flex-1 space-y-6">

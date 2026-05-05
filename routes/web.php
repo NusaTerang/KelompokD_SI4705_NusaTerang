@@ -117,6 +117,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('{id}/pilih-penyedia', [ProyekController::class, 'saveStep2'])->name('save.step2');
 
         Route::get('{id}/review', [ProyekController::class, 'review'])->name('review');
+        Route::post('{id}/draft', [ProyekController::class, 'saveDraft'])->name('save.draft');
         Route::post('{id}/kirim', [ProyekController::class, 'kirimKePenyedia'])->name('kirim');
     });
 

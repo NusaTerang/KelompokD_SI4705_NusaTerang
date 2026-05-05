@@ -20,15 +20,22 @@ class ProyekController extends Controller
 
     public function saveStep1(Request $request)
     {
+        $draftId = $request->draft_id;
+        $existingFotosCount = $draftId
+            ? (Proyek::find($draftId)?->fotos()->count() ?? 0)
+            : 0;
+        $requireFoto = !$draftId || $existingFotosCount === 0;
+
         $validated = $request->validate([
-            'draft_id' => 'nullable|exists:proyeks,id',
-            'judul' => 'required|string|max:255',
-            'desa_id' => 'required|exists:desa,id_desa',
-            'jenis_energi' => 'required|in:panel_surya,mikro_hidro,biogas,hybrid_solar_baterai',
-            'deskripsi' => 'nullable|string',
-            'estimasi_mulai' => 'nullable|date',
-            'estimasi_selesai' => 'nullable|date|after_or_equal:estimasi_mulai',
-            'fotos.*' => 'image|max:2048'
+            'draft_id'          => 'nullable|exists:proyeks,id',
+            'judul'             => 'required|string|max:255',
+            'desa_id'           => 'required|exists:desa,id_desa',
+            'jenis_energi'      => 'required|in:panel_surya,mikro_hidro,biogas,hybrid_solar_baterai',
+            'deskripsi'         => 'nullable|string',
+            'estimasi_mulai'    => 'nullable|date',
+            'estimasi_selesai'  => 'nullable|date|after_or_equal:estimasi_mulai',
+            'fotos'             => $requireFoto ? 'required|array|min:1' : 'nullable|array',
+            'fotos.*'           => 'image|max:2048',
         ]);
 
         // Fix logic for checkbox/radio that might not exist in form if unchecked
@@ -72,8 +79,9 @@ class ProyekController extends Controller
         }
 
         $recommendations = $service->getRecommendations($proyek);
+        $allPenyedia = \App\Models\PenyediaEnergi::where('status', 'aktif')->orderBy('nama')->get();
 
-        return view('admin.proyek.create_step2', compact('proyek', 'recommendations'));
+        return view('admin.proyek.create_step2', compact('proyek', 'recommendations', 'allPenyedia'));
     }
 
     public function saveStep2(Request $request, $id)
@@ -137,6 +145,12 @@ class ProyekController extends Controller
             : 'Proyek berhasil dibatalkan publikasinya.';
 
         return redirect()->route('proyek.kelola')->with('success', $message);
+    }
+
+    public function saveDraft($id)
+    {
+        Proyek::findOrFail($id);
+        return redirect()->route('proyek.kelola')->with('success', 'Proyek disimpan sebagai draft.');
     }
 
     public function kirimKePenyedia(Request $request, $id)

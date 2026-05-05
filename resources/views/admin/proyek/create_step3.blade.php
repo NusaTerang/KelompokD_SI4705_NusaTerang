@@ -143,10 +143,13 @@
 
             {{-- Footer Actions --}}
             <div class="px-8 py-8 bg-surface-container-high/30 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <a href="{{ route('proyek.create', ['draft_id' => $proyek->id]) }}"
-                   class="w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all active:scale-95 duration-200 text-center">
-                    Simpan sebagai Draft
-                </a>
+                <form action="{{ route('proyek.save.draft', $proyek->id) }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                        class="w-full sm:w-auto px-8 py-3 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all active:scale-95 duration-200 text-center">
+                        Simpan sebagai Draft
+                    </button>
+                </form>
                 <form action="{{ route('proyek.kirim', $proyek->id) }}" method="POST">
                     @csrf
                     <button type="submit"

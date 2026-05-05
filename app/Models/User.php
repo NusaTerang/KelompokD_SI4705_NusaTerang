@@ -15,7 +15,6 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'donatur';
     protected $primaryKey = 'id_donatur';
     public const UPDATED_AT = null;
 

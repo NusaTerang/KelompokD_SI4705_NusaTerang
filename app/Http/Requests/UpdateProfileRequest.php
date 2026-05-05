@@ -17,7 +17,7 @@ class UpdateProfileRequest extends FormRequest
 
         return [
             'nama' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'string', 'email', 'max:100', 'unique:donatur,email,' . $id . ',id_donatur'],
+            'email' => ['required', 'string', 'email', 'max:100', 'unique:users,email,' . $id . ',id_donatur'],
             'no_telepon' => ['nullable', 'string', 'max:20'],
         ];
     }
