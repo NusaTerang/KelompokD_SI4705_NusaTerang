@@ -242,12 +242,9 @@
 
                 <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-between">
                     <button type="submit" name="action" value="draft" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                        Simpan Draft
-                    </button>
-                    <button type="submit" name="action" value="submit" class="inline-flex items-center justify-center gap-1 rounded-lg bg-nt-accent px-6 py-2.5 text-sm font-bold text-nt-navy shadow-sm hover:bg-nt-accent-hover">
                         Ajukan Data
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
                     </button>
+
                 </div>
             </form>
         </div>
