@@ -43,6 +43,15 @@ class ProyekController extends Controller
 
         $isDraft = $request->boolean('save_draft');
 
+        // Hapus item kosong dari cost_breakdown agar tidak gagal validasi
+        if ($request->has('cost_breakdown')) {
+            $cleaned = array_values(array_filter(
+                $request->input('cost_breakdown', []),
+                fn ($item) => !empty($item['nama']) || !empty($item['nominal'])
+            ));
+            $request->merge(['cost_breakdown' => $cleaned]);
+        }
+
         $rules = [
             'jenis_energi'             => 'required|array|min:1',
             'jenis_energi.*'           => 'in:panel_surya,mikro_hidro,biogas,hybrid_solar_baterai',
@@ -56,16 +65,34 @@ class ProyekController extends Controller
             'catatan_teknis'           => 'nullable|string|max:2000',
         ];
 
+        $messages = [
+            'jenis_energi.required'       => 'Pilih minimal satu jenis energi.',
+            'jenis_energi.min'            => 'Pilih minimal satu jenis energi.',
+            'jenis_energi.*.in'           => 'Jenis energi tidak valid.',
+            'kapasitas_daya.required'     => 'Kapasitas daya wajib diisi.',
+            'kapasitas_daya.numeric'      => 'Kapasitas daya harus berupa angka.',
+            'satuan_daya.required'        => 'Satuan daya wajib dipilih.',
+            'satuan_daya.in'              => 'Satuan daya tidak valid.',
+            'target_dana.required'        => 'Target dana wajib diisi.',
+            'target_dana.numeric'         => 'Target dana harus berupa angka.',
+            'cost_breakdown.*.nama.required_with'    => 'Nama item cost breakdown wajib diisi jika nominal diisi.',
+            'cost_breakdown.*.nominal.required_with' => 'Nominal item cost breakdown wajib diisi jika nama diisi.',
+            'cost_breakdown.*.nominal.numeric'       => 'Nominal harus berupa angka.',
+            'durasi_minggu.required'      => 'Durasi pengerjaan wajib diisi.',
+            'durasi_minggu.integer'       => 'Durasi harus berupa bilangan bulat.',
+            'catatan_teknis.max'          => 'Catatan teknis maksimal 2000 karakter.',
+        ];
+
         if ($isDraft) {
-            // Relax required rules for draft
             $rules['jenis_energi']   = 'nullable|array';
             $rules['kapasitas_daya'] = 'nullable|numeric|min:0';
             $rules['satuan_daya']    = 'nullable|in:kWp,kW,MW';
             $rules['target_dana']    = 'nullable|numeric|min:0';
             $rules['durasi_minggu']  = 'nullable|integer|min:1';
+            // cost_breakdown sudah dibersihkan di atas, jika kosong menjadi null dan lolos validasi
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, $messages);
         $validated['status'] = $isDraft ? 'draft' : 'submitted';
 
         DetailProyekVendor::updateOrCreate(

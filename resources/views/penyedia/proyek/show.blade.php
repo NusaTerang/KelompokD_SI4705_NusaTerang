@@ -28,8 +28,8 @@
     $waMsg  = urlencode('Halo, saya dari ' . (auth()->user()->penyedia?->nama ?? 'Vendor') . '. Saya ingin berdiskusi mengenai proyek "' . $proyek->judul . '".');
     $waUrl  = $waNumber ? "https://wa.me/{$waNumber}?text={$waMsg}" : '#';
 
-    $selectedEnergies = $detail ? (array) json_decode($detail->jenis_energi ?? '[]') : [];
-    $costBreakdown    = $detail ? (array) json_decode($detail->cost_breakdown ?? '[]') : [];
+    $selectedEnergies = old('jenis_energi', $detail ? ($detail->jenis_energi ?? []) : []);
+    $costBreakdown    = old('cost_breakdown', $detail ? ($detail->cost_breakdown ?? []) : []);
 
     $energiOptions = [
         ['value' => 'panel_surya',          'label' => 'Solar Panel',  'icon' => 'wb_sunny'],
@@ -41,7 +41,7 @@
 
 <div class="max-w-7xl mx-auto"
      x-data="{
-         items: {{ count($costBreakdown) ? json_encode(array_map(fn($i) => ['nama' => $i->nama ?? '', 'nominal' => $i->nominal ?? 0], $costBreakdown)) : '[{nama:\'\',nominal:\'\'}]' }},
+         items: {{ count($costBreakdown) ? json_encode(array_map(fn($i) => ['nama' => is_array($i) ? ($i['nama'] ?? '') : ($i->nama ?? ''), 'nominal' => is_array($i) ? ($i['nominal'] ?? 0) : ($i->nominal ?? 0)], $costBreakdown)) : '[{nama:\'\',nominal:\'\'}]' }},
          addItem() { this.items.push({ nama: '', nominal: '' }); },
          removeItem(i) { if (this.items.length > 1) this.items.splice(i, 1); }
      }">
@@ -130,10 +130,16 @@
                         <label class="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Foto Lokasi Awal</label>
                         <div class="grid grid-cols-2 gap-3">
                             @foreach($proyek->fotos->take(4) as $foto)
+                            @php
+                                $fotoUrl = str_starts_with($foto->path, 'http://') || str_starts_with($foto->path, 'https://')
+                                    ? $foto->path
+                                    : asset('storage/' . $foto->path);
+                            @endphp
                             <div class="relative group overflow-hidden rounded-xl border border-surface-container h-40">
-                                <img src="{{ asset('storage/' . $foto->path) }}"
+                                <img src="{{ $fotoUrl }}"
                                      alt="Foto Proyek"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'flex items-center justify-center h-full text-xs text-slate-400\'>Foto tidak tersedia</div>';">
                             </div>
                             @endforeach
                         </div>
@@ -354,7 +360,7 @@
                             {{ implode(', ', array_map(fn($e) => match($e) {
                                 'panel_surya' => 'Panel Surya', 'mikro_hidro' => 'Mikro Hidro',
                                 'biogas' => 'Biogas', 'hybrid_solar_baterai' => 'Hybrid', default => $e
-                            }, (array) json_decode($detail->jenis_energi ?? '[]'))) }}
+                            }, $detail->jenis_energi ?? [])) }}
                         </p>
                     </div>
                 </div>
