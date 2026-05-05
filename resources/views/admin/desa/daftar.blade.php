@@ -66,9 +66,24 @@
                                     <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $badge }}">{{ str_replace('_', ' ', $sv) }}</span>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
-                                    <a href="#" class="font-medium text-nt-navy hover:underline">Edit</a>
+                                    <a href="{{ route('desa.edit', $d->id_desa) }}"
+                                    class="font-medium text-nt-navy hover:underline">
+                                    Edit
+                                    </a>
+
                                     <span class="mx-2 text-slate-300">|</span>
-                                    <button type="button" class="font-medium text-red-600 hover:underline">Hapus</button>
+
+                                    <form action="{{ route('desa.destroy', $d->id_desa) }}"
+                                        method="POST"
+                                        class="inline"
+                                        onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="font-medium text-red-600 hover:underline">
+                                            Hapus
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty

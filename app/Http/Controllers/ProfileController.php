@@ -8,19 +8,21 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function edit(): View
-    {
-        $user = auth()->user();
+public function edit()
+{
+    $user = auth()->user();
 
-        $bergabung = $user->created_at
-            ? $user->created_at->locale('id')->translatedFormat('F Y')
-            : '—';
-
-        return view('profil.edit', [
-            'user' => $user,
-            'bergabung' => $bergabung,
-        ]);
+    // Jika belum login → pakai dummy user
+    if (!$user) {
+        $user = (object)[
+            'name' => 'Preview User',
+            'email' => 'preview@example.com',
+            'created_at' => now(),
+        ];
     }
+
+    return view('profil.edit', compact('user'));
+}
 
     public function update(UpdateProfileRequest $request): RedirectResponse
     {
