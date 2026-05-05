@@ -88,6 +88,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('/', [DesaController::class, 'store'])->name('store');
         Route::get('kelola', [DesaController::class, 'kelola'])->name('kelola');
         Route::get('daftar', [DesaController::class, 'index'])->name('daftar');
+
+        Route::get('{id}/edit', [DesaController::class, 'edit'])->name('edit');
+        Route::put('{id}', [DesaController::class, 'update'])->name('update');
+        Route::delete('{id}', [DesaController::class, 'destroy'])->name('destroy');
     });
 
     // Proyek creation wizard

@@ -7,9 +7,62 @@ use App\Models\Desa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Http\Request;
 
 class DesaController extends Controller
 {
+    // Tambah fitur edit dan delete kelola daftar desa (trial)
+    public function edit($id): View
+    {
+        $desa = Desa::findOrFail($id);
+        return view('admin.desa.edit', compact('desa'));
+    }
+    
+    public function update(StoreDesaRequest $request, $id): RedirectResponse
+    {
+        $desa = Desa::findOrFail($id);
+
+        $validated = $request->validated();
+
+        $action = $validated['action'] ?? 'submit';
+        unset($validated['action']);
+
+        // 🔥 Gabung kondisi seperti store
+        $kondisiGabungan = $this->gabungKondisiDesa($request, $validated['kondisi_desa'] ?? '');
+
+        unset(
+            $validated['kecamatan'],
+            $validated['kode_wilayah'],
+            $validated['kondisi_desa'],
+            $validated['jumlah_penduduk'],
+            $validated['jumlah_kk'],
+            $validated['status_elektrifikasi'],
+            $validated['estimasi_kebutuhan_daya'],
+            $validated['catatan_tambahan'],
+        );
+
+        $validated['kondisi_desa'] = $kondisiGabungan !== '' ? $kondisiGabungan : null;
+        $validated['status_verifikasi'] = $action === 'draft' ? 'draft' : 'menunggu_verifikasi';
+
+        // 🔥 UPDATE
+        $desa->update($validated);
+
+        return redirect()
+            ->route('desa.daftar')
+            ->with('success', 'Data desa berhasil diperbarui.');
+    }
+    
+    public function destroy($id): RedirectResponse
+    {
+        $desa = Desa::findOrFail($id);
+        $desa->delete();
+
+        return redirect()
+            ->route('desa.daftar')
+            ->with('success', 'Data desa berhasil dihapus.');
+    }
+     // Tambah fitur edit dan delete kelola daftar desa
+
     public function create(): View
     {
         return view('admin.desa.input');
@@ -151,3 +204,4 @@ class DesaController extends Controller
         };
     }
 }
+
