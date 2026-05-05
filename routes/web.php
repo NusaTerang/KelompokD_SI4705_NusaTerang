@@ -32,6 +32,8 @@ Route::get('/', function () {
 
     if (request()->filled('status') && isset($statusMap[request('status')])) {
         $query->where('status', $statusMap[request('status')]);
+    } else {
+        $query->where('status', 'aktif_funding');
     }
 
     $projects = $query->latest()->paginate(6)->withQueryString();
