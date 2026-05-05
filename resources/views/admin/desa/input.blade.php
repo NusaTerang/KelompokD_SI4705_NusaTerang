@@ -62,23 +62,28 @@
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <label for="provinsi" class="mb-1.5 block text-sm font-medium text-slate-700">Provinsi</label>
-                                <select name="provinsi" id="provinsi" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nt-navy focus:outline-none focus:ring-2 focus:ring-nt-navy/20">
-                                    <option value="">Pilih provinsi</option>
-                                    <option value="Nusa Tenggara Timur" @selected(old('provinsi') === 'Nusa Tenggara Timur')>Nusa Tenggara Timur</option>
-                                    <option value="Papua" @selected(old('provinsi') === 'Papua')>Papua</option>
-                                    <option value="Kalimantan Timur" @selected(old('provinsi') === 'Kalimantan Timur')>Kalimantan Timur</option>
-                                </select>
+                                <input 
+                                    type="text" 
+                                    name="provinsi" 
+                                    id="provinsi" 
+                                    value="{{ old('provinsi') }}" 
+                                    placeholder="Masukkan nama provinsi" 
+                                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm focus:border-nt-navy focus:outline-none focus:ring-2 focus:ring-nt-navy/20"
+                                />
                                 @error('provinsi')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
                                 <label for="kabupaten" class="mb-1.5 block text-sm font-medium text-slate-700">Kabupaten</label>
-                                <select name="kabupaten" id="kabupaten" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nt-navy focus:outline-none focus:ring-2 focus:ring-nt-navy/20">
-                                    <option value="">Pilih kabupaten</option>
-                                    <option value="Manggarai" @selected(old('kabupaten') === 'Manggarai')>Manggarai</option>
-                                    <option value="Jayawijaya" @selected(old('kabupaten') === 'Jayawijaya')>Jayawijaya</option>
-                                </select>
+                                <input 
+                                    type="text" 
+                                    name="kabupaten" 
+                                    id="kabupaten" 
+                                    value="{{ old('kabupaten') }}" 
+                                    placeholder="Masukkan nama kabupaten" 
+                                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm focus:border-nt-navy focus:outline-none focus:ring-2 focus:ring-nt-navy/20"
+                                />
                                 @error('kabupaten')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -88,7 +93,7 @@
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <label for="kecamatan" class="mb-1.5 block text-sm font-medium text-slate-700">Kecamatan</label>
-                                <input type="text" name="kecamatan" id="kecamatan" value="{{ old('kecamatan') }}" placeholder="Opsional — siap untuk migrasi kolom" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm focus:border-nt-navy focus:outline-none focus:ring-2 focus:ring-nt-navy/20" />
+                                <input type="text" name="kecamatan" id="kecamatan" value="{{ old('kecamatan') }}" placeholder="Opsional" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm shadow-sm focus:border-nt-navy focus:outline-none focus:ring-2 focus:ring-nt-navy/20" />
                             </div>
                             <div>
                                 <label for="kode_wilayah" class="mb-1.5 block text-sm font-medium text-slate-700">Kode Wilayah</label>
@@ -164,8 +169,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div>
+                         <div>
                             <span class="mb-2 block text-sm font-medium text-slate-700">Status Elektrifikasi</span>
                             <div class="flex flex-wrap gap-2">
                                 @php $el = old('status_elektrifikasi', 'sebagian'); @endphp
@@ -182,7 +186,6 @@
                                     <span class="inline-flex rounded-lg border-2 border-emerald-200 bg-white px-4 py-2 text-sm font-medium text-emerald-800 peer-checked:border-emerald-500 peer-checked:bg-emerald-50">Sudah Teraliri</span>
                                 </label>
                             </div>
-                        </div>
                     </div>
                 </section>
 
@@ -227,17 +230,6 @@
                                     <input type="text" name="estimasi_kebutuhan_daya" id="estimasi_kebutuhan_daya" value="{{ old('estimasi_kebutuhan_daya') }}" inputmode="decimal" class="w-full rounded-lg border border-slate-300 py-2.5 pl-3 pr-12 text-sm shadow-sm focus:border-nt-navy focus:outline-none focus:ring-2 focus:ring-nt-navy/20" />
                                     <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-500">kW</span>
                                 </div>
-                            </div>
-                            <div>
-                                <label for="status_verifikasi" class="mb-1.5 block text-sm font-medium text-slate-700">Status Verifikasi</label>
-                                <select name="status_verifikasi" id="status_verifikasi" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nt-navy focus:outline-none focus:ring-2 focus:ring-nt-navy/20">
-                                    @foreach (['draft' => 'Draft', 'menunggu_verifikasi' => 'Menunggu Verifikasi', 'terverifikasi' => 'Terverifikasi', 'ditolak' => 'Ditolak'] as $val => $label)
-                                        <option value="{{ $val }}" @selected(old('status_verifikasi', 'menunggu_verifikasi') === $val)>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                                @error('status_verifikasi')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
                             </div>
                         </div>
 

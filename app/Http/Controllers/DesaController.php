@@ -11,57 +11,11 @@ use Illuminate\Http\Request;
 
 class DesaController extends Controller
 {
-    // Tambah fitur edit dan delete kelola daftar desa (trial)
-    public function edit($id): View
+    public function index(): View
     {
-        $desa = Desa::findOrFail($id);
-        return view('admin.desa.edit', compact('desa'));
+        $desas = Desa::query()->orderBy('created_at')->get();
+        return view('admin.desa.daftar', compact('desas'));
     }
-    
-    public function update(StoreDesaRequest $request, $id): RedirectResponse
-    {
-        $desa = Desa::findOrFail($id);
-
-        $validated = $request->validated();
-
-        $action = $validated['action'] ?? 'submit';
-        unset($validated['action']);
-
-        // 🔥 Gabung kondisi seperti store
-        $kondisiGabungan = $this->gabungKondisiDesa($request, $validated['kondisi_desa'] ?? '');
-
-        unset(
-            $validated['kecamatan'],
-            $validated['kode_wilayah'],
-            $validated['kondisi_desa'],
-            $validated['jumlah_penduduk'],
-            $validated['jumlah_kk'],
-            $validated['status_elektrifikasi'],
-            $validated['estimasi_kebutuhan_daya'],
-            $validated['catatan_tambahan'],
-        );
-
-        $validated['kondisi_desa'] = $kondisiGabungan !== '' ? $kondisiGabungan : null;
-        $validated['status_verifikasi'] = $action === 'draft' ? 'draft' : 'menunggu_verifikasi';
-
-        // 🔥 UPDATE
-        $desa->update($validated);
-
-        return redirect()
-            ->route('desa.daftar')
-            ->with('success', 'Data desa berhasil diperbarui.');
-    }
-    
-    public function destroy($id): RedirectResponse
-    {
-        $desa = Desa::findOrFail($id);
-        $desa->delete();
-
-        return redirect()
-            ->route('desa.daftar')
-            ->with('success', 'Data desa berhasil dihapus.');
-    }
-     // Tambah fitur edit dan delete kelola daftar desa
 
     public function create(): View
     {
@@ -71,74 +25,74 @@ class DesaController extends Controller
     public function store(StoreDesaRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $action = $validated['action'] ?? 'submit';
+        
+        // Ambil action (submit/draft) lalu hapus dari array agar tidak masuk ke create()
+        $action = $request->input('action', 'submit');
         unset($validated['action']);
 
+        // Gabungkan data input tambahan ke kolom kondisi_desa (Textarea)
         $kondisiGabungan = $this->gabungKondisiDesa($request, $validated['kondisi_desa'] ?? '');
-        unset(
-            $validated['kecamatan'],
-            $validated['kode_wilayah'],
-            $validated['kondisi_desa'],
-            $validated['jumlah_penduduk'],
-            $validated['jumlah_kk'],
-            $validated['status_elektrifikasi'],
-            $validated['estimasi_kebutuhan_daya'],
-            $validated['catatan_tambahan'],
-        );
 
-        $validated['kondisi_desa'] = $kondisiGabungan !== '' ? $kondisiGabungan : null;
-        $validated['status_verifikasi'] = $action === 'draft' ? 'draft' : 'menunggu_verifikasi';
-        $validated['id_admin'] = Auth::id();
+        // Bersihkan field yang tidak ada di tabel database (karena digabung ke kondisi_desa)
+        $dataToSave = collect($validated)->except([
+            'kecamatan', 'kode_wilayah', 'kondisi_desa', 'jumlah_penduduk', 
+            'jumlah_kk', 'status_elektrifikasi', 'estimasi_kebutuhan_daya', 'catatan_tambahan'
+        ])->toArray();
 
-        Desa::query()->create($validated);
+        // Mapping data ke kolom tabel sesuai migrasi
+        $dataToSave['kondisi_desa'] = $kondisiGabungan !== '' ? $kondisiGabungan : null;
+        $dataToSave['id_admin'] = Auth::id();
 
-        $message = $action === 'draft'
+        Desa::create($dataToSave);
+
+        $message = ($action === 'draft')
             ? 'Draft data desa berhasil disimpan.'
             : 'Data desa berhasil diajukan untuk verifikasi.';
 
-        return redirect()
-            ->route('desa.daftar')
-            ->with('success', $message);
+        return redirect()->route('desa.daftar')->with('success', $message);
     }
 
-    public function kelola(): View
+    public function edit($id): View
     {
-        $desaPrioritas = Desa::query()
-            ->orderByDesc('created_at')
-            ->get()
-            ->values()
-            ->map(function (Desa $d, int $i) {
-                $meta = $this->metaDariKondisi($d->kondisi_desa);
-
-                return [
-                    'rank' => $i + 1,
-                    'nama_desa' => $d->nama_desa,
-                    'lokasi' => $d->kabupaten . ', ' . $d->provinsi,
-                    'skor_prioritas' => $this->placeholderPriorityScore($d),
-                    'populasi' => $meta['penduduk'],
-                    'status_listrik' => $this->elektrifikasiLabel($meta['elektrifikasi']),
-                    'yield_kwp' => $meta['yield_kwp'],
-                    'gambar' => 'https://picsum.photos/seed/desa' . $d->id_desa . '/640/360',
-                    'solar_optimized' => $d->sumber === 'solar_panel',
-                    'url_detail' => '#',
-                    'url_proyek' => '#',
-                ];
-            })
-            ->all();
-
-        return view('admin.desa.kelola', compact('desaPrioritas'));
+        $desa = Desa::findOrFail($id);
+        return view('admin.desa.edit', compact('desa'));
     }
 
-    public function index(): View
+    public function update(StoreDesaRequest $request, $id): RedirectResponse
     {
-        $desas = Desa::query()->orderByDesc('created_at')->get();
+        $desa = Desa::findOrFail($id);
+        $validated = $request->validated();
 
-        return view('admin.desa.daftar', compact('desas'));
+        $action = $request->input('action', 'submit');
+        unset($validated['action']);
+
+        $kondisiGabungan = $this->gabungKondisiDesa($request, $validated['kondisi_desa'] ?? '');
+
+        $dataToUpdate = collect($validated)->except([
+            'kecamatan', 'kode_wilayah', 'kondisi_desa', 'jumlah_penduduk', 
+            'jumlah_kk', 'status_elektrifikasi', 'estimasi_kebutuhan_daya', 'catatan_tambahan'
+        ])->toArray();
+
+        $dataToUpdate['kondisi_desa'] = $kondisiGabungan !== '' ? $kondisiGabungan : null;
+        $dataToUpdate['status_verifikasi'] = ($action === 'draft') ? 'draft' : 'menunggu_verifikasi';
+
+        $desa->update($dataToUpdate);
+
+        return redirect()->route('desa.daftar')->with('success', 'Data desa berhasil diperbarui.');
     }
 
-    private function gabungKondisiDesa(StoreDesaRequest $request, string $teksUtama): string
+    public function destroy($id): RedirectResponse
     {
-        $bagian = array_filter([trim($teksUtama)]);
+        $desa = Desa::findOrFail($id);
+        $desa->delete();
+        return redirect()->route('desa.daftar')->with('success', 'Data desa berhasil dihapus.');
+    }
+
+    /**
+     * Logic untuk menggabungkan berbagai field input menjadi satu string teks di kondisi_desa
+     */
+    private function gabungKondisiDesa(Request $request, string $teksUtama): string
+    {
         $tambah = static fn (?string $nilai, string $label) => ($nilai !== null && $nilai !== '')
             ? "{$label}: {$nilai}"
             : null;
@@ -153,45 +107,55 @@ class DesaController extends Controller
             $tambah($request->input('catatan_tambahan'), 'Catatan tambahan'),
         ]);
 
+        $hasil = trim($teksUtama);
         if ($baris !== []) {
-            $bagian[] = implode("\n", $baris);
+            $hasil .= ($hasil !== '' ? "\n\n" : "") . implode("\n", $baris);
         }
 
-        return trim(implode("\n\n", array_filter($bagian)));
+        return $hasil;
     }
 
-    /**
-     * @return array{penduduk: int, elektrifikasi: ?string, yield_kwp: float}
-     */
+    public function kelola(): View
+    {
+        $desas = Desa::query()->orderByDesc('created_at')->get();
+        
+        $desaPrioritas = $desas->map(function (Desa $d, int $i) {
+            $meta = $this->metaDariKondisi($d->kondisi_desa);
+            return [
+                'rank' => $i + 1,
+                'nama_desa' => $d->nama_desa,
+                'lokasi' => $d->kabupaten . ', ' . $d->provinsi,
+                'skor_prioritas' => $this->placeholderPriorityScore($d),
+                'populasi' => $meta['penduduk'],
+                'status_listrik' => $this->elektrifikasiLabel($meta['elektrifikasi']),
+                'yield_kwp' => $meta['yield_kwp'],
+                'gambar' => 'https://picsum.photos/seed/desa' . $d->id_desa . '/640/360',
+                'solar_optimized' => $d->sumber === 'solar_panel',
+                'url_detail' => '#',
+                'url_proyek' => '#',
+            ];
+        })->toArray();
+
+        return view('admin.desa.kelola', compact('desaPrioritas'));
+    }
+
     private function metaDariKondisi(?string $kondisi): array
     {
         $teks = $kondisi ?? '';
-        $penduduk = 0;
-        if (preg_match('/Penduduk \(jiwa\):\s*(\d+)/u', $teks, $m)) {
-            $penduduk = (int) $m[1];
-        }
-        $elektrifikasi = null;
-        if (preg_match('/Status elektrifikasi:\s*(\S+)/u', $teks, $m)) {
-            $elektrifikasi = $m[1];
-        }
-        $yield = 0.0;
-        if (preg_match('/Estimasi kebutuhan daya \(kW\):\s*([0-9]+(?:\.[0-9]+)?)/u', $teks, $m)) {
-            $yield = round((float) $m[1], 1);
-        }
+        preg_match('/Penduduk \(jiwa\):\s*(\d+)/u', $teks, $m1);
+        preg_match('/Status elektrifikasi:\s*(\S+)/u', $teks, $m2);
+        preg_match('/Estimasi kebutuhan daya \(kW\):\s*([0-9]+(?:\.[0-9]+)?)/u', $teks, $m3);
 
         return [
-            'penduduk' => $penduduk,
-            'elektrifikasi' => $elektrifikasi,
-            'yield_kwp' => $yield,
+            'penduduk' => (int)($m1[1] ?? 0),
+            'elektrifikasi' => $m2[1] ?? null,
+            'yield_kwp' => round((float)($m3[1] ?? 0), 1),
         ];
     }
 
     private function placeholderPriorityScore(Desa $desa): float
     {
-        $base = 55.0;
-        $hash = crc32((string) $desa->id_desa . $desa->nama_desa);
-
-        return round($base + ($hash % 450) / 10, 1);
+        return round(55.0 + (crc32($desa->id_desa . $desa->nama_desa) % 450) / 10, 1);
     }
 
     private function elektrifikasiLabel(?string $status): string
@@ -204,4 +168,3 @@ class DesaController extends Controller
         };
     }
 }
-
