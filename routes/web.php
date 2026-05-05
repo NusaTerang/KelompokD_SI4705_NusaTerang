@@ -9,6 +9,7 @@ use App\Http\Controllers\PenugasanController;
 use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
 use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
+use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
 
 // ─── Public ──────────────────────────────────────────────────────────────────
 
@@ -63,7 +64,7 @@ Route::middleware('auth')->group(function () {
 
         return match ($user->role) {
             'admin'    => redirect()->route('desa.daftar'),
-            'penyedia' => redirect()->route('penyedia.dashboard'),
+            'penyedia' => redirect()->route('vendor.dashboard'),
             default    => redirect('/'),
         };
     })->name('dashboard');
@@ -72,13 +73,25 @@ Route::middleware('auth')->group(function () {
     Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
 });
 
-// ─── Penyedia ─────────────────────────────────────────────────────────────────
+// ─── Vendor (Penyedia Energi) ─────────────────────────────────────────────────
 
-Route::middleware('auth')->prefix('penyedia')->group(function () {
+Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->group(function () {
     Route::get('/dashboard', function () {
         return view('penyedia.dashboard');
-    })->name('penyedia.dashboard');
+    })->name('dashboard');
+
+    Route::prefix('proyek')->name('proyek.')->controller(VendorProyekController::class)->group(function () {
+        Route::get('/',            'index')->name('index');
+        Route::get('/{id}',        'show')->name('show');
+        Route::put('/{id}/detail', 'saveDetail')->name('detail');
+        Route::post('/{id}/klarifikasi', 'mintaKlarifikasi')->name('klarifikasi');
+        Route::post('/{id}/kendala',     'laporkanKendala')->name('kendala');
+    });
 });
+
+Route::middleware('auth')->get('/penyedia/dashboard', function () {
+    return redirect()->route('vendor.dashboard');
+})->name('penyedia.dashboard');
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 

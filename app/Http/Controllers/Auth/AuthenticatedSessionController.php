@@ -74,7 +74,7 @@ class AuthenticatedSessionController extends Controller
     {
         return match ($user->role) {
             'admin'    => route('desa.daftar'),
-            'penyedia' => route('penyedia.dashboard'),
+            'penyedia' => route('vendor.dashboard'),
             default    => '/',
         };
     }

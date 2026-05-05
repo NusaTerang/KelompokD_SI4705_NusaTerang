@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn () => null);
+        $middleware->alias([
+            'penyedia' => \App\Http\Middleware\EnsurePenyedia::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
