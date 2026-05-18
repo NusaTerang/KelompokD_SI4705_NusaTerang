@@ -18,21 +18,18 @@ class HomepageWilayahFilterTest extends TestCase
             'provinsi' => 'Jawa Barat',
             'kabupaten' => 'Bogor',
             'sumber' => 'solar_panel',
-            'status_verifikasi' => 'terverifikasi',
         ]);
         $jawaTengah = Desa::create([
             'nama_desa' => 'Desa Sumber Makmur',
             'provinsi' => 'Jawa Tengah',
             'kabupaten' => 'Banjarnegara',
             'sumber' => 'mikro_hidro',
-            'status_verifikasi' => 'terverifikasi',
         ]);
         $papua = Desa::create([
             'nama_desa' => 'Desa Papua Nonaktif',
             'provinsi' => 'Papua',
             'kabupaten' => 'Merauke',
-            'sumber' => 'biomassa',
-            'status_verifikasi' => 'terverifikasi',
+            'sumber' => 'biogas',
         ]);
 
         Proyek::create([
@@ -76,14 +73,12 @@ class HomepageWilayahFilterTest extends TestCase
             'provinsi' => 'Jawa Barat',
             'kabupaten' => 'Bogor',
             'sumber' => 'solar_panel',
-            'status_verifikasi' => 'terverifikasi',
         ]);
         $jawaTengah = Desa::create([
             'nama_desa' => 'Desa Sumber Makmur',
             'provinsi' => 'Jawa Tengah',
             'kabupaten' => 'Banjarnegara',
             'sumber' => 'mikro_hidro',
-            'status_verifikasi' => 'terverifikasi',
         ]);
 
         Proyek::create([
