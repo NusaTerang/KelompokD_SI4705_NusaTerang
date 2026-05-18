@@ -36,8 +36,20 @@ Route::get('/', function () {
         $query->where('status', 'aktif_funding');
     }
 
-    $projects = $query->latest()->paginate(6)->withQueryString();
-    return view('welcome', compact('projects'));
+    $provinceOptions = (clone $query)
+        ->whereHas('desa')
+        ->join('desa', 'proyeks.desa_id', '=', 'desa.id_desa')
+        ->select('desa.provinsi')
+        ->distinct()
+        ->orderBy('desa.provinsi')
+        ->pluck('desa.provinsi');
+
+    if (request()->filled('wilayah')) {
+        $query->whereHas('desa', fn ($dq) => $dq->where('provinsi', request('wilayah')));
+    }
+
+    $projects = $query->latest('proyeks.created_at')->paginate(6)->withQueryString();
+    return view('welcome', compact('projects', 'provinceOptions'));
 });
 
 Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
