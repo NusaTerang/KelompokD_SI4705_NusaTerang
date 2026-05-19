@@ -130,6 +130,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('buat', [ProyekController::class, 'create'])->name('create');
         Route::post('buat', [ProyekController::class, 'saveStep1'])->name('save.step1');
         Route::get('kelola', [ProyekController::class, 'kelola'])->name('kelola');
+        Route::get('{id}/detail', [ProyekController::class, 'adminShow'])->name('admin.show');
         Route::patch('{id}/publish', [ProyekController::class, 'publish'])->name('publish');
         Route::delete('{id}', [ProyekController::class, 'destroy'])->name('destroy');
 

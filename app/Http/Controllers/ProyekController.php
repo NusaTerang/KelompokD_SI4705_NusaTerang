@@ -98,6 +98,13 @@ class ProyekController extends Controller
         return redirect()->route('proyek.review', ['id' => $proyek->id]);
     }
 
+    public function adminShow($id)
+    {
+        $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
+
+        return view('admin.proyek.show', compact('proyek'));
+    }
+
     public function review($id)
     {
         $proyek = Proyek::with(['desa', 'penyedia', 'fotos'])->findOrFail($id);

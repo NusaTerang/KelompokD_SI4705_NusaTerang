@@ -141,7 +141,7 @@
                 <td class="py-4 px-6 text-right">
                     <div class="flex items-center justify-end gap-1">
                         {{-- View detail --}}
-                        <a href="{{ route('proyek.review', $proyek->id) }}"
+                        <a href="{{ route('proyek.admin.show', $proyek->id) }}"
                            class="p-1.5 text-secondary hover:bg-secondary/10 rounded transition-colors"
                            title="Lihat Detail">
                             <span class="material-symbols-outlined text-sm">visibility</span>
