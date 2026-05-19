@@ -37,7 +37,8 @@ class ProyekController extends Controller
     {
         $penyedia = auth()->user()->penyedia;
 
-        $penugasan = PenugasanProyek::where('id_penugasan', $id)
+        $penugasan = PenugasanProyek::with('proyek')
+            ->where('id_penugasan', $id)
             ->where('id_penyedia', $penyedia->id)
             ->firstOrFail();
 
@@ -53,8 +54,6 @@ class ProyekController extends Controller
         }
 
         $rules = [
-            'jenis_energi'             => 'required|array|min:1',
-            'jenis_energi.*'           => 'in:panel_surya,mikro_hidro,biogas,hybrid_solar_baterai',
             'kapasitas_daya'           => 'required|numeric|min:0',
             'satuan_daya'              => 'required|in:kWp,kW,MW',
             'target_dana'              => 'required|numeric|min:0',
@@ -66,9 +65,6 @@ class ProyekController extends Controller
         ];
 
         $messages = [
-            'jenis_energi.required'       => 'Pilih minimal satu jenis energi.',
-            'jenis_energi.min'            => 'Pilih minimal satu jenis energi.',
-            'jenis_energi.*.in'           => 'Jenis energi tidak valid.',
             'kapasitas_daya.required'     => 'Kapasitas daya wajib diisi.',
             'kapasitas_daya.numeric'      => 'Kapasitas daya harus berupa angka.',
             'satuan_daya.required'        => 'Satuan daya wajib dipilih.',
@@ -84,7 +80,6 @@ class ProyekController extends Controller
         ];
 
         if ($isDraft) {
-            $rules['jenis_energi']   = 'nullable|array';
             $rules['kapasitas_daya'] = 'nullable|numeric|min:0';
             $rules['satuan_daya']    = 'nullable|in:kWp,kW,MW';
             $rules['target_dana']    = 'nullable|numeric|min:0';
@@ -93,6 +88,7 @@ class ProyekController extends Controller
         }
 
         $validated = $request->validate($rules, $messages);
+        $validated['jenis_energi'] = [$penugasan->proyek->jenis_energi];
         $validated['status'] = $isDraft ? 'draft' : 'submitted';
 
         DetailProyekVendor::updateOrCreate(

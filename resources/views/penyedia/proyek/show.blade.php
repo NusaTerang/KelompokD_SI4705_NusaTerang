@@ -28,14 +28,18 @@
     $waMsg  = urlencode('Halo, saya dari ' . (auth()->user()->penyedia?->nama ?? 'Vendor') . '. Saya ingin berdiskusi mengenai proyek "' . $proyek->judul . '".');
     $waUrl  = $waNumber ? "https://wa.me/{$waNumber}?text={$waMsg}" : '#';
 
-    $selectedEnergies = old('jenis_energi', $detail ? ($detail->jenis_energi ?? []) : []);
-    $costBreakdown    = old('cost_breakdown', $detail ? ($detail->cost_breakdown ?? []) : []);
+    $costBreakdown = old('cost_breakdown', $detail ? ($detail->cost_breakdown ?? []) : []);
 
     $energiOptions = [
-        ['value' => 'panel_surya',          'label' => 'Solar Panel',  'icon' => 'wb_sunny'],
-        ['value' => 'mikro_hidro',          'label' => 'Mikro Hidro',  'icon' => 'water_drop'],
-        ['value' => 'biogas',               'label' => 'Biogas',       'icon' => 'eco'],
-        ['value' => 'hybrid_solar_baterai', 'label' => 'Hybrid',       'icon' => 'dynamic_form'],
+        'panel_surya'          => ['label' => 'Solar Panel', 'icon' => 'wb_sunny'],
+        'mikro_hidro'          => ['label' => 'Mikro Hidro', 'icon' => 'water_drop'],
+        'biogas'               => ['label' => 'Biogas', 'icon' => 'eco'],
+        'hybrid_solar_baterai' => ['label' => 'Hybrid', 'icon' => 'dynamic_form'],
+    ];
+
+    $projectEnergy = $energiOptions[$proyek->jenis_energi] ?? [
+        'label' => ucfirst(str_replace('_', ' ', $proyek->jenis_energi ?? '-')),
+        'icon'  => 'energy_savings_leaf',
     ];
 @endphp
 
@@ -187,29 +191,16 @@
                         {{-- Energy Type --}}
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">
-                                Pilih Jenis Energi Utama <span class="text-error">*</span>
+                                Jenis Energi Utama
                             </label>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                @foreach($energiOptions as $opt)
-                                @php $checked = in_array($opt['value'], $selectedEnergies); @endphp
-                                <label class="flex flex-col items-center justify-center p-4 border-2 rounded-2xl cursor-pointer transition-all
-                                             {{ $checked ? 'border-solar-gold bg-solar-gold/5' : 'border-surface-container hover:border-solar-gold/50' }}">
-                                    <input type="checkbox"
-                                           name="jenis_energi[]"
-                                           value="{{ $opt['value'] }}"
-                                           class="hidden"
-                                           {{ $checked ? 'checked' : '' }}
-                                           onchange="this.closest('label').classList.toggle('border-solar-gold', this.checked);
-                                                      this.closest('label').classList.toggle('bg-solar-gold/5', this.checked);
-                                                      this.closest('label').classList.toggle('border-surface-container', !this.checked);">
-                                    <span class="material-symbols-outlined mb-2 text-2xl {{ $checked ? 'text-deep-navy active-fill' : 'text-on-surface-variant' }}">
-                                        {{ $opt['icon'] }}
-                                    </span>
-                                    <span class="text-[10px] font-bold uppercase {{ $checked ? 'text-deep-navy' : 'text-on-surface-variant' }}">
-                                        {{ $opt['label'] }}
-                                    </span>
-                                </label>
-                                @endforeach
+                            <div class="flex items-center gap-4 p-4 border-2 border-surface-container rounded-2xl bg-surface-container-low">
+                                <div class="w-12 h-12 rounded-xl bg-solar-gold/10 flex items-center justify-center text-deep-navy shrink-0">
+                                    <span class="material-symbols-outlined active-fill">{{ $projectEnergy['icon'] }}</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-deep-navy">{{ $projectEnergy['label'] }}</p>
+                                    <p class="text-xs text-on-surface-variant font-medium mt-1">Ditentukan oleh Admin saat proyek dibuat.</p>
+                                </div>
                             </div>
                         </div>
 
@@ -356,12 +347,7 @@
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Jenis Energi</p>
-                        <p class="font-bold text-deep-navy">
-                            {{ implode(', ', array_map(fn($e) => match($e) {
-                                'panel_surya' => 'Panel Surya', 'mikro_hidro' => 'Mikro Hidro',
-                                'biogas' => 'Biogas', 'hybrid_solar_baterai' => 'Hybrid', default => $e
-                            }, $detail->jenis_energi ?? [])) }}
-                        </p>
+                        <p class="font-bold text-deep-navy">{{ $projectEnergy['label'] }}</p>
                     </div>
                 </div>
             </div>
