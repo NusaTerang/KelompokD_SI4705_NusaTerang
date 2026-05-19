@@ -31,9 +31,9 @@ class ProyekController extends Controller
             'judul'             => 'required|string|max:255',
             'desa_id'           => 'required|exists:desa,id_desa',
             'jenis_energi'      => 'required|in:panel_surya,mikro_hidro,biogas,hybrid_solar_baterai',
-            'deskripsi'         => 'nullable|string',
-            'estimasi_mulai'    => 'nullable|date',
-            'estimasi_selesai'  => 'nullable|date|after_or_equal:estimasi_mulai',
+            'deskripsi'         => 'required|string',
+            'estimasi_mulai'    => 'required|date',
+            'estimasi_selesai'  => 'required|date|after_or_equal:estimasi_mulai',
             'fotos'             => $requireFoto ? 'required|array|min:1' : 'nullable|array',
             'fotos.*'           => 'image|max:2048',
         ]);
@@ -133,8 +133,8 @@ class ProyekController extends Controller
     {
         $proyek = Proyek::findOrFail($id);
 
-        if (in_array($proyek->status, ['eksekusi', 'selesai'])) {
-            abort(403, 'Proyek yang sedang berjalan atau selesai tidak dapat diubah statusnya.');
+        if (in_array($proyek->status, ['eksekusi', 'selesai', 'refund'])) {
+            abort(403, 'Proyek yang sedang berjalan, selesai, atau refund tidak dapat diubah statusnya.');
         }
 
         $newStatus = $proyek->status === 'aktif_funding' ? 'draft' : 'aktif_funding';

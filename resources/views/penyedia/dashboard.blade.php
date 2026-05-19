@@ -11,6 +11,12 @@
     $penyedia = auth()->user()->penyedia;
     $totalProyek = \App\Models\PenugasanProyek::where('id_penyedia', $penyedia?->id ?? 0)->count();
     $pending = \App\Models\PenugasanProyek::where('id_penyedia', $penyedia?->id ?? 0)->where('status_penugasan', 'pending')->count();
+    $expiryDecisions = \App\Models\PenugasanProyek::where('id_penyedia', $penyedia?->id ?? 0)
+        ->whereHas('proyek', fn ($query) => $query
+            ->where('status', 'menunggu_keputusan_vendor')
+            ->where('expired_extension_pending', true)
+        )
+        ->count();
 @endphp
 
 <div class="max-w-7xl mx-auto">
@@ -54,6 +60,24 @@
             </p>
         </div>
     </div>
+
+    @if($expiryDecisions > 0)
+        <div class="bg-error/10 rounded-2xl p-5 flex items-center justify-between mb-8 border border-error/30">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-error flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+                </div>
+                <div>
+                    <p class="text-sm text-deep-navy font-bold">{{ $expiryDecisions }} proyek menunggu keputusan refund atau lanjut</p>
+                    <p class="text-xs text-deep-navy/70 font-medium">Pilih keputusan agar status proyek bisa diproses.</p>
+                </div>
+            </div>
+            <a href="{{ route('vendor.proyek.index') }}"
+               class="px-5 py-2.5 bg-deep-navy text-white rounded-xl font-bold text-sm hover:bg-deep-navy/90 transition-all shrink-0">
+                Tinjau Sekarang
+            </a>
+        </div>
+    @endif
 
     @if($pending > 0)
         <div class="bg-solar-gold/10 rounded-2xl p-5 flex items-center justify-between mb-8 border border-solar-gold/20">

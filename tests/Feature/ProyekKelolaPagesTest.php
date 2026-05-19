@@ -28,8 +28,7 @@ class ProyekKelolaPagesTest extends TestCase
             'provinsi'          => 'Jawa Barat',
             'kabupaten'         => 'Bandung',
             'kondisi_desa'      => 'off-grid',
-            'sumber'            => 'manual',
-            'status_verifikasi' => 'terverifikasi',
+            'sumber'            => 'solar_panel',
         ]);
     }
 
@@ -78,6 +77,24 @@ class ProyekKelolaPagesTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->get(route('proyek.kelola'));
         $response->assertStatus(200);
+    }
+
+    public function test_save_step1_requires_all_mandatory_project_fields(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->from(route('proyek.create'))
+            ->post(route('proyek.save.step1'), []);
+
+        $response->assertRedirect(route('proyek.create'));
+        $response->assertSessionHasErrors([
+            'desa_id',
+            'judul',
+            'jenis_energi',
+            'deskripsi',
+            'fotos',
+            'estimasi_mulai',
+            'estimasi_selesai',
+        ]);
     }
 
     public function test_kelola_page_filters_by_search(): void
@@ -173,6 +190,30 @@ class ProyekKelolaPagesTest extends TestCase
             ->patch(route('proyek.publish', $proyek->id));
 
         $response->assertStatus(403);
+    }
+
+    public function test_publish_forbidden_when_refund(): void
+    {
+        $proyek = $this->makeProyek(['status' => 'refund']);
+
+        $response = $this->actingAs($this->admin)
+            ->patch(route('proyek.publish', $proyek->id));
+
+        $response->assertStatus(403);
+        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'refund']);
+    }
+
+    public function test_kelola_page_disables_publish_button_when_refund(): void
+    {
+        $proyek = $this->makeProyek(['status' => 'refund']);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('proyek.kelola'));
+
+        $response->assertOk();
+        $response->assertSee('Refund');
+        $response->assertDontSee("openPublishModal({$proyek->id}", false);
+        $response->assertSee('Tidak dapat diubah');
     }
 
     public function test_destroy_deletes_draft_proyek(): void

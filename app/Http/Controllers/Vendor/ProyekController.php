@@ -109,6 +109,56 @@ class ProyekController extends Controller
         return redirect()->route('vendor.proyek.show', $id)->with('success', $msg);
     }
 
+    public function expiryDecisionShow($id)
+    {
+        $penyedia = auth()->user()->penyedia;
+
+        $penugasan = PenugasanProyek::with(['proyek.desa'])
+            ->where('id_penugasan', $id)
+            ->where('id_penyedia', $penyedia->id)
+            ->firstOrFail();
+
+        $proyek = $penugasan->proyek;
+
+        if ($proyek->status !== 'menunggu_keputusan_vendor' || ! $proyek->expired_extension_pending) {
+            abort(403, 'Proyek tidak menunggu keputusan vendor.');
+        }
+
+        return view('penyedia.proyek.expiry_decision', compact('penugasan', 'proyek'));
+    }
+
+    public function expiryDecision(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'decision' => 'required|in:refund,continue',
+        ]);
+
+        $penyedia = auth()->user()->penyedia;
+
+        $penugasan = PenugasanProyek::with('proyek')
+            ->where('id_penugasan', $id)
+            ->where('id_penyedia', $penyedia->id)
+            ->firstOrFail();
+
+        $proyek = $penugasan->proyek;
+
+        if ($proyek->status !== 'menunggu_keputusan_vendor' || ! $proyek->expired_extension_pending) {
+            abort(403, 'Proyek tidak menunggu keputusan vendor.');
+        }
+
+        $proyek->update([
+            'status' => $validated['decision'] === 'refund' ? 'refund' : 'selesai',
+            'expired_vendor_decision' => $validated['decision'],
+            'expired_extension_pending' => false,
+        ]);
+
+        $message = $validated['decision'] === 'refund'
+            ? 'Status proyek diubah menjadi refund.'
+            : 'Proyek dilanjutkan dengan dana terkumpul saat ini.';
+
+        return redirect()->route('vendor.proyek.index')->with('success', $message);
+    }
+
     public function mintaKlarifikasi(Request $request, $id)
     {
         $request->validate(['pertanyaan' => 'required|string|max:1000']);
