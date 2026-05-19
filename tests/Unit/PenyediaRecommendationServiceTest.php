@@ -30,7 +30,6 @@ class PenyediaRecommendationServiceTest extends TestCase
             'koordinat'         => '-6.917464,107.619123',
             'jumlah_penduduk'   => 400,
             'sumber'            => 'solar_panel',
-            'status_verifikasi' => 'terverifikasi',
         ], $attrs));
     }
 

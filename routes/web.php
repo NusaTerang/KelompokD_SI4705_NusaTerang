@@ -97,7 +97,9 @@ Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->grou
     Route::prefix('proyek')->name('proyek.')->controller(VendorProyekController::class)->group(function () {
         Route::get('/',            'index')->name('index');
         Route::get('/{id}',        'show')->name('show');
+        Route::get('/{id}/expiry-decision', 'expiryDecisionShow')->name('expiry-decision.show');
         Route::put('/{id}/detail', 'saveDetail')->name('detail');
+        Route::post('/{id}/expiry-decision', 'expiryDecision')->name('expiry-decision');
         Route::post('/{id}/klarifikasi', 'mintaKlarifikasi')->name('klarifikasi');
         Route::post('/{id}/kendala',     'laporkanKendala')->name('kendala');
     });
@@ -128,6 +130,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('buat', [ProyekController::class, 'create'])->name('create');
         Route::post('buat', [ProyekController::class, 'saveStep1'])->name('save.step1');
         Route::get('kelola', [ProyekController::class, 'kelola'])->name('kelola');
+        Route::get('{id}/detail', [ProyekController::class, 'adminShow'])->name('admin.show');
         Route::patch('{id}/publish', [ProyekController::class, 'publish'])->name('publish');
         Route::delete('{id}', [ProyekController::class, 'destroy'])->name('destroy');
 

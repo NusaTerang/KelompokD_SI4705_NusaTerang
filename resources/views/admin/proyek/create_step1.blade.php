@@ -60,8 +60,8 @@
                 @endif
 
                 <div class="space-y-3">
-                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Pilih Desa Target</label>
-                    <select name="desa_id" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
+                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Pilih Desa Target <span class="text-red-600">*</span></label>
+                    <select name="desa_id" class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface {{ $errors->has('desa_id') ? 'border border-red-500' : 'border-0' }}">
                         <option value="">Pilih Desa</option>
                         @foreach($desas as $desa)
                             <option value="{{ $desa->id_desa }}" {{ (old('desa_id', $proyek->desa_id ?? '') == $desa->id_desa) ? 'selected' : '' }}>
@@ -69,37 +69,55 @@
                             </option>
                         @endforeach
                     </select>
+                    @error('desa_id')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="space-y-3">
-                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Judul Proyek</label>
+                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Judul Proyek <span class="text-red-600">*</span></label>
                     <input name="judul" value="{{ old('judul', $proyek->judul ?? '') }}" required
-                        class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface"
+                        class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface {{ $errors->has('judul') ? 'border border-red-500' : 'border-0' }}"
                         placeholder="Contoh: Instalasi Panel Surya Desa X" type="text" />
+                    @error('judul')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="space-y-3">
-                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Jenis Energi</label>
-                    <select name="jenis_energi" required class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
+                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Jenis Energi <span class="text-red-600">*</span></label>
+                    <select name="jenis_energi" required class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface {{ $errors->has('jenis_energi') ? 'border border-red-500' : 'border-0' }}">
                         <option value="panel_surya"          {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'panel_surya'          ? 'selected' : '' }}>Panel Surya</option>
                         <option value="mikro_hidro"          {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'mikro_hidro'          ? 'selected' : '' }}>Mikro Hidro</option>
                         <option value="biogas"               {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'biogas'               ? 'selected' : '' }}>Biogas</option>
                         <option value="hybrid_solar_baterai" {{ old('jenis_energi', $proyek->jenis_energi ?? '') == 'hybrid_solar_baterai' ? 'selected' : '' }}>Hybrid Solar + Baterai</option>
                     </select>
+                    @error('jenis_energi')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="space-y-3">
-                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Deskripsi Proyek</label>
-                    <textarea name="deskripsi"
-                        class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface resize-none"
+                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Deskripsi Proyek <span class="text-red-600">*</span></label>
+                    <textarea name="deskripsi" required
+                        class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface resize-none {{ $errors->has('deskripsi') ? 'border border-red-500' : 'border-0' }}"
                         placeholder="Ceritakan tujuan proyek..."
                         rows="6">{{ old('deskripsi', $proyek->deskripsi ?? '') }}</textarea>
+                    @error('deskripsi')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div class="space-y-3">
-                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Upload Foto Proyek (Maks 5)</label>
+                    <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Upload Foto Proyek (Maks 5) <span class="text-red-600">*</span></label>
                     <input type="file" name="fotos[]" multiple accept="image/*"
-                        class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface">
+                        class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface {{ $errors->has('fotos') || $errors->has('fotos.*') ? 'border border-red-500' : 'border-0' }}">
+                    @error('fotos')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    @error('fotos.*')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                     @if($proyek && $proyek->fotos->count() > 0)
                         <p class="text-sm font-bold mt-2">Foto Terunggah:</p>
                         <div class="flex gap-2 flex-wrap">
@@ -112,18 +130,24 @@
 
                 <div class="grid grid-cols-2 gap-6">
                     <div class="space-y-3">
-                        <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tanggal Mulai</label>
-                        <input name="estimasi_mulai"
+                        <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tanggal Mulai <span class="text-red-600">*</span></label>
+                        <input name="estimasi_mulai" required
                             value="{{ old('estimasi_mulai', ($proyek && $proyek->estimasi_mulai) ? $proyek->estimasi_mulai->format('Y-m-d') : '') }}"
-                            class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface"
+                            class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface {{ $errors->has('estimasi_mulai') ? 'border border-red-500' : 'border-0' }}"
                             type="date" />
+                        @error('estimasi_mulai')
+                            <p class="text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div class="space-y-3">
-                        <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tanggal Berakhir</label>
-                        <input name="estimasi_selesai"
+                        <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tanggal Berakhir <span class="text-red-600">*</span></label>
+                        <input name="estimasi_selesai" required
                             value="{{ old('estimasi_selesai', ($proyek && $proyek->estimasi_selesai) ? $proyek->estimasi_selesai->format('Y-m-d') : '') }}"
-                            class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface"
+                            class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface {{ $errors->has('estimasi_selesai') ? 'border border-red-500' : 'border-0' }}"
                             type="date" />
+                        @error('estimasi_selesai')
+                            <p class="text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 
