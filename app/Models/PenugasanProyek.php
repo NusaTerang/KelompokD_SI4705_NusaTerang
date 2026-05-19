@@ -21,4 +21,22 @@ class PenugasanProyek extends Model
     {
         return $this->hasOne(DetailProyekVendor::class, 'id_penugasan');
     }
+
+    public function progressUpdates()
+    {
+        return $this->hasMany(ProgressProyekVendor::class, 'id_penugasan', 'id_penugasan');
+    }
+
+    public function submittedProgressUpdates()
+    {
+        return $this->hasMany(ProgressProyekVendor::class, 'id_penugasan', 'id_penugasan')
+            ->where('status', 'submitted')
+            ->orderByDesc('submitted_at');
+    }
+
+    public function progressDraft()
+    {
+        return $this->hasOne(ProgressProyekVendor::class, 'id_penugasan', 'id_penugasan')
+            ->where('status', 'draft');
+    }
 }

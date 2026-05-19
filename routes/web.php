@@ -97,6 +97,8 @@ Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->grou
     Route::prefix('proyek')->name('proyek.')->controller(VendorProyekController::class)->group(function () {
         Route::get('/',            'index')->name('index');
         Route::get('/{id}',        'show')->name('show');
+        Route::get('/{id}/progress', 'progressShow')->name('progress.show');
+        Route::post('/{id}/progress', 'progressStore')->name('progress.store');
         Route::get('/{id}/expiry-decision', 'expiryDecisionShow')->name('expiry-decision.show');
         Route::put('/{id}/detail', 'saveDetail')->name('detail');
         Route::post('/{id}/expiry-decision', 'expiryDecision')->name('expiry-decision');

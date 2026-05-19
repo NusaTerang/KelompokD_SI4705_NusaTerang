@@ -136,13 +136,49 @@
             </div>
         </div>
 
-        {{-- Timeline Placeholder --}}
+        @php
+            $submittedProgressUpdates = $proyek->penugasan
+                ->flatMap(fn ($penugasan) => $penugasan->submittedProgressUpdates)
+                ->sortByDesc('submitted_at');
+        @endphp
+
         <div class="flex flex-col gap-6 w-full py-6">
             <h2 class="text-secondary text-2xl font-headline font-semibold">Update Progress</h2>
-            <div class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
-                <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">update</span>
-                <p class="text-on-surface-variant text-sm">Belum ada update progress untuk proyek ini.</p>
-            </div>
+
+            @if($submittedProgressUpdates->isEmpty())
+                <div class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
+                    <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">update</span>
+                    <p class="text-on-surface-variant text-sm">Belum ada update progress untuk proyek ini.</p>
+                </div>
+            @else
+                <div class="space-y-4">
+                    @foreach($submittedProgressUpdates as $update)
+                        <article class="bg-surface-container-low rounded-xl p-5 border border-surface-container">
+                            <div class="flex items-start justify-between gap-4 mb-3">
+                                <div>
+                                    <p class="text-primary text-2xl font-bold">{{ $update->persentase }}%</p>
+                                    <p class="text-xs text-on-surface-variant font-bold uppercase tracking-wide">
+                                        {{ $update->submitted_at?->format('d M Y H:i') ?? $update->created_at?->format('d M Y H:i') }}
+                                    </p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold {{ $update->status_progress === 'selesai' ? 'bg-tertiary-container text-on-tertiary-fixed' : 'bg-secondary-container text-on-secondary-fixed' }}">
+                                    {{ $update->status_progress === 'selesai' ? 'Selesai' : 'Berjalan' }}
+                                </span>
+                            </div>
+
+                            <p class="text-on-surface-variant leading-relaxed whitespace-pre-line">{{ $update->deskripsi }}</p>
+
+                            @if(!empty($update->foto_paths))
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                                    @foreach($update->foto_paths as $path)
+                                        <img src="{{ asset('storage/' . $path) }}" alt="Foto progress" class="h-32 w-full object-cover rounded-lg border border-surface-container">
+                                    @endforeach
+                                </div>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
     </div>

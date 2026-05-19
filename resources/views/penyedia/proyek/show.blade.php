@@ -353,6 +353,25 @@
             </div>
             @endif
 
+            @if($penugasan->progressDraft)
+                <div class="bg-solar-gold/10 rounded-2xl p-5 border border-solar-gold/20">
+                    <p class="text-sm font-bold text-deep-navy">Ada draft progress yang belum dikirim.</p>
+                    <p class="text-xs text-deep-navy/70 mt-1">Buka halaman update progress untuk melanjutkan pengisian.</p>
+                </div>
+            @endif
+
+            @php
+                $latestProgress = $penugasan->submittedProgressUpdates->first();
+            @endphp
+
+            @if($latestProgress)
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-surface-container">
+                    <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Progress Terakhir</p>
+                    <p class="text-3xl font-extrabold text-deep-navy">{{ $latestProgress->persentase }}%</p>
+                    <p class="text-sm text-on-surface-variant mt-2">{{ $latestProgress->deskripsi }}</p>
+                </div>
+            @endif
+
         </div>
 
         {{-- RIGHT: Actions (Sticky) --}}
@@ -398,6 +417,13 @@
                         </button>
                     </div>
                 </div>
+
+                @if(in_array($proyek->status, ['eksekusi', 'selesai']))
+                    <a href="{{ route('vendor.proyek.progress.show', $penugasan->id_penugasan) }}" class="w-full py-4 bg-deep-navy text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all mb-6">
+                        <span class="material-symbols-outlined text-sm">timeline</span>
+                        Update Progress
+                    </a>
+                @endif
 
                 <div class="pt-6 border-t border-surface-container">
                     <p class="text-xs text-on-surface-variant mb-4 font-medium">Hubungi PIC Project melalui jalur resmi:</p>

@@ -100,7 +100,13 @@ class ProyekController extends Controller
 
     public function adminShow($id)
     {
-        $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
+        $proyek = Proyek::with([
+            'desa',
+            'penyedia',
+            'fotos',
+            'penugasan.detail',
+            'penugasan.submittedProgressUpdates',
+        ])->findOrFail($id);
 
         return view('admin.proyek.show', compact('proyek'));
     }
@@ -197,7 +203,13 @@ class ProyekController extends Controller
 
     public function show($id)
     {
-        $proyek = Proyek::with(['desa', 'penyedia', 'fotos'])->findOrFail($id);
+        $proyek = Proyek::with([
+            'desa',
+            'penyedia',
+            'fotos',
+            'penugasan.submittedProgressUpdates',
+        ])->findOrFail($id);
+
         return view('proyek.show', compact('proyek'));
     }
 }

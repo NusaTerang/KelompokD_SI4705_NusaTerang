@@ -45,4 +45,23 @@ class Proyek extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function progressUpdates()
+    {
+        return $this->hasManyThrough(
+            ProgressProyekVendor::class,
+            PenugasanProyek::class,
+            'id_proyek',
+            'id_penugasan',
+            'id',
+            'id_penugasan'
+        );
+    }
+
+    public function submittedProgressUpdates()
+    {
+        return $this->progressUpdates()
+            ->where('progress_proyek_vendor.status', 'submitted')
+            ->orderByDesc('progress_proyek_vendor.submitted_at');
+    }
 }

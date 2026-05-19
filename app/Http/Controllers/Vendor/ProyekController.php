@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vendor;
 use App\Http\Controllers\Controller;
 use App\Models\DetailProyekVendor;
 use App\Models\PenugasanProyek;
+use App\Models\ProgressProyekVendor;
 use Illuminate\Http\Request;
 
 class ProyekController extends Controller
@@ -25,12 +26,131 @@ class ProyekController extends Controller
     {
         $penyedia = auth()->user()->penyedia;
 
-        $penugasan = PenugasanProyek::with(['proyek.desa', 'proyek.fotos', 'proyek.creator', 'detail'])
+        $penugasan = PenugasanProyek::with([
+                'proyek.desa',
+                'proyek.fotos',
+                'proyek.creator',
+                'detail',
+                'progressDraft',
+                'submittedProgressUpdates',
+            ])
             ->where('id_penugasan', $id)
             ->where('id_penyedia', $penyedia->id)
             ->firstOrFail();
 
         return view('penyedia.proyek.show', compact('penugasan'));
+    }
+
+    private function findOwnedPenugasanForProgressOrAbort($id): PenugasanProyek
+    {
+        $penyedia = auth()->user()->penyedia;
+
+        if (! $penyedia) {
+            abort(403);
+        }
+
+        $penugasan = PenugasanProyek::with([
+                'proyek.desa',
+                'proyek.fotos',
+                'proyek.creator',
+                'detail',
+                'progressDraft',
+                'submittedProgressUpdates',
+            ])
+            ->where('id_penugasan', $id)
+            ->firstOrFail();
+
+        if ((int) $penugasan->id_penyedia !== (int) $penyedia->id) {
+            abort(403);
+        }
+
+        return $penugasan;
+    }
+
+    public function progressShow($id)
+    {
+        $penugasan = $this->findOwnedPenugasanForProgressOrAbort($id);
+        $proyek = $penugasan->proyek;
+        $draft = $penugasan->progressDraft;
+        $updates = $penugasan->submittedProgressUpdates;
+
+        return view('penyedia.proyek.progress', compact('penugasan', 'proyek', 'draft', 'updates'));
+    }
+
+    public function progressStore(Request $request, $id)
+    {
+        $penugasan = $this->findOwnedPenugasanForProgressOrAbort($id);
+        $proyek = $penugasan->proyek;
+        $isDraft = $request->boolean('save_draft');
+
+        $rules = [
+            'persentase' => $isDraft ? 'nullable|integer|min:0|max:100' : 'required|integer|min:0|max:100',
+            'deskripsi' => $isDraft ? 'nullable|string|max:2000' : 'required|string|max:2000',
+            'status_progress' => $isDraft ? 'nullable|in:dijadwalkan,berjalan,selesai' : 'required|in:dijadwalkan,berjalan,selesai',
+            'fotos' => 'nullable|array|max:5',
+            'fotos.*' => 'image|max:2048',
+        ];
+
+        $messages = [
+            'persentase.required' => 'Persentase progress wajib diisi.',
+            'persentase.integer' => 'Persentase progress harus berupa angka.',
+            'persentase.min' => 'Persentase progress minimal 0.',
+            'persentase.max' => 'Persentase progress maksimal 100.',
+            'deskripsi.required' => 'Keterangan update wajib diisi.',
+            'deskripsi.max' => 'Keterangan update maksimal 2000 karakter.',
+            'status_progress.required' => 'Status instalasi wajib dipilih.',
+            'status_progress.in' => 'Status instalasi tidak valid.',
+            'fotos.max' => 'Maksimal 5 foto progress.',
+            'fotos.*.image' => 'File progress harus berupa gambar.',
+            'fotos.*.max' => 'Ukuran setiap foto maksimal 2MB.',
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        $fotoPaths = [];
+        if ($request->hasFile('fotos')) {
+            foreach ($request->file('fotos') as $foto) {
+                $fotoPaths[] = $foto->store('progress_proyek_fotos', 'public');
+            }
+        }
+
+        $payload = [
+            'id_penugasan' => $penugasan->id_penugasan,
+            'persentase' => $validated['persentase'] ?? 0,
+            'deskripsi' => $validated['deskripsi'] ?? null,
+            'foto_paths' => $fotoPaths ?: null,
+            'status_progress' => $validated['status_progress'] ?? 'berjalan',
+            'status' => $isDraft ? 'draft' : 'submitted',
+            'submitted_at' => $isDraft ? null : now(),
+        ];
+
+        if ($isDraft) {
+            ProgressProyekVendor::updateOrCreate(
+                [
+                    'id_penugasan' => $penugasan->id_penugasan,
+                    'status' => 'draft',
+                ],
+                $payload
+            );
+
+            return redirect()
+                ->route('vendor.proyek.progress.show', $penugasan->id_penugasan)
+                ->with('success', 'Draft progress tersimpan.');
+        }
+
+        ProgressProyekVendor::create($payload);
+
+        ProgressProyekVendor::where('id_penugasan', $penugasan->id_penugasan)
+            ->where('status', 'draft')
+            ->delete();
+
+        $proyek->update([
+            'status' => $payload['status_progress'] === 'selesai' ? 'selesai' : 'eksekusi',
+        ]);
+
+        return redirect()
+            ->route('vendor.proyek.progress.show', $penugasan->id_penugasan)
+            ->with('success', 'Update progress berhasil dikirim dan dapat dilihat Admin/Donatur.');
     }
 
     public function saveDetail(Request $request, $id)
