@@ -84,7 +84,7 @@
                 @foreach($projects as $project)
                     @php
                         $progress      = $project->target_dana > 0 ? round(($project->dana_terkumpul / $project->target_dana) * 100) : 0;
-                        $daysLeft      = $project->estimasi_selesai ? max(0, now()->diffInDays($project->estimasi_selesai, false)) : 0;
+                        $daysLeft      = $project->estimasi_selesai ? max(0, (int) ceil(now()->diffInDays($project->estimasi_selesai, false))) : 0;
                         $firstFoto = $project->fotos->first();
                         $imageUrl  = $firstFoto
                             ? (str_starts_with($firstFoto->path, 'http') ? $firstFoto->path : asset('storage/' . $firstFoto->path))

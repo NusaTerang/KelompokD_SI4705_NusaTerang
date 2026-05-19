@@ -4,7 +4,7 @@
 
 @php
     $progress  = $proyek->target_dana > 0 ? round(($proyek->dana_terkumpul / $proyek->target_dana) * 100) : 0;
-    $daysLeft  = $proyek->estimasi_selesai ? max(0, now()->diffInDays($proyek->estimasi_selesai, false)) : 0;
+    $daysLeft  = $proyek->estimasi_selesai ? max(0, (int) ceil(now()->diffInDays($proyek->estimasi_selesai, false))) : 0;
     $firstFoto = $proyek->fotos->first();
     $imageUrl  = $firstFoto
         ? (str_starts_with($firstFoto->path, 'http') ? $firstFoto->path : asset('storage/' . $firstFoto->path))
