@@ -5,7 +5,11 @@
         "This file is @generated automatically"
     ],
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "content-hash": "c57754c93ae34ac3b9b716a0fd2f2149",
+=======
+    "content-hash": "e263da5d6a20a7c1a6846bb2cf1d63ea",
+>>>>>>> Stashed changes
 =======
     "content-hash": "e263da5d6a20a7c1a6846bb2cf1d63ea",
 >>>>>>> Stashed changes
@@ -857,6 +861,7 @@
         },
         {
             "name": "guzzlehttp/psr7",
+<<<<<<< Updated upstream
             "version": "2.10.1",
             "source": {
                 "type": "git",
@@ -867,6 +872,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/guzzle/psr7/zipball/73ab136360b5dfd858006eae9795e8fe43c80361",
                 "reference": "73ab136360b5dfd858006eae9795e8fe43c80361",
+=======
+            "version": "2.10.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/guzzle/psr7.git",
+                "reference": "a1bbdc172f32a25fe999965b65b6e71fd87da9ed"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/a1bbdc172f32a25fe999965b65b6e71fd87da9ed",
+                "reference": "a1bbdc172f32a25fe999965b65b6e71fd87da9ed",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -954,7 +971,11 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
+<<<<<<< Updated upstream
                 "source": "https://github.com/guzzle/psr7/tree/2.10.1"
+=======
+                "source": "https://github.com/guzzle/psr7/tree/2.10.2"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -970,7 +991,11 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< Updated upstream
             "time": "2026-05-20T09:27:36+00:00"
+=======
+            "time": "2026-05-25T22:58:15+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "guzzlehttp/uri-template",
@@ -1062,6 +1087,7 @@
             "name": "laravel/framework",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "version": "v13.5.0",
             "source": {
                 "type": "git",
@@ -1083,6 +1109,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/laravel/framework/zipball/a0c6ad03b380287015287d8d5a0fa2459e2332fd",
                 "reference": "a0c6ad03b380287015287d8d5a0fa2459e2332fd",
+>>>>>>> Stashed changes
+=======
+            "version": "v13.11.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/framework.git",
+                "reference": "4148042bf6ee01edd05408f1f66d91b231f85c25"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/4148042bf6ee01edd05408f1f66d91b231f85c25",
+                "reference": "4148042bf6ee01edd05408f1f66d91b231f85c25",
 >>>>>>> Stashed changes
 =======
             "version": "v13.11.2",
@@ -1138,9 +1176,12 @@
                 "symfony/mime": "^7.4.0 || ^8.0.0",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "symfony/polyfill-php84": "^1.33",
                 "symfony/polyfill-php85": "^1.33",
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
                 "symfony/polyfill-php84": "^1.36",
@@ -1316,9 +1357,13 @@
             },
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-04-14T13:55:03+00:00"
 =======
             "time": "2026-05-13T15:38:40+00:00"
+>>>>>>> Stashed changes
+=======
+            "time": "2026-05-20T11:46:02+00:00"
 >>>>>>> Stashed changes
 =======
             "time": "2026-05-20T11:46:02+00:00"
@@ -3556,6 +3601,7 @@
             "name": "symfony/console",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "version": "v7.4.8",
             "source": {
                 "type": "git",
@@ -3566,6 +3612,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/console/zipball/1e92e39c51f95b88e3d66fa2d9f06d1fb45dd707",
                 "reference": "1e92e39c51f95b88e3d66fa2d9f06d1fb45dd707",
+=======
+            "version": "v7.4.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/console.git",
+                "reference": "ed0107e43ab452aa77ae99e005b95e56b556e075"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/console/zipball/ed0107e43ab452aa77ae99e005b95e56b556e075",
+                "reference": "ed0107e43ab452aa77ae99e005b95e56b556e075",
+>>>>>>> Stashed changes
 =======
             "version": "v7.4.11",
             "source": {
@@ -3656,7 +3714,11 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/console/tree/v7.4.8"
+=======
+                "source": "https://github.com/symfony/console/tree/v7.4.11"
+>>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/console/tree/v7.4.11"
 >>>>>>> Stashed changes
@@ -3684,6 +3746,7 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-30T13:54:39+00:00"
         },
         {
@@ -3698,6 +3761,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/css-selector/zipball/b055f228a4178a1d6774909903905e3475f3eac8",
                 "reference": "b055f228a4178a1d6774909903905e3475f3eac8",
+=======
+            "time": "2026-05-13T12:04:42+00:00"
+        },
+        {
+            "name": "symfony/css-selector",
+            "version": "v7.4.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/css-selector.git",
+                "reference": "b75663ed96cf4756e28e3105476f220f92886cc4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/b75663ed96cf4756e28e3105476f220f92886cc4",
+                "reference": "b75663ed96cf4756e28e3105476f220f92886cc4",
+>>>>>>> Stashed changes
 =======
             "time": "2026-05-13T12:04:42+00:00"
         },
@@ -3767,7 +3846,11 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/css-selector/tree/v7.4.8"
+=======
+                "source": "https://github.com/symfony/css-selector/tree/v7.4.9"
+>>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/css-selector/tree/v7.4.9"
 >>>>>>> Stashed changes
@@ -3795,7 +3878,11 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-24T13:12:05+00:00"
+=======
+            "time": "2026-04-18T13:18:21+00:00"
+>>>>>>> Stashed changes
 =======
             "time": "2026-04-18T13:18:21+00:00"
 >>>>>>> Stashed changes
@@ -3960,6 +4047,7 @@
             "name": "symfony/event-dispatcher",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "version": "v7.4.8",
             "source": {
                 "type": "git",
@@ -3970,6 +4058,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/f57b899fa736fd71121168ef268f23c206083f0a",
                 "reference": "f57b899fa736fd71121168ef268f23c206083f0a",
+=======
+            "version": "v7.4.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/event-dispatcher.git",
+                "reference": "e4a2e29753c7801f7a8340e066cfa788f3bc8101"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/e4a2e29753c7801f7a8340e066cfa788f3bc8101",
+                "reference": "e4a2e29753c7801f7a8340e066cfa788f3bc8101",
+>>>>>>> Stashed changes
 =======
             "version": "v7.4.9",
             "source": {
@@ -4047,7 +4147,11 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/event-dispatcher/tree/v7.4.8"
+=======
+                "source": "https://github.com/symfony/event-dispatcher/tree/v7.4.9"
+>>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/event-dispatcher/tree/v7.4.9"
 >>>>>>> Stashed changes
@@ -4075,7 +4179,11 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-30T13:54:39+00:00"
+=======
+            "time": "2026-04-18T13:18:21+00:00"
+>>>>>>> Stashed changes
 =======
             "time": "2026-04-18T13:18:21+00:00"
 >>>>>>> Stashed changes
@@ -4317,6 +4425,7 @@
             "name": "symfony/http-kernel",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "version": "v7.4.8",
             "source": {
                 "type": "git",
@@ -4338,6 +4447,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/http-kernel/zipball/eb9d68199af3fcfb3fb4d2e227367b68f8c1bb88",
                 "reference": "eb9d68199af3fcfb3fb4d2e227367b68f8c1bb88",
+>>>>>>> Stashed changes
+=======
+            "version": "v7.4.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/http-kernel.git",
+                "reference": "7922b53e70d2ba2027af8bb6a59d91eb3541ea4d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/http-kernel/zipball/7922b53e70d2ba2027af8bb6a59d91eb3541ea4d",
+                "reference": "7922b53e70d2ba2027af8bb6a59d91eb3541ea4d",
 >>>>>>> Stashed changes
 =======
             "version": "v7.4.12",
@@ -4438,9 +4559,13 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/http-kernel/tree/v7.4.8"
 =======
                 "source": "https://github.com/symfony/http-kernel/tree/v7.4.11"
+>>>>>>> Stashed changes
+=======
+                "source": "https://github.com/symfony/http-kernel/tree/v7.4.12"
 >>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/http-kernel/tree/v7.4.12"
@@ -4466,6 +4591,7 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-31T20:57:01+00:00"
 =======
             "time": "2026-05-13T17:55:00+00:00"
@@ -4483,6 +4609,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/mailer/zipball/f6ea532250b476bfc1b56699b388a1bdbf168f62",
                 "reference": "f6ea532250b476bfc1b56699b388a1bdbf168f62",
+=======
+            "time": "2026-05-20T09:27:11+00:00"
+        },
+        {
+            "name": "symfony/mailer",
+            "version": "v7.4.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/mailer.git",
+                "reference": "5cefb712a25f320579615ba9e1942abaeade7dff"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/mailer/zipball/5cefb712a25f320579615ba9e1942abaeade7dff",
+                "reference": "5cefb712a25f320579615ba9e1942abaeade7dff",
+>>>>>>> Stashed changes
 =======
             "time": "2026-05-20T09:27:11+00:00"
         },
@@ -4550,7 +4692,11 @@
             "homepage": "https://symfony.com",
             "support": {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/mailer/tree/v7.4.8"
+=======
+                "source": "https://github.com/symfony/mailer/tree/v7.4.12"
+>>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/mailer/tree/v7.4.12"
 >>>>>>> Stashed changes
@@ -4573,6 +4719,7 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
             "time": "2026-03-24T13:12:05+00:00"
         },
@@ -4600,6 +4747,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/mime/zipball/2d550c4758ba4c47519a6667c36553d535705b0c",
                 "reference": "2d550c4758ba4c47519a6667c36553d535705b0c",
+>>>>>>> Stashed changes
+=======
+            "time": "2026-05-20T07:20:23+00:00"
+        },
+        {
+            "name": "symfony/mime",
+            "version": "v7.4.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/mime.git",
+                "reference": "b198dd66c211c97119bcaaff7c13431dbbb5e470"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/mime/zipball/b198dd66c211c97119bcaaff7c13431dbbb5e470",
+                "reference": "b198dd66c211c97119bcaaff7c13431dbbb5e470",
 >>>>>>> Stashed changes
 =======
             "time": "2026-05-20T07:20:23+00:00"
@@ -4674,9 +4837,13 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/mime/tree/v7.4.8"
 =======
                 "source": "https://github.com/symfony/mime/tree/v7.4.9"
+>>>>>>> Stashed changes
+=======
+                "source": "https://github.com/symfony/mime/tree/v7.4.12"
 >>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/mime/tree/v7.4.12"
@@ -4702,9 +4869,13 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-30T14:11:46+00:00"
 =======
             "time": "2026-04-29T13:21:53+00:00"
+>>>>>>> Stashed changes
+=======
+            "time": "2026-05-20T07:20:23+00:00"
 >>>>>>> Stashed changes
 =======
             "time": "2026-05-20T07:20:23+00:00"
@@ -4795,6 +4966,7 @@
         },
         {
             "name": "symfony/polyfill-intl-grapheme",
+<<<<<<< Updated upstream
             "version": "v1.36.0",
             "source": {
                 "type": "git",
@@ -4805,6 +4977,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/ad1b7b9092976d6c948b8a187cec9faaea9ec1df",
                 "reference": "ad1b7b9092976d6c948b8a187cec9faaea9ec1df",
+=======
+            "version": "v1.38.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-intl-grapheme.git",
+                "reference": "9c862df890f7c833b1101ac5578ec4dcf199efb5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-grapheme/zipball/9c862df890f7c833b1101ac5578ec4dcf199efb5",
+                "reference": "9c862df890f7c833b1101ac5578ec4dcf199efb5",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -4853,7 +5037,11 @@
                 "shim"
             ],
             "support": {
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/polyfill-intl-grapheme/tree/v1.36.0"
+=======
+                "source": "https://github.com/symfony/polyfill-intl-grapheme/tree/v1.38.0"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -4873,7 +5061,11 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< Updated upstream
             "time": "2026-04-10T16:19:22+00:00"
+=======
+            "time": "2026-05-25T12:39:52+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "symfony/polyfill-intl-idn",
@@ -4964,16 +5156,20 @@
         },
         {
             "name": "symfony/polyfill-intl-normalizer",
+<<<<<<< Updated upstream
             "version": "v1.36.0",
+=======
+            "version": "v1.38.0",
+>>>>>>> Stashed changes
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
-                "reference": "3833d7255cc303546435cb650316bff708a1c75c"
+                "reference": "2d446c214bdbe5b71bde5011b060a05fece3ae6b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/3833d7255cc303546435cb650316bff708a1c75c",
-                "reference": "3833d7255cc303546435cb650316bff708a1c75c",
+                "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/2d446c214bdbe5b71bde5011b060a05fece3ae6b",
+                "reference": "2d446c214bdbe5b71bde5011b060a05fece3ae6b",
                 "shasum": ""
             },
             "require": {
@@ -5025,7 +5221,11 @@
                 "shim"
             ],
             "support": {
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.36.0"
+=======
+                "source": "https://github.com/symfony/polyfill-intl-normalizer/tree/v1.38.0"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -5045,20 +5245,24 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-09-09T11:45:10+00:00"
+            "time": "2026-05-25T13:48:31+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
+<<<<<<< Updated upstream
             "version": "v1.36.0",
+=======
+            "version": "v1.38.0",
+>>>>>>> Stashed changes
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "6a21eb99c6973357967f6ce3708cd55a6bec6315"
+                "reference": "6b177d03d2eb04a6c9d01bab9818fb93a30ce7fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/6a21eb99c6973357967f6ce3708cd55a6bec6315",
-                "reference": "6a21eb99c6973357967f6ce3708cd55a6bec6315",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/6b177d03d2eb04a6c9d01bab9818fb93a30ce7fd",
+                "reference": "6b177d03d2eb04a6c9d01bab9818fb93a30ce7fd",
                 "shasum": ""
             },
             "require": {
@@ -5110,7 +5314,11 @@
                 "shim"
             ],
             "support": {
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.36.0"
+=======
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.38.0"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -5130,7 +5338,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T17:25:58+00:00"
+            "time": "2026-05-25T14:08:27+00:00"
         },
         {
             "name": "symfony/polyfill-php80",
@@ -5218,6 +5426,7 @@
         },
         {
             "name": "symfony/polyfill-php83",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
             "version": "v1.36.0",
@@ -5394,11 +5603,98 @@
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php84.git",
                 "reference": "88486db2c389b290bf87ff1de7ebc1e13e42bb06"
+=======
+            "version": "v1.38.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php83.git",
+                "reference": "c4406e07046227db8844a25f89d111da078aaa9c"
+>>>>>>> Stashed changes
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php84/zipball/88486db2c389b290bf87ff1de7ebc1e13e42bb06",
-                "reference": "88486db2c389b290bf87ff1de7ebc1e13e42bb06",
+                "url": "https://api.github.com/repos/symfony/polyfill-php83/zipball/c4406e07046227db8844a25f89d111da078aaa9c",
+                "reference": "c4406e07046227db8844a25f89d111da078aaa9c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php83\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 8.3+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php83/tree/v1.38.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-05-25T12:39:52+00:00"
+        },
+        {
+            "name": "symfony/polyfill-php84",
+            "version": "v1.38.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php84.git",
+                "reference": "a0e0aca0368801ec79f8791dea9a7c12af527c93"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php84/zipball/a0e0aca0368801ec79f8791dea9a7c12af527c93",
+                "reference": "a0e0aca0368801ec79f8791dea9a7c12af527c93",
                 "shasum": ""
             },
             "require": {
@@ -5445,7 +5741,11 @@
                 "shim"
             ],
             "support": {
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/polyfill-php84/tree/v1.36.0"
+=======
+                "source": "https://github.com/symfony/polyfill-php84/tree/v1.38.0"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -5465,10 +5765,11 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T18:47:49+00:00"
+            "time": "2026-05-25T12:12:52+00:00"
         },
         {
             "name": "symfony/polyfill-php85",
+<<<<<<< Updated upstream
             "version": "v1.36.0",
             "source": {
                 "type": "git",
@@ -5479,6 +5780,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/polyfill-php85/zipball/2c408a6bb0313e6001a83628dc5506100474254e",
                 "reference": "2c408a6bb0313e6001a83628dc5506100474254e",
+=======
+            "version": "v1.38.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php85.git",
+                "reference": "3e851ffb42624b64b3b9ec234a0e2074b0f880e3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php85/zipball/3e851ffb42624b64b3b9ec234a0e2074b0f880e3",
+                "reference": "3e851ffb42624b64b3b9ec234a0e2074b0f880e3",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -5525,7 +5838,11 @@
                 "shim"
             ],
             "support": {
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/polyfill-php85/tree/v1.36.0"
+=======
+                "source": "https://github.com/symfony/polyfill-php85/tree/v1.38.0"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -5545,7 +5862,91 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< Updated upstream
             "time": "2026-04-10T16:50:15+00:00"
+=======
+            "time": "2026-05-25T11:50:50+00:00"
+        },
+        {
+            "name": "symfony/polyfill-php86",
+            "version": "v1.38.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php86.git",
+                "reference": "fcec68d64f46dc84e1f6ffcf2c6dda40ff3143ad"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php86/zipball/fcec68d64f46dc84e1f6ffcf2c6dda40ff3143ad",
+                "reference": "fcec68d64f46dc84e1f6ffcf2c6dda40ff3143ad",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php86\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 8.6+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php86/tree/v1.38.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-05-25T11:52:35+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "symfony/polyfill-uuid",
@@ -5634,6 +6035,7 @@
             "name": "symfony/process",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "version": "v7.4.8",
             "source": {
                 "type": "git",
@@ -5644,6 +6046,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/process/zipball/60f19cd3badc8de688421e21e4305eba50f8089a",
                 "reference": "60f19cd3badc8de688421e21e4305eba50f8089a",
+=======
+            "version": "v7.4.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "d9593c9efa40499eb078b81144de42cbc28a31f0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/d9593c9efa40499eb078b81144de42cbc28a31f0",
+                "reference": "d9593c9efa40499eb078b81144de42cbc28a31f0",
+>>>>>>> Stashed changes
 =======
             "version": "v7.4.11",
             "source": {
@@ -5701,7 +6115,11 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/process/tree/v7.4.8"
+=======
+                "source": "https://github.com/symfony/process/tree/v7.4.11"
+>>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/process/tree/v7.4.11"
 >>>>>>> Stashed changes
@@ -5727,6 +6145,7 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
             "time": "2026-03-24T13:12:05+00:00"
@@ -5758,6 +6177,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/routing/zipball/287771d8bc86eacb30678dd10eda6c64a859951f",
                 "reference": "287771d8bc86eacb30678dd10eda6c64a859951f",
+>>>>>>> Stashed changes
+=======
+            "time": "2026-05-11T16:55:21+00:00"
+        },
+        {
+            "name": "symfony/routing",
+            "version": "v7.4.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/routing.git",
+                "reference": "3b04a5ec4887a8135a12ebf0f4cbc5b8fc8ee204"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/3b04a5ec4887a8135a12ebf0f4cbc5b8fc8ee204",
+                "reference": "3b04a5ec4887a8135a12ebf0f4cbc5b8fc8ee204",
 >>>>>>> Stashed changes
 =======
             "time": "2026-05-11T16:55:21+00:00"
@@ -5828,9 +6263,13 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/routing/tree/v7.4.8"
 =======
                 "source": "https://github.com/symfony/routing/tree/v7.4.9"
+>>>>>>> Stashed changes
+=======
+                "source": "https://github.com/symfony/routing/tree/v7.4.12"
 >>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/routing/tree/v7.4.12"
@@ -5856,9 +6295,13 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-24T13:12:05+00:00"
 =======
             "time": "2026-04-22T15:21:55+00:00"
+>>>>>>> Stashed changes
+=======
+            "time": "2026-05-20T07:20:23+00:00"
 >>>>>>> Stashed changes
 =======
             "time": "2026-05-20T07:20:23+00:00"
@@ -5955,6 +6398,7 @@
             "name": "symfony/string",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "version": "v7.4.8",
             "source": {
                 "type": "git",
@@ -5965,6 +6409,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/string/zipball/114ac57257d75df748eda23dd003878080b8e688",
                 "reference": "114ac57257d75df748eda23dd003878080b8e688",
+=======
+            "version": "v7.4.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/string.git",
+                "reference": "965f7306a43383d02c6aca1e3f3bd2f0ea5dee15"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/string/zipball/965f7306a43383d02c6aca1e3f3bd2f0ea5dee15",
+                "reference": "965f7306a43383d02c6aca1e3f3bd2f0ea5dee15",
+>>>>>>> Stashed changes
 =======
             "version": "v7.4.11",
             "source": {
@@ -6048,7 +6504,11 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/string/tree/v7.4.8"
+=======
+                "source": "https://github.com/symfony/string/tree/v7.4.11"
+>>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/string/tree/v7.4.11"
 >>>>>>> Stashed changes
@@ -6076,6 +6536,7 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-24T13:12:05+00:00"
         },
         {
@@ -6090,6 +6551,22 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/translation/zipball/33600f8489485425bfcddd0d983391038d3422e7",
                 "reference": "33600f8489485425bfcddd0d983391038d3422e7",
+=======
+            "time": "2026-05-13T12:04:42+00:00"
+        },
+        {
+            "name": "symfony/translation",
+            "version": "v7.4.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/translation.git",
+                "reference": "ada7578c30dd5feaa8259cff3e885069ea81ddde"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/ada7578c30dd5feaa8259cff3e885069ea81ddde",
+                "reference": "ada7578c30dd5feaa8259cff3e885069ea81ddde",
+>>>>>>> Stashed changes
 =======
             "time": "2026-05-13T12:04:42+00:00"
         },
@@ -6190,7 +6667,11 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/translation/tree/v7.4.8"
+=======
+                "source": "https://github.com/symfony/translation/tree/v7.4.10"
+>>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/translation/tree/v7.4.10"
 >>>>>>> Stashed changes
@@ -6218,7 +6699,11 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-24T13:12:05+00:00"
+=======
+            "time": "2026-05-06T11:19:24+00:00"
+>>>>>>> Stashed changes
 =======
             "time": "2026-05-06T11:19:24+00:00"
 >>>>>>> Stashed changes
@@ -6312,6 +6797,7 @@
             "name": "symfony/uid",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "version": "v7.4.8",
             "source": {
                 "type": "git",
@@ -6322,6 +6808,18 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/symfony/uid/zipball/6883ebdf7bf6a12b37519dbc0df62b0222401b56",
                 "reference": "6883ebdf7bf6a12b37519dbc0df62b0222401b56",
+=======
+            "version": "v7.4.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/uid.git",
+                "reference": "2676b524340abcfe4d6151ec698463cebafee439"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/uid/zipball/2676b524340abcfe4d6151ec698463cebafee439",
+                "reference": "2676b524340abcfe4d6151ec698463cebafee439",
+>>>>>>> Stashed changes
 =======
             "version": "v7.4.9",
             "source": {
@@ -6392,7 +6890,11 @@
             "support": {
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/symfony/uid/tree/v7.4.8"
+=======
+                "source": "https://github.com/symfony/uid/tree/v7.4.9"
+>>>>>>> Stashed changes
 =======
                 "source": "https://github.com/symfony/uid/tree/v7.4.9"
 >>>>>>> Stashed changes
@@ -6420,7 +6922,11 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-03-24T13:12:05+00:00"
+=======
+            "time": "2026-04-30T15:19:22+00:00"
+>>>>>>> Stashed changes
 =======
             "time": "2026-04-30T15:19:22+00:00"
 >>>>>>> Stashed changes
@@ -7769,6 +8275,7 @@
             "name": "phpunit/phpunit",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "version": "12.5.23",
             "source": {
                 "type": "git",
@@ -7803,6 +8310,18 @@
                 "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e78c9ad74f73fd3642a23e65ace83746dc8df26d",
                 "reference": "e78c9ad74f73fd3642a23e65ace83746dc8df26d",
 >>>>>>> Stashed changes
+=======
+            "version": "12.5.27",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/phpunit.git",
+                "reference": "f37c01edaf3a0cd820331462506af93f1495696e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/f37c01edaf3a0cd820331462506af93f1495696e",
+                "reference": "f37c01edaf3a0cd820331462506af93f1495696e",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
@@ -7824,7 +8343,11 @@
                 "sebastian/cli-parser": "^4.2.1",
                 "sebastian/comparator": "^7.1.8",
                 "sebastian/diff": "^7.0.0",
+<<<<<<< Updated upstream
                 "sebastian/environment": "^8.1.1",
+=======
+                "sebastian/environment": "^8.1.2",
+>>>>>>> Stashed changes
                 "sebastian/exporter": "^7.0.3",
                 "sebastian/global-state": "^8.0.2",
                 "sebastian/object-enumerator": "^7.0.0",
@@ -7873,12 +8396,16 @@
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.23"
 =======
                 "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.25"
 >>>>>>> Stashed changes
 =======
                 "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.26"
+>>>>>>> Stashed changes
+=======
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/12.5.27"
 >>>>>>> Stashed changes
             },
             "funding": [
@@ -7889,12 +8416,16 @@
             ],
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             "time": "2026-04-18T06:12:49+00:00"
 =======
             "time": "2026-05-13T03:56:57+00:00"
 >>>>>>> Stashed changes
 =======
             "time": "2026-05-21T12:36:53+00:00"
+>>>>>>> Stashed changes
+=======
+            "time": "2026-05-25T15:35:34+00:00"
 >>>>>>> Stashed changes
         },
         {
@@ -8185,6 +8716,7 @@
         },
         {
             "name": "sebastian/environment",
+<<<<<<< Updated upstream
             "version": "8.1.1",
             "source": {
                 "type": "git",
@@ -8195,13 +8727,29 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/334bc42a97ec6fc44c59001dc3467e0d739a20e9",
                 "reference": "334bc42a97ec6fc44c59001dc3467e0d739a20e9",
+=======
+            "version": "8.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/environment.git",
+                "reference": "9d32c685773823b1983e256ae4ecd48a10d6e439"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/9d32c685773823b1983e256ae4ecd48a10d6e439",
+                "reference": "9d32c685773823b1983e256ae4ecd48a10d6e439",
+>>>>>>> Stashed changes
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.3"
             },
             "require-dev": {
+<<<<<<< Updated upstream
                 "phpunit/phpunit": "^12.5.25"
+=======
+                "phpunit/phpunit": "^12.5.26"
+>>>>>>> Stashed changes
             },
             "suggest": {
                 "ext-posix": "*"
@@ -8237,7 +8785,11 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/environment/issues",
                 "security": "https://github.com/sebastianbergmann/environment/security/policy",
+<<<<<<< Updated upstream
                 "source": "https://github.com/sebastianbergmann/environment/tree/8.1.1"
+=======
+                "source": "https://github.com/sebastianbergmann/environment/tree/8.1.2"
+>>>>>>> Stashed changes
             },
             "funding": [
                 {
@@ -8257,7 +8809,11 @@
                     "type": "tidelift"
                 }
             ],
+<<<<<<< Updated upstream
             "time": "2026-05-21T08:45:32+00:00"
+=======
+            "time": "2026-05-25T13:40:20+00:00"
+>>>>>>> Stashed changes
         },
         {
             "name": "sebastian/exporter",

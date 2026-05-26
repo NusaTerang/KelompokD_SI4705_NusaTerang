@@ -1,7 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+<<<<<<< Updated upstream
 use App\Http\Controllers\PaymentCallbackController;
+=======
+use App\Http\Controllers\PenugasanController;
+use App\Http\Controllers\ProyekController;
+use App\Http\Controllers\PenyediaController;
+use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
+use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
+use App\Http\Controllers\PaymentCallbackController; // Midtrans
+>>>>>>> Stashed changes
 use App\Http\Controllers\OrderController;
 
 // ─── Public ───────────────────────────────────────────────────────────────────
@@ -54,6 +63,9 @@ Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () 
 // ─── Authenticated ─────────────────────────────────────────────────────────────
 
 Route::middleware('auth')->group(function () {
+    Route::post('/donasi/{proyek_id}', [OrderController::class, 'store'])->name('donasi.store');
+    Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');
+
     Route::get('/dashboard', function () {
         /** @var \App\Models\User $user */
         $user = auth()->user();
@@ -139,7 +151,16 @@ Route::post('/assign',      'App\Http\Controllers\PenugasanController@assign');
 Route::post('/respon/{id}', 'App\Http\Controllers\PenugasanController@respon');
 Route::post('/detail',      'App\Http\Controllers\PenugasanController@isiDetail');
 
+<<<<<<< Updated upstream
 // ─── Midtrans Webhook (CSRF exempt — lihat bootstrap/app.php) ─────────────────
 
 Route::post('/payments/midtrans-notification', [PaymentCallbackController::class, 'receive'])
     ->name('midtrans.callback');
+=======
+Route::post('/assign', [PenugasanController::class, 'assign']);
+Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
+Route::post('/detail', [PenugasanController::class, 'isiDetail']);
+
+// Midtrans
+Route::post('payments/midtrans-notification', [PaymentCallbackController::class, 'receive']);
+>>>>>>> Stashed changes
