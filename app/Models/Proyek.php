@@ -8,13 +8,17 @@ class Proyek extends Model
 {
     protected $fillable = [
         'desa_id', 'penyedia_id', 'judul', 'deskripsi', 'jenis_energi',
-        'estimasi_mulai', 'estimasi_selesai', 'target_dana', 'dana_terkumpul', 
+        'estimasi_mulai', 'estimasi_selesai', 'target_dana', 'dana_terkumpul',
+        'expired_extension_pending', 'expired_original_end_date', 'expired_extended_at', 'expired_vendor_decision',
         'status', 'created_by',
     ];
 
     protected $casts = [
         'estimasi_mulai' => 'date',
         'estimasi_selesai' => 'date',
+        'expired_extension_pending' => 'boolean',
+        'expired_original_end_date' => 'date',
+        'expired_extended_at' => 'datetime',
     ];
 
     public function penugasan()

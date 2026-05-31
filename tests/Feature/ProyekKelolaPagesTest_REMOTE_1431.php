@@ -30,11 +30,7 @@ class ProyekKelolaPagesTest extends TestCase
             'provinsi'          => 'Jawa Barat',
             'kabupaten'         => 'Bandung',
             'kondisi_desa'      => 'off-grid',
-<<<<<<< HEAD
-            'sumber'            => 'manual',
-=======
             'sumber'            => 'solar_panel',
->>>>>>> 0e890572773598675b5ab68e7394778180026ac2
         ]);
     }
 

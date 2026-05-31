@@ -110,10 +110,11 @@
                     'aktif_funding'                => ['label' => 'Aktif Funding',      'class' => 'bg-tertiary-container/30 text-on-tertiary-container',  'dot' => 'bg-tertiary'],
                     'eksekusi'                     => ['label' => 'Eksekusi',           'class' => 'bg-teal-50 text-teal-700',                             'dot' => 'bg-teal-400'],
                     'selesai'                      => ['label' => 'Selesai',            'class' => 'bg-emerald-50 text-emerald-700',                       'dot' => 'bg-emerald-400'],
+                    'refund'                       => ['label' => 'Refund',             'class' => 'bg-red-50 text-red-700',                               'dot' => 'bg-red-400'],
                     'ditolak'                      => ['label' => 'Ditolak',            'class' => 'bg-red-50 text-red-700',                               'dot' => 'bg-red-400'],
                     default                        => ['label' => $proyek->status,      'class' => 'bg-slate-100 text-slate-500',                          'dot' => 'bg-slate-400'],
                 };
-                $canTogglePublish = !in_array($proyek->status, ['eksekusi', 'selesai']);
+                $canTogglePublish = !in_array($proyek->status, ['eksekusi', 'selesai', 'refund']);
                 $canDelete        = $proyek->status === 'draft';
             @endphp
             <tr class="hover:bg-surface-container-low/50 transition-colors">
@@ -140,7 +141,7 @@
                 <td class="py-4 px-6 text-right">
                     <div class="flex items-center justify-end gap-1">
                         {{-- View detail --}}
-                        <a href="{{ route('proyek.review', $proyek->id) }}"
+                        <a href="{{ route('proyek.admin.show', $proyek->id) }}"
                            class="p-1.5 text-secondary hover:bg-secondary/10 rounded transition-colors"
                            title="Lihat Detail">
                             <span class="material-symbols-outlined text-sm">visibility</span>

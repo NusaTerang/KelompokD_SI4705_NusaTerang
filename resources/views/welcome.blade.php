@@ -40,34 +40,39 @@
         <div class="max-w-7xl mx-auto px-8 flex flex-wrap items-center justify-between gap-6">
 
             <div class="flex items-center gap-3">
-                <a href="{{ url()->current() }}"
+                <a href="{{ url()->current() }}{{ request()->filled('search') || request()->filled('wilayah') ? '?' . http_build_query(request()->only(['search', 'wilayah'])) : '' }}"
                    class="{{ !request('status') ? 'px-6 py-2 rounded-full bg-secondary text-white font-bold shadow-md' : 'px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-medium hover:bg-surface-container transition-all' }}">
                     Semua
                 </a>
-                <a href="{{ url()->current() }}?status=berlangsung"
+                <a href="{{ url()->current() }}?{{ http_build_query(array_merge(request()->only(['search', 'wilayah']), ['status' => 'berlangsung'])) }}"
                    class="{{ request('status') == 'berlangsung' ? 'px-6 py-2 rounded-full bg-secondary text-white font-bold shadow-md' : 'px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-medium hover:bg-surface-container transition-all' }}">
                     Berlangsung
                 </a>
-                <a href="{{ url()->current() }}?status=terpenuhi"
+                <a href="{{ url()->current() }}?{{ http_build_query(array_merge(request()->only(['search', 'wilayah']), ['status' => 'terpenuhi'])) }}"
                    class="{{ request('status') == 'terpenuhi' ? 'px-6 py-2 rounded-full bg-secondary text-white font-bold shadow-md' : 'px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-medium hover:bg-surface-container transition-all' }}">
                     Terpenuhi
                 </a>
-                <a href="{{ url()->current() }}?status=selesai"
+                <a href="{{ url()->current() }}?{{ http_build_query(array_merge(request()->only(['search', 'wilayah']), ['status' => 'selesai'])) }}"
                    class="{{ request('status') == 'selesai' ? 'px-6 py-2 rounded-full bg-secondary text-white font-bold shadow-md' : 'px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant font-medium hover:bg-surface-container transition-all' }}">
                     Selesai
                 </a>
             </div>
 
-            <div class="flex items-center gap-4">
+            <form action="{{ url()->current() }}" method="GET" class="flex items-center gap-4">
+                @if(request()->filled('search'))
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                @endif
+                @if(request()->filled('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
                 <span class="text-on-surface-variant text-sm font-medium">Filter wilayah:</span>
-                <select class="bg-surface-container-highest border-none rounded-lg font-body text-sm px-4 py-2 focus:ring-2 focus:ring-secondary cursor-pointer text-on-surface outline-none">
-                    <option>Seluruh Indonesia</option>
-                    <option>Nusa Tenggara Timur</option>
-                    <option>Nusa Tenggara Barat</option>
-                    <option>Maluku</option>
-                    <option>Papua</option>
+                <select name="wilayah" onchange="this.form.submit()" class="bg-surface-container-highest border-none rounded-lg font-body text-sm px-4 py-2 focus:ring-2 focus:ring-secondary cursor-pointer text-on-surface outline-none">
+                    <option value="">Seluruh Indonesia</option>
+                    @foreach($provinceOptions as $province)
+                        <option value="{{ $province }}" @selected(request('wilayah') === $province)>{{ $province }}</option>
+                    @endforeach
                 </select>
-            </div>
+            </form>
 
         </div>
     </div>
@@ -79,7 +84,7 @@
                 @foreach($projects as $project)
                     @php
                         $progress      = $project->target_dana > 0 ? round(($project->dana_terkumpul / $project->target_dana) * 100) : 0;
-                        $daysLeft      = $project->estimasi_selesai ? max(0, now()->diffInDays($project->estimasi_selesai, false)) : 0;
+                        $daysLeft      = $project->estimasi_selesai ? max(0, (int) ceil(now()->diffInDays($project->estimasi_selesai, false))) : 0;
                         $firstFoto = $project->fotos->first();
                         $imageUrl  = $firstFoto
                             ? (str_starts_with($firstFoto->path, 'http') ? $firstFoto->path : asset('storage/' . $firstFoto->path))

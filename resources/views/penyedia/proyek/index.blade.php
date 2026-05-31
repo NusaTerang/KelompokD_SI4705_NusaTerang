@@ -26,17 +26,22 @@
             @foreach($penugasans as $p)
             @php
                 $proyek = $p->proyek;
-                $statusColor = match($p->status_penugasan) {
-                    'pending'  => 'bg-solar-gold/10 text-deep-navy',
-                    'diterima' => 'bg-sustainability-green/10 text-sustainability-green',
-                    'ditolak'  => 'bg-error/10 text-error',
-                    default    => 'bg-surface-container text-on-surface-variant',
+                $isTerminalProject = in_array($proyek->status, ['refund', 'selesai']);
+                $statusColor = match(true) {
+                    $proyek->status === 'refund' => 'bg-error/10 text-error',
+                    $proyek->status === 'selesai' => 'bg-sustainability-green/10 text-sustainability-green',
+                    $p->status_penugasan === 'pending' => 'bg-solar-gold/10 text-deep-navy',
+                    $p->status_penugasan === 'diterima' => 'bg-sustainability-green/10 text-sustainability-green',
+                    $p->status_penugasan === 'ditolak' => 'bg-error/10 text-error',
+                    default => 'bg-surface-container text-on-surface-variant',
                 };
-                $statusLabel = match($p->status_penugasan) {
-                    'pending'  => 'Menunggu Konfirmasi',
-                    'diterima' => 'Diterima',
-                    'ditolak'  => 'Ditolak',
-                    default    => '-',
+                $statusLabel = match(true) {
+                    $proyek->status === 'refund' => 'Refund',
+                    $proyek->status === 'selesai' => 'Selesai',
+                    $p->status_penugasan === 'pending' => 'Menunggu Konfirmasi',
+                    $p->status_penugasan === 'diterima' => 'Diterima',
+                    $p->status_penugasan === 'ditolak' => 'Ditolak',
+                    default => '-',
                 };
                 $detailStatus = $p->detail?->status;
             @endphp
@@ -54,26 +59,39 @@
                             <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest {{ $statusColor }}">
                                 {{ $statusLabel }}
                             </span>
-                            @if($detailStatus === 'submitted')
-                                <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-sustainability-green/10 text-sustainability-green">
-                                    Rincian Terkirim
+                            @if($proyek->status === 'menunggu_keputusan_vendor' && $proyek->expired_extension_pending)
+                                <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-error/10 text-error">
+                                    Menunggu Keputusan Refund/Lanjut
                                 </span>
-                            @elseif($detailStatus === 'draft')
-                                <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-solar-gold/10 text-deep-navy">
-                                    Draft Tersimpan
-                                </span>
-                            @else
-                                <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-surface-container text-on-surface-variant">
-                                    Belum Diisi
-                                </span>
+                            @endif
+                            @if(! $isTerminalProject)
+                                @if($detailStatus === 'submitted')
+                                    <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-sustainability-green/10 text-sustainability-green">
+                                        Rincian Terkirim
+                                    </span>
+                                @elseif($detailStatus === 'draft')
+                                    <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-solar-gold/10 text-deep-navy">
+                                        Draft Tersimpan
+                                    </span>
+                                @else
+                                    <span class="text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest bg-surface-container text-on-surface-variant">
+                                        Belum Diisi
+                                    </span>
+                                @endif
                             @endif
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('vendor.proyek.show', $p->id_penugasan) }}"
-                   class="shrink-0 px-5 py-2.5 bg-deep-navy text-white rounded-xl font-bold text-sm hover:bg-deep-navy/90 transition-all text-center">
-                    Lihat &amp; Isi Rincian
-                </a>
+                @if($isTerminalProject)
+                    <span class="shrink-0 px-5 py-2.5 bg-surface-container text-on-surface-variant rounded-xl font-bold text-sm text-center cursor-not-allowed">
+                        Selesai Diproses
+                    </span>
+                @else
+                    <a href="{{ $proyek->status === 'menunggu_keputusan_vendor' && $proyek->expired_extension_pending ? route('vendor.proyek.expiry-decision.show', $p->id_penugasan) : route('vendor.proyek.show', $p->id_penugasan) }}"
+                       class="shrink-0 px-5 py-2.5 bg-deep-navy text-white rounded-xl font-bold text-sm hover:bg-deep-navy/90 transition-all text-center">
+                        {{ $proyek->status === 'menunggu_keputusan_vendor' && $proyek->expired_extension_pending ? 'Tinjau Keputusan' : 'Lihat & Isi Rincian' }}
+                    </a>
+                @endif
             </div>
             @endforeach
         </div>
