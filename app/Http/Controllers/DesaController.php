@@ -74,7 +74,6 @@ class DesaController extends Controller
         ])->toArray();
 
         $dataToUpdate['kondisi_desa'] = $kondisiGabungan !== '' ? $kondisiGabungan : null;
-        $dataToUpdate['status_verifikasi'] = ($action === 'draft') ? 'draft' : 'menunggu_verifikasi';
 
         $desa->update($dataToUpdate);
 

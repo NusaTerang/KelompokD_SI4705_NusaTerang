@@ -54,33 +54,77 @@
 
         {{-- Stats Grid --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+            {{-- Dana Terkumpul --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-primary flex flex-col gap-1">
-                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">TERKUMPUL</p>
-                <p class="text-on-surface text-lg font-bold">Rp {{ number_format($proyek->dana_terkumpul / 1000000, 1) }}jt</p>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
+                    TERKUMPUL
+                </p>
+
+                <p id="stats-funding"
+                class="text-on-surface text-lg font-bold">
+                    Rp {{ number_format($proyek->dana_terkumpul / 1000000, 1) }}jt
+                </p>
             </div>
+
+            {{-- Target --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-outline-variant flex flex-col gap-1">
-                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">TARGET</p>
-                <p class="text-on-surface text-lg font-bold">Rp {{ number_format($proyek->target_dana / 1000000, 1) }}jt</p>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
+                    TARGET
+                </p>
+
+                <p class="text-on-surface text-lg font-bold">
+                    Rp {{ number_format($proyek->target_dana / 1000000, 1) }}jt
+                </p>
             </div>
+
+            {{-- Donatur --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-secondary-container flex flex-col gap-1">
-                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">DONATUR</p>
-                <p class="text-on-surface text-lg font-bold">0</p>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
+                    DONATUR
+                </p>
+
+                <p id="donatur-count"
+                class="text-on-surface text-lg font-bold">
+                    {{ $proyek->donasis?->count() ?? 0 }}
+                </p>
             </div>
+
+            {{-- Sisa Hari --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-tertiary-container flex flex-col gap-1">
-                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">SISA HARI</p>
-                <p class="text-on-surface text-lg font-bold">{{ $daysLeft }} Hari</p>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
+                    SISA HARI
+                </p>
+
+                <p class="text-on-surface text-lg font-bold">
+                    {{ $daysLeft }} Hari
+                </p>
             </div>
+
         </div>
 
         {{-- Progress Bar --}}
         <div class="flex flex-col gap-2 w-full">
+
             <div class="flex justify-between items-end">
-                <p class="text-on-surface-variant text-sm font-bold">Kemajuan Pendanaan</p>
-                <p class="text-primary text-2xl font-bold">{{ $progress }}%</p>
+                <p class="text-on-surface-variant text-sm font-bold">
+                    Kemajuan Pendanaan
+                </p>
+
+                <p id="progress-text"
+                class="text-primary text-2xl font-bold">
+                    {{ min($progress, 100) }}%
+                </p>
             </div>
+
             <div class="w-full h-4 bg-surface-container rounded-full overflow-hidden">
-                <div class="h-full solar-gradient rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+
+                <div id="progress-bar"
+                    class="h-full solar-gradient rounded-full transition-all duration-500"
+                    style="width: {{ min($progress, 100) }}%">
+                </div>
+
             </div>
+
         </div>
 
         {{-- About --}}
@@ -137,12 +181,74 @@
         </div>
 
         {{-- Timeline Placeholder --}}
+        {{-- Activity Feed --}}
         <div class="flex flex-col gap-6 w-full py-6">
-            <h2 class="text-secondary text-2xl font-headline font-semibold">Update Progress</h2>
-            <div class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
-                <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">update</span>
-                <p class="text-on-surface-variant text-sm">Belum ada update progress untuk proyek ini.</p>
+
+            <div class="flex items-center justify-between">
+                <h2 class="text-secondary text-2xl font-headline font-semibold">
+                    Aktivitas Donasi Terbaru
+                </h2>
+
+                <span class="text-sm text-on-surface-variant">
+                    Real-time update
+                </span>
             </div>
+
+            <div id="activity-feed"
+                class="flex flex-col gap-4">
+
+                @if(isset($proyek->donasis) && $proyek->donasis->count() > 0)
+
+                    @foreach($proyek->donasis->take(5) as $donasi)
+
+                        <div class="bg-surface-container-low p-5 rounded-xl border border-surface-container">
+
+                            <div class="flex items-center justify-between">
+
+                                <div class="flex flex-col gap-1">
+
+                                    <p class="text-on-surface font-semibold">
+                                        {{ $donasi->user->name ?? 'Donatur' }}
+                                    </p>
+
+                                    <p class="text-sm text-on-surface-variant">
+                                        Berdonasi sebesar
+                                        <span class="font-bold">
+                                            Rp {{ number_format($donasi->nominal, 0, ',', '.') }}
+                                        </span>
+                                    </p>
+
+                                </div>
+
+                                <span class="text-xs text-on-surface-variant">
+                                    {{ $donasi->created_at->diffForHumans() }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    @endforeach
+
+                @else
+
+                    <div id="empty-state"
+                        class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
+
+                        <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">
+                            volunteer_activism
+                        </span>
+
+                        <p class="text-on-surface-variant text-sm">
+                            Belum ada donasi pada proyek ini.
+                        </p>
+
+                    </div>
+
+                @endif
+
+            </div>
+
         </div>
 
     </div>
@@ -156,10 +262,15 @@
             <div class="flex flex-col gap-2">
                 <div class="flex justify-between items-center">
                     <p class="text-on-surface-variant text-xs font-bold uppercase">TERKUMPUL</p>
-                    <p class="text-tertiary text-2xl font-bold">Rp {{ number_format($proyek->dana_terkumpul, 0, ',', '.') }}</p>
+                    <p id="funding-amount" class="text-tertiary text-2xl font-bold">Rp {{ number_format($proyek->dana_terkumpul, 0, ',', '.') }}</p>
                 </div>
                 <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden my-1">
-                    <div class="h-full solar-gradient rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+
+                    <div id="side-progress-bar"
+                        class="h-full solar-gradient rounded-full transition-all duration-500"
+                        style="width: {{ min($progress, 100) }}%">
+                    </div>
+
                 </div>
                 <div class="flex gap-1 text-xs">
                     <span class="text-on-surface-variant">Dari target</span>
@@ -186,9 +297,36 @@
                 </div>
             </div>
 
-            <a href="{{ route('login') }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
-                Donasi Sekarang
-            </a>
+            @if($proyek->status === 'eksekusi')
+
+                <button
+                    disabled
+                    class="w-full bg-gray-300 text-gray-600 font-headline font-extrabold text-lg py-4 rounded-xl cursor-not-allowed text-center block">
+
+                    Pendanaan Tercapai
+
+                </button>
+
+            @elseif(!auth()->check())
+
+                <a href="{{ route('login') }}"
+                class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
+
+                    Login untuk Donasi
+
+                </a>
+
+            @else
+
+                <button
+                    id="donasi-button"
+                    class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2">
+
+                    Donasi Sekarang
+
+                </button>
+
+            @endif
 
             <div class="flex items-center gap-6 pt-2 border-t border-surface-container">
                 <div class="flex items-center gap-2">
@@ -205,5 +343,238 @@
     </div>
 
 </div>
+
+<script>
+
+async function refreshFundingData()
+{
+    try {
+
+        const response = await fetch(
+            '/api/v1/proyek/{{ $proyek->id }}/funding',
+            {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        // Funding
+        document.getElementById('funding-amount').innerText =
+            'Rp ' + Number(data.dana_terkumpul)
+                .toLocaleString('id-ID');
+
+        // Stats Funding
+        document.getElementById('stats-funding').innerText =
+            'Rp ' +
+            (data.dana_terkumpul / 1000000).toFixed(1)
+            + 'jt';
+
+        // Donatur
+        document.getElementById('donatur-count').innerText =
+            data.jumlah_donatur;
+
+        // Progress Text
+        document.getElementById('progress-text').innerText =
+            data.persentase + '%';
+
+        // Main Progress Bar
+        document.getElementById('progress-bar').style.width =
+            data.persentase + '%';
+
+        // Side Progress Bar
+        document.getElementById('side-progress-bar').style.width =
+            data.persentase + '%';
+
+        // Auto Disable Button
+        if (data.status === 'eksekusi') {
+
+            const button = document.getElementById('donasi-button');
+
+            if (button) {
+
+                button.disabled = true;
+
+                button.innerText = 'Pendanaan Tercapai';
+
+                button.classList.remove(
+                    'bg-primary-container'
+                );
+
+                button.classList.add(
+                    'bg-gray-300',
+                    'text-gray-600',
+                    'cursor-not-allowed'
+                );
+            }
+        }
+
+        // Activity Feed
+        const activityFeed =
+            document.getElementById('activity-feed');
+
+        if (data.donasi_terbaru.length > 0) {
+
+            activityFeed.innerHTML = '';
+
+            data.donasi_terbaru.forEach((donasi) => {
+
+                activityFeed.innerHTML += `
+                    <div class="bg-surface-container-low p-5 rounded-xl border border-surface-container">
+
+                        <div class="flex items-center justify-between">
+
+                            <div class="flex flex-col gap-1">
+
+                                <p class="text-on-surface font-semibold">
+                                    ${donasi.user?.name ?? 'Donatur'}
+                                </p>
+
+                                <p class="text-sm text-on-surface-variant">
+                                    Berdonasi sebesar
+                                    <span class="font-bold">
+                                        Rp ${Number(donasi.nominal)
+                                            .toLocaleString('id-ID')}
+                                    </span>
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+            });
+        }
+
+    } catch (error) {
+
+        console.error(
+            'Funding realtime error:',
+            error
+        );
+    }
+}
+
+<script>
+
+async function refreshFundingData()
+{
+    try {
+
+        const response = await fetch(
+            '/api/v1/proyek/{{ $proyek->id }}/funding',
+            {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        // Funding
+        document.getElementById('funding-amount').innerText =
+            'Rp ' + Number(data.dana_terkumpul)
+                .toLocaleString('id-ID');
+
+        // Stats Funding
+        document.getElementById('stats-funding').innerText =
+            'Rp ' +
+            (data.dana_terkumpul / 1000000).toFixed(1)
+            + 'jt';
+
+        // Donatur
+        document.getElementById('donatur-count').innerText =
+            data.jumlah_donatur;
+
+        // Progress Text
+        document.getElementById('progress-text').innerText =
+            data.persentase + '%';
+
+        // Main Progress Bar
+        document.getElementById('progress-bar').style.width =
+            data.persentase + '%';
+
+        // Side Progress Bar
+        document.getElementById('side-progress-bar').style.width =
+            data.persentase + '%';
+
+        // Auto Disable Button
+        if (data.status === 'eksekusi') {
+
+            const button = document.getElementById('donasi-button');
+
+            if (button) {
+
+                button.disabled = true;
+
+                button.innerText = 'Pendanaan Tercapai';
+
+                button.classList.remove(
+                    'bg-primary-container'
+                );
+
+                button.classList.add(
+                    'bg-gray-300',
+                    'text-gray-600',
+                    'cursor-not-allowed'
+                );
+            }
+        }
+
+        // Activity Feed
+        const activityFeed =
+            document.getElementById('activity-feed');
+
+        if (data.donasi_terbaru.length > 0) {
+
+            activityFeed.innerHTML = '';
+
+            data.donasi_terbaru.forEach((donasi) => {
+
+                activityFeed.innerHTML += `
+                    <div class="bg-surface-container-low p-5 rounded-xl border border-surface-container">
+
+                        <div class="flex items-center justify-between">
+
+                            <div class="flex flex-col gap-1">
+
+                                <p class="text-on-surface font-semibold">
+                                    ${donasi.user?.name ?? 'Donatur'}
+                                </p>
+
+                                <p class="text-sm text-on-surface-variant">
+                                    Berdonasi sebesar
+                                    <span class="font-bold">
+                                        Rp ${Number(donasi.nominal)
+                                            .toLocaleString('id-ID')}
+                                    </span>
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+            });
+        }
+
+    } catch (error) {
+
+        console.error(
+            'Funding realtime error:',
+            error
+        );
+    }
+}
+
+// Refresh tiap 5 detik
+setInterval(refreshFundingData, 5000);
+
+</script>
 
 @endsection

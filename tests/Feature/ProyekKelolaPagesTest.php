@@ -29,7 +29,6 @@ class ProyekKelolaPagesTest extends TestCase
             'kabupaten'         => 'Bandung',
             'kondisi_desa'      => 'off-grid',
             'sumber'            => 'manual',
-            'status_verifikasi' => 'terverifikasi',
         ]);
     }
 

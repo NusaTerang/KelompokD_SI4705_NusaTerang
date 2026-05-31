@@ -37,6 +37,11 @@ class User extends Authenticatable
         return $this->hasMany(Donasi::class, 'id_donatur', 'id_donatur');
     }
 
+    public function getNameAttribute(): ?string
+    {
+        return $this->nama;
+    }
+
     protected function casts(): array
     {
         return [

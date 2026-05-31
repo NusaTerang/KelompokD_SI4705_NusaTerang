@@ -13,7 +13,7 @@ class ProyekDummySeeder extends Seeder
     {
         $desa = Desa::first() ?? Desa::create([
             'nama_desa' => 'Desa Dummy', 'provinsi' => 'NTT', 'kabupaten' => 'Manggarai',
-            'koordinat' => '0,0', 'sumber' => 'solar_panel', 'status_verifikasi' => 'terverifikasi'
+            'koordinat' => '0,0', 'sumber' => 'solar_panel'
         ]);
 
         $data = [
