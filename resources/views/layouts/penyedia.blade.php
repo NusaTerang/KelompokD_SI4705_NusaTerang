@@ -15,6 +15,8 @@
 
 @php
     $proyekOpen = request()->routeIs('vendor.proyek.*');
+    $notificationOpen = request()->routeIs('notifications.*');
+    $unreadNotifications = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
 @endphp
 
 <div class="flex min-h-screen">
@@ -46,9 +48,14 @@
                 Profil Perusahaan
             </a>
 
-            <a href="#"
-               class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-headline tracking-wide text-white/70 hover:text-white hover:bg-white/5 transition-all duration-200">
-                <span class="material-symbols-outlined">notifications</span>
+            <a href="{{ route('notifications.index') }}"
+               class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-headline tracking-wide transition-all duration-200
+                      {{ $notificationOpen ? 'bg-white/10 text-white font-bold' : 'text-white/70 hover:text-white hover:bg-white/5' }}">
+                <span class="material-symbols-outlined relative {{ $notificationOpen ? 'active-fill' : '' }}">notifications
+                    @if($unreadNotifications > 0)
+                        <span class="absolute -right-3 -top-2 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</span>
+                    @endif
+                </span>
                 Notifikasi
             </a>
         </nav>

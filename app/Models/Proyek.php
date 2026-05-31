@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\TargetDanaTercapai;
+use App\Services\NotificationRecipientService;
 use Illuminate\Database\Eloquent\Model;
 
 class Proyek extends Model
@@ -63,5 +65,24 @@ class Proyek extends Model
         return $this->progressUpdates()
             ->where('progress_proyek_vendor.status', 'submitted')
             ->orderByDesc('progress_proyek_vendor.submitted_at');
+    }
+
+    public function donasi()
+    {
+        return $this->hasMany(Donasi::class, 'id_proyek');
+    }
+
+    public function recordFunding(float|int $amount): void
+    {
+        $wasBelowTarget = $this->dana_terkumpul < $this->target_dana;
+
+        $this->increment('dana_terkumpul', $amount);
+        $this->refresh();
+
+        if ($wasBelowTarget && $this->dana_terkumpul >= $this->target_dana) {
+            app(NotificationRecipientService::class)
+                ->adminsAndDonorsForProject($this)
+                ->each(fn ($recipient) => $recipient->notify(new TargetDanaTercapai($this)));
+        }
     }
 }

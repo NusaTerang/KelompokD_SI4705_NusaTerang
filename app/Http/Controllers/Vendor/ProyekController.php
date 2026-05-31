@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\DetailProyekVendor;
 use App\Models\PenugasanProyek;
 use App\Models\ProgressProyekVendor;
+use App\Notifications\DetailProyekDiisi;
+use App\Notifications\ProgressProyekDikirim;
+use App\Notifications\ProyekSelesai;
+use App\Services\NotificationRecipientService;
 use Illuminate\Http\Request;
 
 class ProyekController extends Controller
@@ -77,7 +81,7 @@ class ProyekController extends Controller
         return view('penyedia.proyek.progress', compact('penugasan', 'proyek', 'draft', 'updates'));
     }
 
-    public function progressStore(Request $request, $id)
+    public function progressStore(Request $request, $id, NotificationRecipientService $recipients)
     {
         $penugasan = $this->findOwnedPenugasanForProgressOrAbort($id);
         $proyek = $penugasan->proyek;
@@ -148,12 +152,19 @@ class ProyekController extends Controller
             'status' => $payload['status_progress'] === 'selesai' ? 'selesai' : 'eksekusi',
         ]);
 
+        $notification = $payload['status_progress'] === 'selesai'
+            ? new ProyekSelesai($proyek)
+            : new ProgressProyekDikirim($proyek);
+
+        $recipients->adminsAndDonorsForProject($proyek)
+            ->each(fn ($recipient) => $recipient->notify($notification));
+
         return redirect()
             ->route('vendor.proyek.progress.show', $penugasan->id_penugasan)
             ->with('success', 'Update progress berhasil dikirim dan dapat dilihat Admin/Donatur.');
     }
 
-    public function saveDetail(Request $request, $id)
+    public function saveDetail(Request $request, $id, NotificationRecipientService $recipients)
     {
         $penyedia = auth()->user()->penyedia;
 
@@ -217,7 +228,15 @@ class ProyekController extends Controller
         );
 
         if (! $isDraft) {
+            $penugasan->update([
+                'status_penugasan' => 'diterima',
+                'tanggal_respon' => now(),
+            ]);
+
             $penugasan->proyek->update(['status' => 'menunggu_review_admin']);
+
+            $recipients->admins()
+                ->each(fn ($admin) => $admin->notify(new DetailProyekDiisi($penugasan->proyek)));
         }
 
         $msg = $isDraft ? 'Draft tersimpan.' : 'Rincian berhasil dikirim ke Admin untuk ditinjau!';

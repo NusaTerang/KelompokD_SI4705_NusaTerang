@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Proyek;
 use App\Models\Desa;
+use App\Notifications\ProyekDitugaskan;
+use App\Services\NotificationRecipientService;
 use App\Services\PenyediaRecommendationService;
 
 class ProyekController extends Controller
@@ -150,12 +152,17 @@ class ProyekController extends Controller
             abort(403, 'Proyek yang sedang berjalan, selesai, atau refund tidak dapat diubah statusnya.');
         }
 
-        $newStatus = $proyek->status === 'aktif_funding' ? 'draft' : 'aktif_funding';
+        $newStatus = match ($proyek->status) {
+            'aktif_funding' => 'eksekusi',
+            'draft', 'diterima_penyedia', 'menunggu_review_admin' => 'aktif_funding',
+            default => abort(403, 'Proyek belum siap dipublikasikan.'),
+        };
+
         $proyek->update(['status' => $newStatus]);
 
-        $message = $newStatus === 'aktif_funding'
-            ? 'Proyek berhasil dipublikasikan.'
-            : 'Proyek berhasil dibatalkan publikasinya.';
+        $message = $newStatus === 'eksekusi'
+            ? 'Proyek berhasil masuk fase eksekusi.'
+            : 'Proyek berhasil dipublikasikan.';
 
         return redirect()->route('proyek.kelola')->with('success', $message);
     }
@@ -166,7 +173,7 @@ class ProyekController extends Controller
         return redirect()->route('proyek.kelola')->with('success', 'Proyek disimpan sebagai draft.');
     }
 
-    public function kirimKePenyedia(Request $request, $id)
+    public function kirimKePenyedia(Request $request, $id, NotificationRecipientService $recipients)
     {
         $proyek = Proyek::findOrFail($id);
 
@@ -176,10 +183,13 @@ class ProyekController extends Controller
 
         $proyek->update(['status' => 'menunggu_konfirmasi_penyedia']);
 
-        \App\Models\PenugasanProyek::firstOrCreate([
+        $penugasan = \App\Models\PenugasanProyek::firstOrCreate([
             'id_proyek'   => $proyek->id,
             'id_penyedia' => $proyek->penyedia_id,
         ]);
+
+        $vendor = $recipients->vendorForProject($proyek);
+        $vendor?->notify(new ProyekDitugaskan($proyek, $penugasan));
 
         return redirect()->route('proyek.kelola')->with('success', 'Proyek berhasil dikirim ke penyedia!');
     }
