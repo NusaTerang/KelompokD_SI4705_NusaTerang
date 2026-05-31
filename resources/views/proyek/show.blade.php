@@ -54,6 +54,7 @@
 
         {{-- Stats Grid --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+<<<<<<< HEAD
             {{-- Dana Terkumpul --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-primary flex flex-col gap-1">
                 <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
@@ -100,10 +101,29 @@
                 </p>
             </div>
 
+=======
+            <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-primary flex flex-col gap-1">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">TERKUMPUL</p>
+                <p class="text-on-surface text-lg font-bold">Rp {{ number_format($proyek->dana_terkumpul / 1000000, 1) }}jt</p>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-outline-variant flex flex-col gap-1">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">TARGET</p>
+                <p class="text-on-surface text-lg font-bold">Rp {{ number_format($proyek->target_dana / 1000000, 1) }}jt</p>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-secondary-container flex flex-col gap-1">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">DONATUR</p>
+                <p class="text-on-surface text-lg font-bold">0</p>
+            </div>
+            <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-tertiary-container flex flex-col gap-1">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">SISA HARI</p>
+                <p class="text-on-surface text-lg font-bold">{{ $daysLeft }} Hari</p>
+            </div>
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
         </div>
 
         {{-- Progress Bar --}}
         <div class="flex flex-col gap-2 w-full">
+<<<<<<< HEAD
 
             <div class="flex justify-between items-end">
                 <p class="text-on-surface-variant text-sm font-bold">
@@ -125,6 +145,15 @@
 
             </div>
 
+=======
+            <div class="flex justify-between items-end">
+                <p class="text-on-surface-variant text-sm font-bold">Kemajuan Pendanaan</p>
+                <p class="text-primary text-2xl font-bold">{{ $progress }}%</p>
+            </div>
+            <div class="w-full h-4 bg-surface-container rounded-full overflow-hidden">
+                <div class="h-full solar-gradient rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+            </div>
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
         </div>
 
         {{-- About --}}
@@ -181,6 +210,7 @@
         </div>
 
         {{-- Timeline Placeholder --}}
+<<<<<<< HEAD
         {{-- Activity Feed --}}
         <div class="flex flex-col gap-6 w-full py-6">
 
@@ -249,6 +279,14 @@
 
             </div>
 
+=======
+        <div class="flex flex-col gap-6 w-full py-6">
+            <h2 class="text-secondary text-2xl font-headline font-semibold">Update Progress</h2>
+            <div class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
+                <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">update</span>
+                <p class="text-on-surface-variant text-sm">Belum ada update progress untuk proyek ini.</p>
+            </div>
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
         </div>
 
     </div>
@@ -262,6 +300,7 @@
             <div class="flex flex-col gap-2">
                 <div class="flex justify-between items-center">
                     <p class="text-on-surface-variant text-xs font-bold uppercase">TERKUMPUL</p>
+<<<<<<< HEAD
                     <p id="funding-amount" class="text-tertiary text-2xl font-bold">Rp {{ number_format($proyek->dana_terkumpul, 0, ',', '.') }}</p>
                 </div>
                 <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden my-1">
@@ -271,6 +310,12 @@
                         style="width: {{ min($progress, 100) }}%">
                     </div>
 
+=======
+                    <p class="text-tertiary text-2xl font-bold">Rp {{ number_format($proyek->dana_terkumpul, 0, ',', '.') }}</p>
+                </div>
+                <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden my-1">
+                    <div class="h-full solar-gradient rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
                 </div>
                 <div class="flex gap-1 text-xs">
                     <span class="text-on-surface-variant">Dari target</span>
@@ -278,6 +323,7 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <div class="grid grid-cols-2 gap-3 w-full">
                 <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
                 <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
@@ -327,6 +373,58 @@
                 </button>
 
             @endif
+=======
+            @auth
+                <form action="{{ route('donasi.store', $proyek->id) }}" method="POST" class="flex flex-col gap-4 w-full">
+                    @csrf
+                    <div class="grid grid-cols-2 gap-3 w-full">
+                        <button type="button" onclick="document.getElementById('amount').value=50000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=100000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=250000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=500000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
+                    </div>
+
+                    <div class="flex flex-col gap-2 w-full">
+                        <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                        <div class="relative w-full">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
+                            <input
+                                type="number"
+                                name="amount"
+                                id="amount"
+                                placeholder="0"
+                                required
+                                min="10000"
+                                class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none"
+                            />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
+                        Donasi Sekarang
+                    </button>
+                </form>
+            @else
+                <div class="grid grid-cols-2 gap-3 w-full opacity-50 pointer-events-none">
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 50k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 100k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 250k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 500k</button>
+                </div>
+
+                <div class="flex flex-col gap-2 w-full opacity-50 pointer-events-none">
+                    <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                    <div class="relative w-full">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
+                        <input type="text" placeholder="0" class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface border-none" disabled />
+                    </div>
+                </div>
+
+                <a href="{{ route('login') }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
+                    Login untuk Donasi
+                </a>
+            @endauth
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 
             <div class="flex items-center gap-6 pt-2 border-t border-surface-container">
                 <div class="flex items-center gap-2">
@@ -344,6 +442,7 @@
 
 </div>
 
+<<<<<<< HEAD
 <script>
 
 async function refreshFundingData()
@@ -577,4 +676,6 @@ setInterval(refreshFundingData, 5000);
 
 </script>
 
+=======
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 @endsection

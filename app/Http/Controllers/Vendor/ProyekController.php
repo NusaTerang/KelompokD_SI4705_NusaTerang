@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
+<<<<<<< HEAD
 use App\Models\DetailProyekVendor;
 use App\Models\PenugasanProyek;
 use Illuminate\Http\Request;
@@ -170,4 +171,18 @@ class ProyekController extends Controller
         // TODO: store kendala / send notification
         return redirect()->back()->with('info', 'Laporan kendala telah diterima.');
     }
+=======
+use Illuminate\Http\Request;
+
+/** Stub — akan diimplementasi oleh tim */
+class ProyekController extends Controller
+{
+    public function index() { abort(501, 'Belum diimplementasi'); }
+    public function show($id) { abort(501, 'Belum diimplementasi'); }
+    public function expiryDecisionShow($id) { abort(501, 'Belum diimplementasi'); }
+    public function saveDetail(Request $request, $id) { abort(501, 'Belum diimplementasi'); }
+    public function expiryDecision(Request $request, $id) { abort(501, 'Belum diimplementasi'); }
+    public function mintaKlarifikasi(Request $request, $id) { abort(501, 'Belum diimplementasi'); }
+    public function laporkanKendala(Request $request, $id) { abort(501, 'Belum diimplementasi'); }
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 }

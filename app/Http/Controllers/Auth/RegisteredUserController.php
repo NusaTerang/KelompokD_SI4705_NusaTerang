@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+<<<<<<< HEAD
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,10 +19,20 @@ class RegisteredUserController extends Controller
      * Display the registration view.
      */
     public function create(): View
+=======
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+class RegisteredUserController extends Controller
+{
+    public function create()
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
     {
         return view('auth.register');
     }
 
+<<<<<<< HEAD
     /**
      * Handle an incoming registration request.
      *
@@ -72,5 +83,25 @@ class RegisteredUserController extends Controller
             'penyedia' => route('penyedia.dashboard'),
             default    => '/',
         };
+=======
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        event(new Registered($user));
+        Auth::login($user);
+
+        return redirect()->route('dashboard');
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
     }
 }

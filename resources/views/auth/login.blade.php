@@ -125,7 +125,11 @@
               <input type="checkbox" id="remember" name="remember" class="w-4 h-4 rounded border-gray-300 text-[#1a4a6e] focus:ring-[#1a4a6e]" {{ old('remember') ? 'checked' : '' }} />
               Ingat saya
             </label>
+<<<<<<< HEAD
             <a href="#" class="text-[#1a4a6e] font-medium hover:underline" id="forgot-password-link">Lupa Password?</a>
+=======
+            <a href="{{ route('password.request') }}" class="text-[#1a4a6e] font-medium hover:underline" id="forgot-password-link">Lupa Password?</a>
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
           </div>
 
           <!-- Submit -->

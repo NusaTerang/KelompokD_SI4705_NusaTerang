@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+<<<<<<< HEAD
 use App\Models\Desa;
 use App\Services\PenyediaRecommendationService;
 
@@ -51,4 +52,13 @@ class PenyediaController extends Controller
             'data' => $recommendations
         ]);
     }
+=======
+
+/** Stub — akan diimplementasi oleh tim */
+class PenyediaController extends Controller
+{
+    public function index() { abort(501, 'Belum diimplementasi'); }
+    public function show($id) { abort(501, 'Belum diimplementasi'); }
+    public function getRekomendasi() { abort(501, 'Belum diimplementasi'); }
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 }

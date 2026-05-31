@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+<<<<<<< HEAD
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +15,19 @@ class AuthenticatedSessionController extends Controller
      * Display the login view.
      */
     public function create(): View
+=======
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AuthenticatedSessionController extends Controller
+{
+    public function create()
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
     {
         return view('auth.login');
     }
 
+<<<<<<< HEAD
     /**
      * Handle an incoming authentication request.
      */
@@ -78,4 +88,30 @@ class AuthenticatedSessionController extends Controller
             default    => '/',
         };
     }
+=======
+    public function store(Request $request)
+    {
+        $credentials = $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+            return back()->withErrors([
+                'email' => 'Email atau password salah.',
+            ])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
+        return redirect()->intended(route('dashboard'));
+    }
+
+    public function destroy(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
+    }
+>>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 }
