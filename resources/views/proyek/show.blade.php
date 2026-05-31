@@ -18,9 +18,9 @@
         'menunggu_konfirmasi_penyedia'   => ['text' => 'MENUNGGU PENYEDIA',  'bg' => 'bg-yellow-100',           'color' => 'text-yellow-800'],
         'diterima_penyedia'              => ['text' => 'DITERIMA PENYEDIA',  'bg' => 'bg-secondary-fixed',      'color' => 'text-on-secondary-fixed'],
         'menunggu_review_admin'          => ['text' => 'MENUNGGU REVIEW',    'bg' => 'bg-yellow-100',           'color' => 'text-yellow-800'],
-        'aktif_funding'                  => ['text' => 'SEDANG BERJALAN',    'bg' => 'bg-primary-container',    'color' => 'text-on-primary-fixed'],
-        'eksekusi'                       => ['text' => 'DALAM EKSEKUSI',     'bg' => 'bg-secondary-container',  'color' => 'text-on-secondary-fixed'],
-        'selesai'                        => ['text' => 'SELESAI',            'bg' => 'bg-tertiary-container',   'color' => 'text-on-tertiary-fixed'],
+        'aktif_funding'                  => ['text' => 'Menunggu Dana',      'bg' => 'bg-primary-container',    'color' => 'text-on-primary-fixed'],
+        'eksekusi'                       => ['text' => 'Sedang Berjalan',    'bg' => 'bg-secondary-container',  'color' => 'text-on-secondary-fixed'],
+        'selesai'                        => ['text' => 'Selesai',            'bg' => 'bg-tertiary-container',   'color' => 'text-on-tertiary-fixed'],
         'ditolak'                        => ['text' => 'DITOLAK',            'bg' => 'bg-error-container',      'color' => 'text-on-error-container'],
     ];
     $status = $statusMap[$proyek->status] ?? ['text' => strtoupper($proyek->status), 'bg' => 'bg-surface-container', 'color' => 'text-on-surface-variant'];
@@ -139,44 +139,102 @@
         @php
             $submittedProgressUpdates = $proyek->penugasan
                 ->flatMap(fn ($penugasan) => $penugasan->submittedProgressUpdates)
-                ->sortByDesc('submitted_at');
+                ->sortByDesc('submitted_at')
+                ->values();
+            $latestProgressUpdate = $submittedProgressUpdates->first();
+            $monitoringProgress = $latestProgressUpdate ? (int) $latestProgressUpdate->persentase : 0;
+            $monitoringProgressWidth = max(0, min($monitoringProgress, 100));
         @endphp
 
         <div class="flex flex-col gap-6 w-full py-6">
-            <h2 class="text-secondary text-2xl font-headline font-semibold">Update Progress</h2>
+            <div class="bg-surface-container-low rounded-xl p-5 border border-surface-container flex flex-col gap-3">
+                <div class="flex justify-between items-end gap-4">
+                    <div>
+                        <p class="text-on-surface-variant text-sm font-bold">Progress Pengerjaan</p>
+                        @if($latestProgressUpdate)
+                            <p class="text-xs text-on-surface-variant mt-1">Update terakhir {{ $latestProgressUpdate->submitted_at?->format('d M Y H:i') ?? $latestProgressUpdate->created_at?->format('d M Y H:i') }}</p>
+                        @else
+                            <p class="text-xs text-on-surface-variant mt-1">Belum ada update progres dari vendor.</p>
+                        @endif
+                    </div>
+                    <p class="text-secondary text-2xl font-bold">{{ $monitoringProgress }}%</p>
+                </div>
+                <div class="w-full h-3 bg-surface-container rounded-full overflow-hidden">
+                    <div class="h-full bg-secondary rounded-full" style="width: {{ $monitoringProgressWidth }}%"></div>
+                </div>
+            </div>
+
+            <h2 class="text-secondary text-2xl font-headline font-semibold">Timeline & Progress Updates</h2>
 
             @if($submittedProgressUpdates->isEmpty())
                 <div class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
                     <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">update</span>
-                    <p class="text-on-surface-variant text-sm">Belum ada update progress untuk proyek ini.</p>
+                    <p class="text-on-surface-variant text-sm">Vendor belum mengunggah update progres</p>
                 </div>
             @else
-                <div class="space-y-4">
+                <div class="relative flex flex-col gap-8">
                     @foreach($submittedProgressUpdates as $update)
-                        <article class="bg-surface-container-low rounded-xl p-5 border border-surface-container">
-                            <div class="flex items-start justify-between gap-4 mb-3">
-                                <div>
-                                    <p class="text-primary text-2xl font-bold">{{ $update->persentase }}%</p>
-                                    <p class="text-xs text-on-surface-variant font-bold uppercase tracking-wide">
-                                        {{ $update->submitted_at?->format('d M Y H:i') ?? $update->created_at?->format('d M Y H:i') }}
-                                    </p>
-                                </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-bold {{ $update->status_progress === 'selesai' ? 'bg-tertiary-container text-on-tertiary-fixed' : 'bg-secondary-container text-on-secondary-fixed' }}">
-                                    {{ $update->status_progress === 'selesai' ? 'Selesai' : 'Berjalan' }}
-                                </span>
+                        @php
+                            $submittedAt = $update->submitted_at ?? $update->created_at;
+                            $photoPaths = is_array($update->foto_paths) ? $update->foto_paths : [];
+                            $isDone = $update->status_progress === 'selesai';
+                        @endphp
+                        <article class="grid grid-cols-[72px_24px_1fr] gap-4 items-start">
+                            <div class="text-right pt-1">
+                                <p class="text-sm font-extrabold text-on-surface-variant">{{ $submittedAt?->format('d M') }}</p>
+                                <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">{{ $submittedAt?->format('Y') }}</p>
                             </div>
 
-                            <p class="text-on-surface-variant leading-relaxed whitespace-pre-line">{{ $update->deskripsi }}</p>
+                            <div class="relative flex justify-center h-full min-h-[120px]">
+                                @if(!$loop->last)
+                                    <span class="absolute top-6 bottom-[-32px] w-0.5 bg-surface-container"></span>
+                                @endif
+                                <span class="relative z-10 mt-2 w-4 h-4 rounded-full {{ $isDone ? 'bg-tertiary' : 'bg-primary-container' }} ring-4 {{ $isDone ? 'ring-tertiary/10' : 'ring-primary-container/30' }}"></span>
+                            </div>
 
-                            @if(!empty($update->foto_paths))
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                                    @foreach($update->foto_paths as $path)
-                                        <img src="{{ asset('storage/' . $path) }}" alt="Foto progress" class="h-32 w-full object-cover rounded-lg border border-surface-container">
-                                    @endforeach
+                            <div class="bg-surface-container-low rounded-2xl p-5 border {{ $loop->first ? 'border-primary-container shadow-sm' : 'border-surface-container' }}">
+                                <div class="flex items-start justify-between gap-4 mb-3">
+                                    <div>
+                                        <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold {{ $isDone ? 'bg-tertiary-container text-on-tertiary-fixed' : 'bg-secondary-container text-on-secondary-fixed' }}">
+                                            {{ $isDone ? 'Selesai' : 'Sedang Berjalan' }}
+                                        </span>
+                                        <p class="text-xs text-on-surface-variant font-bold uppercase tracking-wide mt-2">
+                                            {{ $submittedAt?->format('d M Y H:i') }}
+                                        </p>
+                                    </div>
+                                    <p class="text-primary text-2xl font-bold">{{ $update->persentase }}%</p>
                                 </div>
-                            @endif
+
+                                <p class="text-on-surface-variant leading-relaxed whitespace-pre-line">{{ $update->deskripsi }}</p>
+
+                                @if(!empty($photoPaths))
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                                        @foreach($photoPaths as $path)
+                                            <img src="{{ str_starts_with($path, 'http') ? $path : asset('storage/' . $path) }}" alt="Foto progress" class="h-32 w-full object-cover rounded-lg border border-surface-container">
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
                         </article>
                     @endforeach
+                </div>
+            @endif
+
+            @if($proyek->status === 'selesai')
+                <div class="bg-tertiary-container/30 border border-tertiary/20 rounded-xl p-5 flex flex-col gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-tertiary">task_alt</span>
+                        <h3 class="text-secondary text-xl font-headline font-semibold">Laporan Akhir</h3>
+                    </div>
+                    <p class="text-on-surface-variant leading-relaxed">
+                        Proyek telah selesai. Ringkasan akhir ditampilkan berdasarkan update progres terakhir dari penyedia energi.
+                    </p>
+                    @if($latestProgressUpdate)
+                        <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
+                            <p class="text-primary text-2xl font-bold mb-2">{{ $latestProgressUpdate->persentase }}%</p>
+                            <p class="text-on-surface-variant whitespace-pre-line">{{ $latestProgressUpdate->deskripsi }}</p>
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>

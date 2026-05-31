@@ -58,9 +58,19 @@ class VendorProjectDetailEnergyTest extends TestCase
             'catatan_teknis' => 'Menggunakan konfigurasi sesuai kebutuhan proyek.',
             'status' => 'submitted',
         ]);
+        $this->assertDatabaseHas('proyeks', [
+            'id' => $penugasan->id_proyek,
+            'status' => 'menunggu_review_admin',
+        ]);
+        $this->assertDatabaseHas('penugasan_proyek', [
+            'id_penugasan' => $penugasan->id_penugasan,
+            'status_penugasan' => 'diterima',
+        ]);
 
         $detail = DetailProyekVendor::where('id_penugasan', $penugasan->id_penugasan)->firstOrFail();
+        $penugasan->refresh();
         $this->assertSame(['panel_surya'], $detail->jenis_energi);
+        $this->assertNotNull($penugasan->tanggal_respon);
     }
 
     private function createAssignedProject(string $jenisEnergi): array
@@ -108,8 +118,8 @@ class VendorProjectDetailEnergyTest extends TestCase
         $penugasan = PenugasanProyek::create([
             'id_proyek' => $proyek->id,
             'id_penyedia' => $penyedia->id,
-            'status_penugasan' => 'diterima',
-            'tanggal_respon' => now(),
+            'status_penugasan' => 'pending',
+            'tanggal_respon' => null,
         ]);
 
         return [$vendorUser, $penugasan, $proyek, $penyedia, $adminUser, $desa];

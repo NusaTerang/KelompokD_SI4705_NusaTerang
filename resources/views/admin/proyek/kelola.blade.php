@@ -114,7 +114,9 @@
                     'ditolak'                      => ['label' => 'Ditolak',            'class' => 'bg-red-50 text-red-700',                               'dot' => 'bg-red-400'],
                     default                        => ['label' => $proyek->status,      'class' => 'bg-slate-100 text-slate-500',                          'dot' => 'bg-slate-400'],
                 };
-                $canTogglePublish = !in_array($proyek->status, ['eksekusi', 'selesai', 'refund']);
+                $canTogglePublish = in_array($proyek->status, ['draft', 'diterima_penyedia', 'menunggu_review_admin', 'aktif_funding']);
+                $publishTitle     = $proyek->status === 'aktif_funding' ? 'Mulai Eksekusi' : 'Publikasikan';
+                $publishIcon      = $proyek->status === 'aktif_funding' ? 'play_arrow' : 'publish';
                 $canDelete        = $proyek->status === 'draft';
             @endphp
             <tr class="hover:bg-surface-container-low/50 transition-colors">
@@ -158,9 +160,9 @@
                         @if($canTogglePublish)
                             <button type="button"
                                     onclick="openPublishModal({{ $proyek->id }}, '{{ addslashes($proyek->judul) }}', '{{ $proyek->status }}')"
-                                    class="p-1.5 rounded transition-colors {{ $proyek->status === 'aktif_funding' ? 'text-slate-400 hover:bg-red-50 hover:text-error' : 'text-slate-400 hover:bg-tertiary-container/30 hover:text-tertiary' }}"
-                                    title="{{ $proyek->status === 'aktif_funding' ? 'Batalkan Publikasi' : 'Publikasikan' }}">
-                                <span class="material-symbols-outlined text-sm">{{ $proyek->status === 'aktif_funding' ? 'unpublished' : 'publish' }}</span>
+                                    class="p-1.5 rounded transition-colors text-slate-400 hover:bg-tertiary-container/30 hover:text-tertiary"
+                                    title="{{ $publishTitle }}">
+                                <span class="material-symbols-outlined text-sm">{{ $publishIcon }}</span>
                             </button>
                         @else
                             <span class="p-1.5 text-slate-200 cursor-not-allowed" title="Tidak dapat diubah">
@@ -263,16 +265,16 @@
 @push('scripts')
 <script>
 function openPublishModal(id, judul, status) {
-    const isAktif = status === 'aktif_funding';
+    const isFunding = status === 'aktif_funding';
     document.getElementById('publishForm').action = `/admin/proyek/${id}/publish`;
-    document.getElementById('publishModalIcon').textContent = isAktif ? 'unpublished' : 'publish';
-    document.getElementById('publishModalIcon').className = `material-symbols-outlined text-3xl ${isAktif ? 'text-error' : 'text-tertiary'}`;
-    document.getElementById('publishModalTitle').textContent = isAktif ? 'Batalkan Publikasi?' : 'Publikasikan Proyek?';
-    document.getElementById('publishModalDesc').textContent = isAktif
-        ? `"${judul}" akan dinonaktifkan dari halaman publik.`
+    document.getElementById('publishModalIcon').textContent = isFunding ? 'play_arrow' : 'publish';
+    document.getElementById('publishModalIcon').className = 'material-symbols-outlined text-3xl text-tertiary';
+    document.getElementById('publishModalTitle').textContent = isFunding ? 'Mulai Eksekusi?' : 'Publikasikan Proyek?';
+    document.getElementById('publishModalDesc').textContent = isFunding
+        ? `"${judul}" akan masuk fase eksekusi. Penyedia energi dapat mulai mengirim update progress.`
         : `"${judul}" akan dipublikasikan dan tampil di halaman publik.`;
-    document.getElementById('publishBtn').textContent = isAktif ? 'Batalkan Publikasi' : 'Publikasikan';
-    document.getElementById('publishBtn').className = `px-5 py-2 text-sm font-semibold rounded-lg hover:opacity-90 transition-colors ${isAktif ? 'bg-error text-white' : 'bg-tertiary text-white'}`;
+    document.getElementById('publishBtn').textContent = isFunding ? 'Mulai Eksekusi' : 'Publikasikan';
+    document.getElementById('publishBtn').className = 'px-5 py-2 text-sm font-semibold rounded-lg hover:opacity-90 transition-colors bg-tertiary text-white';
     document.getElementById('publishModal').classList.replace('hidden', 'flex');
 }
 
