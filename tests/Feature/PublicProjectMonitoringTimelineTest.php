@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Desa;
 use App\Models\PenugasanProyek;
+use App\Models\LaporanAkhirProyekVendor;
 use App\Models\PenyediaEnergi;
 use App\Models\ProgressProyekVendor;
 use App\Models\Proyek;
@@ -44,9 +45,21 @@ class PublicProjectMonitoringTimelineTest extends TestCase
         ProgressProyekVendor::create([
             'id_penugasan' => $penugasan->id_penugasan,
             'persentase' => 100,
-            'deskripsi' => 'Instalasi selesai dan sudah diuji bersama warga.',
+            'deskripsi' => 'Progress selesai 100%.',
             'foto_paths' => ['progress/selesai.jpg'],
             'status_progress' => 'selesai',
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        LaporanAkhirProyekVendor::create([
+            'id_penugasan' => $penugasan->id_penugasan,
+            'id_proyek' => $proyek->id,
+            'id_penyedia' => $penugasan->id_penyedia,
+            'deskripsi' => 'Instalasi selesai dan sudah diuji bersama warga.',
+            'kapasitas_terpasang' => 10,
+            'satuan_kapasitas' => 'kWp',
+            'foto_paths' => ['laporan/selesai.jpg'],
             'status' => 'submitted',
             'submitted_at' => now(),
         ]);

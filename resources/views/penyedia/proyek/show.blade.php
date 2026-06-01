@@ -362,6 +362,8 @@
 
             @php
                 $latestProgress = $penugasan->submittedProgressUpdates->first();
+                $canSubmitFinalReport = $penugasan->hasCompletedProgress() && ! $penugasan->submittedFinalReport;
+                $finalReportDraft = $penugasan->finalReportDraft;
             @endphp
 
             @if($latestProgress)
@@ -369,6 +371,76 @@
                     <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Progress Terakhir</p>
                     <p class="text-3xl font-extrabold text-deep-navy">{{ $latestProgress->persentase }}%</p>
                     <p class="text-sm text-on-surface-variant mt-2">{{ $latestProgress->deskripsi }}</p>
+                </div>
+            @endif
+
+            @if($canSubmitFinalReport)
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-surface-container">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-lg bg-sustainability-green/10 flex items-center justify-center text-sustainability-green">
+                            <span class="material-symbols-outlined active-fill">assignment_turned_in</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-deep-navy">Form Laporan Akhir</h3>
+                            <p class="text-xs text-on-surface-variant font-medium mt-1">Progress sudah 100%. Kirim laporan akhir untuk menyelesaikan proyek.</p>
+                        </div>
+                    </div>
+
+                    @if($errors->any())
+                        <div class="mb-6 bg-error/10 border border-error/30 rounded-xl p-4 text-sm text-error font-medium space-y-1">
+                            @foreach($errors->all() as $err)
+                                <p>{{ $err }}</p>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <form action="{{ route('vendor.proyek.final-report.store', $penugasan->id_penugasan) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                        @csrf
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Deskripsi Hasil Pekerjaan <span class="text-error">*</span></label>
+                            <textarea name="deskripsi" rows="4" placeholder="Jelaskan hasil pengerjaan proyek secara keseluruhan..." class="w-full bg-surface-container-low border-none rounded-2xl px-4 py-4 text-sm font-medium focus:ring-2 focus:ring-deep-navy">{{ old('deskripsi', $finalReportDraft?->deskripsi) }}</textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Kapasitas Terpasang <span class="text-error">*</span></label>
+                                <input type="number" name="kapasitas_terpasang" step="0.01" min="0" value="{{ old('kapasitas_terpasang', $finalReportDraft?->kapasitas_terpasang) }}" placeholder="0.00" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 text-sm font-semibold focus:ring-2 focus:ring-deep-navy">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Satuan <span class="text-error">*</span></label>
+                                <select name="satuan_kapasitas" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 text-sm font-bold focus:ring-2 focus:ring-deep-navy">
+                                    @foreach(['kWp', 'kWh'] as $satuan)
+                                        <option value="{{ $satuan }}" {{ old('satuan_kapasitas', $finalReportDraft?->satuan_kapasitas ?? 'kWp') === $satuan ? 'selected' : '' }}>{{ $satuan }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Foto Dokumentasi Akhir <span class="text-error">*</span></label>
+                            <input type="file" name="fotos[]" multiple accept="image/*" class="w-full bg-surface-container-low border-2 border-dashed border-surface-container rounded-2xl px-4 py-4 text-sm font-medium focus:ring-2 focus:ring-deep-navy">
+                            <p class="text-xs text-on-surface-variant mt-2">Minimal 1 foto, maksimal 5 foto. Upload baru akan mengganti foto draft.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Catatan Tambahan</label>
+                            <textarea name="catatan" rows="3" placeholder="Tambahkan catatan khusus jika ada..." class="w-full bg-surface-container-low border-none rounded-2xl px-4 py-4 text-sm font-medium focus:ring-2 focus:ring-deep-navy">{{ old('catatan', $finalReportDraft?->catatan) }}</textarea>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button type="submit" name="save_draft" value="1" class="flex-1 py-4 border-2 border-deep-navy text-deep-navy rounded-2xl font-bold text-sm hover:bg-deep-navy hover:text-white transition-all uppercase tracking-wide">
+                                Simpan Draft
+                            </button>
+                            <button type="submit" class="flex-1 py-5 bg-solar-gold hover:bg-solar-gold/90 text-deep-navy rounded-2xl font-black text-lg shadow-xl shadow-solar-gold/20 transition-all active:scale-95 uppercase tracking-wide">
+                                Submit Laporan Akhir
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @elseif($penugasan->submittedFinalReport)
+                <div class="bg-sustainability-green/10 rounded-2xl p-6 border border-sustainability-green/20">
+                    <p class="text-sm font-bold text-sustainability-green">Laporan akhir sudah dikirim.</p>
+                    <p class="text-xs text-deep-navy/70 mt-1">Proyek telah ditandai selesai dan laporan tampil di halaman detail proyek.</p>
                 </div>
             @endif
 

@@ -67,6 +67,18 @@ class Proyek extends Model
             ->orderByDesc('progress_proyek_vendor.submitted_at');
     }
 
+    public function finalReports()
+    {
+        return $this->hasMany(LaporanAkhirProyekVendor::class, 'id_proyek');
+    }
+
+    public function submittedFinalReport()
+    {
+        return $this->hasOne(LaporanAkhirProyekVendor::class, 'id_proyek')
+            ->where('status', 'submitted')
+            ->latestOfMany('submitted_at');
+    }
+
     public function donasi()
     {
         return $this->hasMany(Donasi::class, 'id_proyek');

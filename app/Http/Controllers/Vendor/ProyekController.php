@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
 use App\Models\DetailProyekVendor;
+use App\Models\LaporanAkhirProyekVendor;
 use App\Models\PenugasanProyek;
 use App\Models\ProgressProyekVendor;
 use App\Notifications\DetailProyekDiisi;
@@ -37,6 +38,8 @@ class ProyekController extends Controller
                 'detail',
                 'progressDraft',
                 'submittedProgressUpdates',
+                'finalReportDraft',
+                'submittedFinalReport',
             ])
             ->where('id_penugasan', $id)
             ->where('id_penyedia', $penyedia->id)
@@ -60,6 +63,8 @@ class ProyekController extends Controller
                 'detail',
                 'progressDraft',
                 'submittedProgressUpdates',
+                'finalReportDraft',
+                'submittedFinalReport',
             ])
             ->where('id_penugasan', $id)
             ->firstOrFail();
@@ -149,19 +154,111 @@ class ProyekController extends Controller
             ->delete();
 
         $proyek->update([
-            'status' => $payload['status_progress'] === 'selesai' ? 'selesai' : 'eksekusi',
+            'status' => 'eksekusi',
         ]);
 
-        $notification = $payload['status_progress'] === 'selesai'
-            ? new ProyekSelesai($proyek)
-            : new ProgressProyekDikirim($proyek);
-
         $recipients->adminsAndDonorsForProject($proyek)
-            ->each(fn ($recipient) => $recipient->notify($notification));
+            ->each(fn ($recipient) => $recipient->notify(new ProgressProyekDikirim($proyek)));
 
         return redirect()
             ->route('vendor.proyek.progress.show', $penugasan->id_penugasan)
             ->with('success', 'Update progress berhasil dikirim dan dapat dilihat Admin/Donatur.');
+    }
+
+    public function finalReportStore(Request $request, $id, NotificationRecipientService $recipients)
+    {
+        $penugasan = $this->findOwnedPenugasanForProgressOrAbort($id);
+        $proyek = $penugasan->proyek;
+        $isDraft = $request->boolean('save_draft');
+
+        if (! $penugasan->hasCompletedProgress()) {
+            abort(403, 'Laporan akhir hanya dapat diisi setelah progress selesai 100%.');
+        }
+
+        if ($penugasan->submittedFinalReport) {
+            return redirect()
+                ->route('vendor.proyek.show', $penugasan->id_penugasan)
+                ->withErrors(['laporan_akhir' => 'Laporan akhir sudah pernah disubmit']);
+        }
+
+        $existingDraft = $penugasan->finalReportDraft;
+        $hasExistingPhotos = ! empty($existingDraft?->foto_paths);
+
+        $rules = [
+            'deskripsi' => $isDraft ? 'nullable|string|max:3000' : 'required|string|max:3000',
+            'kapasitas_terpasang' => $isDraft ? 'nullable|numeric|min:0' : 'required|numeric|min:0',
+            'satuan_kapasitas' => $isDraft ? 'nullable|in:kWh,kWp' : 'required|in:kWh,kWp',
+            'catatan' => 'nullable|string|max:2000',
+            'fotos' => ($isDraft || $hasExistingPhotos) ? 'nullable|array|max:5' : 'required|array|min:1|max:5',
+            'fotos.*' => 'image|max:2048',
+        ];
+
+        $messages = [
+            'deskripsi.required' => 'Deskripsi laporan wajib diisi',
+            'deskripsi.max' => 'Deskripsi laporan maksimal 3000 karakter.',
+            'kapasitas_terpasang.required' => 'Kapasitas terpasang wajib diisi.',
+            'kapasitas_terpasang.numeric' => 'Kapasitas terpasang harus berupa angka.',
+            'kapasitas_terpasang.min' => 'Kapasitas terpasang minimal 0.',
+            'satuan_kapasitas.required' => 'Satuan kapasitas wajib dipilih.',
+            'satuan_kapasitas.in' => 'Satuan kapasitas tidak valid.',
+            'fotos.required' => 'Minimal 1 foto dokumentasi akhir wajib diunggah',
+            'fotos.min' => 'Minimal 1 foto dokumentasi akhir wajib diunggah',
+            'fotos.max' => 'Maksimal 5 foto dokumentasi akhir.',
+            'fotos.*.image' => 'File dokumentasi akhir harus berupa gambar.',
+            'fotos.*.max' => 'Ukuran setiap foto maksimal 2MB.',
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        $fotoPaths = $existingDraft?->foto_paths ?? [];
+        if ($request->hasFile('fotos')) {
+            $fotoPaths = [];
+            foreach ($request->file('fotos') as $foto) {
+                $fotoPaths[] = $foto->store('laporan_akhir_proyek_fotos', 'public');
+            }
+        }
+
+        $payload = [
+            'id_penugasan' => $penugasan->id_penugasan,
+            'id_proyek' => $proyek->id,
+            'id_penyedia' => $penugasan->id_penyedia,
+            'deskripsi' => $validated['deskripsi'] ?? null,
+            'kapasitas_terpasang' => $validated['kapasitas_terpasang'] ?? null,
+            'satuan_kapasitas' => $validated['satuan_kapasitas'] ?? 'kWp',
+            'foto_paths' => $fotoPaths ?: null,
+            'catatan' => $validated['catatan'] ?? null,
+            'status' => $isDraft ? 'draft' : 'submitted',
+            'submitted_at' => $isDraft ? null : now(),
+        ];
+
+        if ($isDraft) {
+            LaporanAkhirProyekVendor::updateOrCreate(
+                [
+                    'id_penugasan' => $penugasan->id_penugasan,
+                    'status' => 'draft',
+                ],
+                $payload
+            );
+
+            return redirect()
+                ->route('vendor.proyek.show', $penugasan->id_penugasan)
+                ->with('success', 'Draft laporan akhir tersimpan.');
+        }
+
+        LaporanAkhirProyekVendor::create($payload);
+
+        LaporanAkhirProyekVendor::where('id_penugasan', $penugasan->id_penugasan)
+            ->where('status', 'draft')
+            ->delete();
+
+        $proyek->update(['status' => 'selesai']);
+
+        $recipients->adminsAndDonorsForProject($proyek)
+            ->each(fn ($recipient) => $recipient->notify(new ProyekSelesai($proyek)));
+
+        return redirect()
+            ->route('vendor.proyek.show', $penugasan->id_penugasan)
+            ->with('success', 'Laporan akhir berhasil dikirim. Proyek ditandai selesai.');
     }
 
     public function saveDetail(Request $request, $id, NotificationRecipientService $recipients)

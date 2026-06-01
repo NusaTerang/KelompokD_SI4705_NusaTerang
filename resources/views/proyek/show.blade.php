@@ -220,19 +220,41 @@
                 </div>
             @endif
 
-            @if($proyek->status === 'selesai')
-                <div class="bg-tertiary-container/30 border border-tertiary/20 rounded-xl p-5 flex flex-col gap-3">
+            @if($proyek->submittedFinalReport)
+                @php
+                    $finalReport = $proyek->submittedFinalReport;
+                    $finalReportPhotos = is_array($finalReport->foto_paths) ? $finalReport->foto_paths : [];
+                @endphp
+                <div class="bg-tertiary-container/30 border border-tertiary/20 rounded-xl p-5 flex flex-col gap-4">
                     <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-tertiary">task_alt</span>
                         <h3 class="text-secondary text-xl font-headline font-semibold">Laporan Akhir</h3>
                     </div>
-                    <p class="text-on-surface-variant leading-relaxed">
-                        Proyek telah selesai. Ringkasan akhir ditampilkan berdasarkan update progres terakhir dari penyedia energi.
-                    </p>
-                    @if($latestProgressUpdate)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
-                            <p class="text-primary text-2xl font-bold mb-2">{{ $latestProgressUpdate->persentase }}%</p>
-                            <p class="text-on-surface-variant whitespace-pre-line">{{ $latestProgressUpdate->deskripsi }}</p>
+                            <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide mb-1">Kapasitas Terpasang</p>
+                            <p class="text-primary text-2xl font-bold">{{ rtrim(rtrim(number_format((float) $finalReport->kapasitas_terpasang, 2, '.', ''), '0'), '.') }} {{ $finalReport->satuan_kapasitas }}</p>
+                        </div>
+                        <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
+                            <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide mb-1">Tanggal Submit</p>
+                            <p class="text-on-surface font-semibold">{{ $finalReport->submitted_at?->format('d M Y H:i') ?? '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
+                        <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide mb-2">Deskripsi Hasil Pekerjaan</p>
+                        <p class="text-on-surface-variant whitespace-pre-line leading-relaxed">{{ $finalReport->deskripsi }}</p>
+                    </div>
+                    @if($finalReport->catatan)
+                        <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
+                            <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide mb-2">Catatan Tambahan</p>
+                            <p class="text-on-surface-variant whitespace-pre-line leading-relaxed">{{ $finalReport->catatan }}</p>
+                        </div>
+                    @endif
+                    @if(!empty($finalReportPhotos))
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @foreach($finalReportPhotos as $path)
+                                <img src="{{ str_starts_with($path, 'http') ? $path : asset('storage/' . $path) }}" alt="Foto laporan akhir" class="h-32 w-full object-cover rounded-lg border border-tertiary/10">
+                            @endforeach
                         </div>
                     @endif
                 </div>

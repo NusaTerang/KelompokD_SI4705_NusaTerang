@@ -39,4 +39,27 @@ class PenugasanProyek extends Model
         return $this->hasOne(ProgressProyekVendor::class, 'id_penugasan', 'id_penugasan')
             ->where('status', 'draft');
     }
+
+    public function finalReport()
+    {
+        return $this->hasOne(LaporanAkhirProyekVendor::class, 'id_penugasan', 'id_penugasan');
+    }
+
+    public function finalReportDraft()
+    {
+        return $this->hasOne(LaporanAkhirProyekVendor::class, 'id_penugasan', 'id_penugasan')
+            ->where('status', 'draft');
+    }
+
+    public function submittedFinalReport()
+    {
+        return $this->hasOne(LaporanAkhirProyekVendor::class, 'id_penugasan', 'id_penugasan')
+            ->where('status', 'submitted');
+    }
+
+    public function hasCompletedProgress(): bool
+    {
+        return $this->submittedProgressUpdates
+            ->contains(fn (ProgressProyekVendor $progress) => (int) $progress->persentase === 100 && $progress->status_progress === 'selesai');
+    }
 }

@@ -110,7 +110,7 @@ class VendorProjectProgressTest extends TestCase
         $response->assertSessionHasErrors('persentase');
     }
 
-    public function test_vendor_can_submit_selesai_without_final_report(): void
+    public function test_vendor_can_submit_selesai_progress_without_completing_project_before_final_report(): void
     {
         [$vendorUser, $penugasan, $proyek] = $this->createAssignedExecutionProject();
 
@@ -125,7 +125,7 @@ class VendorProjectProgressTest extends TestCase
 
         $this->assertDatabaseHas('proyeks', [
             'id' => $proyek->id,
-            'status' => 'selesai',
+            'status' => 'eksekusi',
         ]);
 
         $this->assertDatabaseHas('progress_proyek_vendor', [

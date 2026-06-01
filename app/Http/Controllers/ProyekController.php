@@ -217,6 +217,7 @@ class ProyekController extends Controller
             'desa',
             'penyedia',
             'fotos',
+            'submittedFinalReport',
             'penugasan.submittedProgressUpdates',
         ])->findOrFail($id);
 

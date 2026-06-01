@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Desa;
 use App\Models\PenugasanProyek;
 use App\Models\PenyediaEnergi;
+use App\Models\ProgressProyekVendor;
 use App\Models\Proyek;
 use App\Models\User;
 use App\Notifications\DetailProyekDiisi;
@@ -79,16 +80,26 @@ class NotificationTest extends TestCase
         Notification::assertNotSentTo($nonDonor, ProgressProyekDikirim::class);
     }
 
-    public function test_project_completion_notification_is_sent_instead_of_progress_notification(): void
+    public function test_project_completion_notification_is_sent_after_final_report_submission(): void
     {
         Notification::fake();
         [$admin, $vendorUser, $proyek, $penugasan] = $this->createAssignedProject(status: 'eksekusi');
         [$donorA] = $this->createDonorsForProject($proyek);
 
-        $this->actingAs($vendorUser)->post(route('vendor.proyek.progress.store', $penugasan->id_penugasan), [
+        ProgressProyekVendor::create([
+            'id_penugasan' => $penugasan->id_penugasan,
             'persentase' => 100,
             'deskripsi' => 'Proyek selesai diuji.',
             'status_progress' => 'selesai',
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+
+        $this->actingAs($vendorUser)->post(route('vendor.proyek.final-report.store', $penugasan->id_penugasan), [
+            'deskripsi' => 'Laporan akhir proyek selesai.',
+            'kapasitas_terpasang' => 12,
+            'satuan_kapasitas' => 'kWp',
+            'fotos' => [\Illuminate\Http\UploadedFile::fake()->image('laporan-notifikasi.jpg')],
         ]);
 
         Notification::assertSentTo($admin, ProyekSelesai::class);

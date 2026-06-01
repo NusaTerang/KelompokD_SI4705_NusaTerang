@@ -104,6 +104,7 @@ Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->grou
         Route::get('/{id}',        'show')->name('show');
         Route::get('/{id}/progress', 'progressShow')->name('progress.show');
         Route::post('/{id}/progress', 'progressStore')->name('progress.store');
+        Route::post('/{id}/laporan-akhir', 'finalReportStore')->name('final-report.store');
         Route::get('/{id}/expiry-decision', 'expiryDecisionShow')->name('expiry-decision.show');
         Route::put('/{id}/detail', 'saveDetail')->name('detail');
         Route::post('/{id}/expiry-decision', 'expiryDecision')->name('expiry-decision');
