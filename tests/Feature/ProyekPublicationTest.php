@@ -31,7 +31,7 @@ class ProyekPublicationTest extends TestCase
         $proyek = Proyek::factory()->create(['status' => 'eksekusi']);
 
         $response = $this->actingAs($this->admin)
-                         ->get(route('proyek.previewPublish', $proyek->id));
+                         ->get(route('proyek.publikasi', $proyek->id));
 
         $response->assertRedirect(route('proyek.kelola'))
                  ->assertSessionHas('error');
@@ -42,10 +42,10 @@ class ProyekPublicationTest extends TestCase
         $proyek = Proyek::factory()->create(['status' => 'menunggu_review_admin']);
 
         $response = $this->actingAs($this->admin)
-                         ->get(route('proyek.previewPublish', $proyek->id));
+                         ->get(route('proyek.publikasi', $proyek->id));
 
         $response->assertStatus(200)
-                 ->assertViewIs('admin.proyek.publish');
+                 ->assertViewIs('admin.proyek.publikasi');
     }
 
     public function test_cannot_publish_if_data_incomplete()
@@ -62,7 +62,7 @@ class ProyekPublicationTest extends TestCase
                          ->patch(route('proyek.publish', $proyek->id));
 
         $response->assertRedirect()
-                 ->assertSessionHas('error');
+                 ->assertSessionHasErrors('error');
                  
         $this->assertDatabaseHas('proyeks', [
             'id' => $proyek->id,
@@ -85,6 +85,18 @@ class ProyekPublicationTest extends TestCase
             'penyedia_id' => $penyedia->id,
         ]);
         ProyekFoto::factory()->create(['proyek_id' => $proyek->id]);
+        $penugasan = PenugasanProyek::create([
+            'id_proyek' => $proyek->id,
+            'id_penyedia' => $penyedia->id,
+            'status_penugasan' => 'diterima'
+        ]);
+        \App\Models\DetailProyekVendor::create([
+            'id_penugasan' => $penugasan->id_penugasan,
+            'kapasitas_daya' => 15,
+            'satuan_daya' => 'kWp',
+            'target_dana' => 100000000,
+            'status' => 'submitted'
+        ]);
 
         $response = $this->actingAs($this->admin)
                          ->patch(route('proyek.publish', $proyek->id));
@@ -112,6 +124,18 @@ class ProyekPublicationTest extends TestCase
             'penyedia_id' => $penyedia->id,
         ]);
         ProyekFoto::factory()->create(['proyek_id' => $proyek->id]);
+        $penugasan = PenugasanProyek::create([
+            'id_proyek' => $proyek->id,
+            'id_penyedia' => $penyedia->id,
+            'status_penugasan' => 'diterima'
+        ]);
+        \App\Models\DetailProyekVendor::create([
+            'id_penugasan' => $penugasan->id_penugasan,
+            'kapasitas_daya' => 15,
+            'satuan_daya' => 'kWp',
+            'target_dana' => 100000000,
+            'status' => 'submitted'
+        ]);
 
         $scheduleTime = now()->addDays(1)->format('Y-m-d\TH:i');
 
@@ -125,8 +149,8 @@ class ProyekPublicationTest extends TestCase
 
         $this->assertDatabaseHas('proyeks', [
             'id' => $proyek->id,
-            'status' => 'dijadwalkan',
-            'jadwal_publikasi' => $scheduleTime . ':00'
+            'status' => 'terjadwal',
+            'jadwal_publikasi' => str_replace('T', ' ', $scheduleTime) . ':00'
         ]);
     }
 
@@ -134,13 +158,13 @@ class ProyekPublicationTest extends TestCase
     {
         // Buat proyek yang dijadwalkan di masa lalu
         $proyek = Proyek::factory()->create([
-            'status' => 'dijadwalkan',
+            'status' => 'terjadwal',
             'jadwal_publikasi' => now()->subMinutes(5)
         ]);
 
         // Buat proyek yang dijadwalkan di masa depan (tidak boleh terpengaruh)
         $futureProyek = Proyek::factory()->create([
-            'status' => 'dijadwalkan',
+            'status' => 'terjadwal',
             'jadwal_publikasi' => now()->addMinutes(5)
         ]);
 
@@ -156,7 +180,7 @@ class ProyekPublicationTest extends TestCase
 
         $this->assertDatabaseHas('proyeks', [
             'id' => $futureProyek->id,
-            'status' => 'dijadwalkan'
+            'status' => 'terjadwal'
         ]);
     }
 }

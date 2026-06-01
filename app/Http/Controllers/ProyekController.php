@@ -189,6 +189,10 @@ class ProyekController extends Controller
     {
         $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
 
+        if (!in_array($proyek->status, ['draft', 'menunggu_review_admin', 'menunggu_konfirmasi_penyedia'])) {
+            return redirect()->route('proyek.kelola')->with('error', 'Status proyek tidak valid untuk publikasi.');
+        }
+
         $penugasan = $proyek->penugasan->first();
         $detail = $penugasan?->detail;
 

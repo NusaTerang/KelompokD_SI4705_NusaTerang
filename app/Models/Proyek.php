@@ -4,8 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Proyek extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'desa_id', 'penyedia_id', 'judul', 'deskripsi', 'jenis_energi',
         'estimasi_mulai', 'estimasi_selesai', 'target_dana', 'dana_terkumpul',
