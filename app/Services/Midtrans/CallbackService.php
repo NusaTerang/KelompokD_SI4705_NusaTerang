@@ -1,9 +1,5 @@
 <?php
-<<<<<<< Updated upstream
 
-=======
-// For Midtrans
->>>>>>> Stashed changes
 namespace App\Services\Midtrans;
 
 use App\Models\Order;

@@ -3,7 +3,11 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PenyediaController;
 use App\Http\Controllers\Api\ProyekController;
+use App\Http\Controllers\Api\ProjectFundingController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/projects/{id}/funding', [ProjectFundingController::class, 'show']);
+Route::get('/projects/{id}/donation-feed', [ProjectFundingController::class, 'feed']);
 
 Route::prefix('v1')->group(function () {
     // Auth Routes

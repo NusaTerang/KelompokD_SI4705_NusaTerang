@@ -1,9 +1,5 @@
 <?php
 
-<<<<<<< Updated upstream
-=======
-// For Midtrans
->>>>>>> Stashed changes
 namespace App\Services\Midtrans;
 
 use Midtrans\Snap;
@@ -15,38 +11,6 @@ class CreateSnapTokenService extends Midtrans
     public function __construct($order)
     {
         parent::__construct();
-<<<<<<< Updated upstream
-        $this->order = $order;
-    }
-
-    public function getSnapToken(): string
-    {
-        $params = [
-            'transaction_details' => [
-                'order_id'     => $this->order->number,
-                'gross_amount' => (int) $this->order->total_price,
-            ],
-            'item_details' => [
-                [
-                    'id'       => 'DONASI-' . $this->order->id,
-                    'price'    => (int) $this->order->total_price,
-                    'quantity' => 1,
-                    'name'     => 'Donasi NusaTerang',
-                    'category' => 'Donation',
-                ],
-            ],
-            'customer_details' => [
-                'first_name' => $this->order->donatur_name,
-                'email'      => $this->order->donatur_email,
-                'phone'      => $this->order->donatur_phone ?? '',
-            ],
-            // Batasi ke QRIS saja agar sesuai requirement
-            'enabled_payments' => ['qris'],
-        ];
-
-        return Snap::getSnapToken($params);
-=======
-
         $this->order = $order;
     }
 
@@ -55,12 +19,12 @@ class CreateSnapTokenService extends Midtrans
         $params = [
             'transaction_details' => [
                 'order_id' => $this->order->number,
-                'gross_amount' => $this->order->total_price,
+                'gross_amount' => (int) $this->order->total_price,
             ],
             'item_details' => [
                 [
                     'id' => $this->order->proyek_id,
-                    'price' => $this->order->total_price,
+                    'price' => (int) $this->order->total_price,
                     'quantity' => 1,
                     'name' => substr('Donasi ' . $this->order->proyek->judul, 0, 50),
                 ],
@@ -75,9 +39,6 @@ class CreateSnapTokenService extends Midtrans
             ]
         ];
 
-        $snapToken = Snap::getSnapToken($params);
-
-        return $snapToken;
->>>>>>> Stashed changes
+        return Snap::getSnapToken($params);
     }
 }

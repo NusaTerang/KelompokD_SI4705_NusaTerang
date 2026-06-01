@@ -5,27 +5,15 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DesaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
 use App\Http\Controllers\PaymentCallbackController;
-=======
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 use App\Http\Controllers\PenugasanController;
 use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
 use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
-<<<<<<< HEAD
-
-// ─── Public ──────────────────────────────────────────────────────────────────
-=======
-use App\Http\Controllers\PaymentCallbackController; // Midtrans
->>>>>>> Stashed changes
 use App\Http\Controllers\OrderController;
 
 // ─── Public ───────────────────────────────────────────────────────────────────
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 
 Route::get('/', function () {
     $query = \App\Models\Proyek::with(['desa', 'fotos']);
@@ -66,13 +54,11 @@ Route::get('/', function () {
     return view('welcome', compact('projects', 'provinceOptions'));
 });
 
-<<<<<<< HEAD
-Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
 Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('penyedia.daftar');
 Route::get('/penyedia/{id}', [PenyediaController::class, 'show'])->name('penyedia.show');
 Route::get('/api/penyedia/rekomendasi', [PenyediaController::class, 'getRekomendasi'])->name('api.penyedia.rekomendasi');
 
-// ─── Auth (guest only) ────────────────────────────────────────────────────────
+// ─── Auth (guest only) ─────────────────────────────────────────────────────────
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -84,63 +70,20 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
 
-// ─── Authenticated ────────────────────────────────────────────────────────────
-
-Route::middleware('auth')->group(function () {
-=======
-// ─── Placeholder routes untuk controller yang belum diimplementasi ─────────────
-// (Akan diisi oleh tim setelah controller dibuat)
-
-// Proyek & Penyedia — public
-Route::get('/proyek/{id}', 'App\Http\Controllers\ProyekController@show')
-    ->name('proyek.show');
-Route::get('/penyedia/daftar', 'App\Http\Controllers\PenyediaController@index')
-    ->name('penyedia.daftar');
-Route::get('/penyedia/{id}', 'App\Http\Controllers\PenyediaController@show')
-    ->name('penyedia.show');
-Route::get('/api/penyedia/rekomendasi', 'App\Http\Controllers\PenyediaController@getRekomendasi')
-    ->name('api.penyedia.rekomendasi');
-
-// ─── Auth (guest only) ─────────────────────────────────────────────────────────
-
-Route::middleware('guest')->group(function () {
-    Route::get('register', 'App\Http\Controllers\Auth\RegisteredUserController@create')
-        ->name('register');
-    Route::post('register', 'App\Http\Controllers\Auth\RegisteredUserController@store');
-
-    Route::get('login', 'App\Http\Controllers\Auth\AuthenticatedSessionController@create')
-        ->name('login');
-    Route::post('login', 'App\Http\Controllers\Auth\AuthenticatedSessionController@store');
-
-    Route::get('forgot-password', function () { return "Lupa Password (Belum Diimplementasi)"; })
-        ->name('password.request');
-});
-
-Route::post('/logout', 'App\Http\Controllers\Auth\AuthenticatedSessionController@destroy')
-    ->name('logout')
-    ->middleware('auth');
-
-// ─── Donasi (Authenticated — role: user biasa / donatur) ──────────────────────
-
-Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () {
-    Route::get('/',               [OrderController::class, 'create'])->name('create');
-    Route::post('/',              [OrderController::class, 'store'])->name('store');
-    Route::get('/{order}',        [OrderController::class, 'show'])->name('show');
-    Route::get('/{order}/status', [OrderController::class, 'status'])->name('status');
-});
-
 // ─── Authenticated ─────────────────────────────────────────────────────────────
 
 Route::middleware('auth')->group(function () {
+    // Project detail is protected (only accessible to logged-in users)
+    Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
+
+    // Donation routes
     Route::post('/donasi/{proyek_id}', [OrderController::class, 'store'])->name('donasi.store');
     Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');
 
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
     Route::get('/dashboard', function () {
         /** @var \App\Models\User $user */
         $user = auth()->user();
 
-<<<<<<< HEAD
         return match ($user->role) {
             'admin'    => redirect()->route('desa.daftar'),
             'penyedia' => redirect()->route('vendor.dashboard'),
@@ -152,31 +95,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
 });
 
-// ─── Vendor (Penyedia Energi) ─────────────────────────────────────────────────
-
-Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->group(function () {
-=======
-        // Redirect berdasarkan role
-        return match (property_exists($user, 'role') ? $user->role : null) {
-            'admin'    => redirect()->route('desa.daftar'),
-            'penyedia' => redirect()->route('vendor.dashboard'),
-            default    => redirect()->route('donasi.create'),
-        };
-    })->name('dashboard');
-
-    Route::get('/profil', 'App\Http\Controllers\ProfileController@edit')->name('profil.edit');
-    Route::put('/profil', 'App\Http\Controllers\ProfileController@update')->name('profil.update');
-});
-
 // ─── Vendor (Penyedia Energi) ──────────────────────────────────────────────────
 
-Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function () {
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
+Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->group(function () {
     Route::get('/dashboard', function () {
         return view('penyedia.dashboard');
     })->name('dashboard');
 
-<<<<<<< HEAD
     Route::prefix('proyek')->name('proyek.')->controller(VendorProyekController::class)->group(function () {
         Route::get('/',            'index')->name('index');
         Route::get('/{id}',        'show')->name('show');
@@ -185,16 +110,6 @@ Route::middleware(['auth'])->prefix('vendor')->name('vendor.')->group(function (
         Route::post('/{id}/expiry-decision', 'expiryDecision')->name('expiry-decision');
         Route::post('/{id}/klarifikasi', 'mintaKlarifikasi')->name('klarifikasi');
         Route::post('/{id}/kendala',     'laporkanKendala')->name('kendala');
-=======
-    Route::prefix('proyek')->name('proyek.')->group(function () {
-        Route::get('/',            'App\Http\Controllers\Vendor\ProyekController@index')->name('index');
-        Route::get('/{id}',        'App\Http\Controllers\Vendor\ProyekController@show')->name('show');
-        Route::get('/{id}/expiry-decision', 'App\Http\Controllers\Vendor\ProyekController@expiryDecisionShow')->name('expiry-decision.show');
-        Route::put('/{id}/detail', 'App\Http\Controllers\Vendor\ProyekController@saveDetail')->name('detail');
-        Route::post('/{id}/expiry-decision', 'App\Http\Controllers\Vendor\ProyekController@expiryDecision')->name('expiry-decision');
-        Route::post('/{id}/klarifikasi', 'App\Http\Controllers\Vendor\ProyekController@mintaKlarifikasi')->name('klarifikasi');
-        Route::post('/{id}/kendala',     'App\Http\Controllers\Vendor\ProyekController@laporkanKendala')->name('kendala');
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
     });
 });
 
@@ -202,17 +117,12 @@ Route::middleware('auth')->get('/penyedia/dashboard', function () {
     return redirect()->route('vendor.dashboard');
 })->name('penyedia.dashboard');
 
-<<<<<<< HEAD
-// ─── Admin ────────────────────────────────────────────────────────────────────
-=======
 // ─── Admin ─────────────────────────────────────────────────────────────────────
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 
-Route::middleware('auth')->prefix('admin')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     // Desa management
     Route::prefix('desa')->name('desa.')->group(function () {
-<<<<<<< HEAD
         Route::get('input', [DesaController::class, 'create'])->name('input');
         Route::post('/', [DesaController::class, 'store'])->name('store');
         Route::get('kelola', [DesaController::class, 'kelola'])->name('kelola');
@@ -223,7 +133,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::delete('{id}', [DesaController::class, 'destroy'])->name('destroy');
     });
 
-    // Proyek creation wizard
+    // Proyek management
     Route::prefix('proyek')->name('proyek.')->group(function () {
         Route::get('buat', [ProyekController::class, 'create'])->name('create');
         Route::post('buat', [ProyekController::class, 'saveStep1'])->name('save.step1');
@@ -240,7 +150,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('{id}/kirim', [ProyekController::class, 'kirimKePenyedia'])->name('kirim');
     });
 
-    // Vendor / Penyedia Energi CRUD
+    // Vendor CRUD
     Route::prefix('vendors')->name('admin.vendors.')->group(function () {
         Route::get('/', [AdminPenyediaController::class, 'index'])->name('index');
         Route::get('/create', [AdminPenyediaController::class, 'create'])->name('create');
@@ -251,66 +161,15 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     });
 });
 
-// ─── Legacy / misc ────────────────────────────────────────────────────────────
+// ─── Legacy / misc ─────────────────────────────────────────────────────────────
 
 Route::get('/profil-preview', [ProfileController::class, 'edit']);
 
 Route::post('/assign', [PenugasanController::class, 'assign']);
 Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
 Route::post('/detail', [PenugasanController::class, 'isiDetail']);
-=======
-        Route::get('input',  'App\Http\Controllers\DesaController@create')->name('input');
-        Route::post('/',     'App\Http\Controllers\DesaController@store')->name('store');
-        Route::get('kelola', 'App\Http\Controllers\DesaController@kelola')->name('kelola');
-        Route::get('daftar', 'App\Http\Controllers\DesaController@index')->name('daftar');
-        Route::get('{id}/edit', 'App\Http\Controllers\DesaController@edit')->name('edit');
-        Route::put('{id}',      'App\Http\Controllers\DesaController@update')->name('update');
-        Route::delete('{id}',   'App\Http\Controllers\DesaController@destroy')->name('destroy');
-    });
 
-    // Proyek management
-    Route::prefix('proyek')->name('proyek.')->group(function () {
-        Route::get('buat',   'App\Http\Controllers\ProyekController@create')->name('create');
-        Route::post('buat',  'App\Http\Controllers\ProyekController@saveStep1')->name('save.step1');
-        Route::get('kelola', 'App\Http\Controllers\ProyekController@kelola')->name('kelola');
-        Route::get('{id}/detail',    'App\Http\Controllers\ProyekController@adminShow')->name('admin.show');
-        Route::patch('{id}/publish', 'App\Http\Controllers\ProyekController@publish')->name('publish');
-        Route::delete('{id}',        'App\Http\Controllers\ProyekController@destroy')->name('destroy');
-        Route::get('{id}/pilih-penyedia',  'App\Http\Controllers\ProyekController@step2')->name('step2');
-        Route::post('{id}/pilih-penyedia', 'App\Http\Controllers\ProyekController@saveStep2')->name('save.step2');
-        Route::get('{id}/review',  'App\Http\Controllers\ProyekController@review')->name('review');
-        Route::post('{id}/draft',  'App\Http\Controllers\ProyekController@saveDraft')->name('save.draft');
-        Route::post('{id}/kirim',  'App\Http\Controllers\ProyekController@kirimKePenyedia')->name('kirim');
-    });
-
-    // Vendor CRUD
-    Route::prefix('vendors')->name('admin.vendors.')->group(function () {
-        Route::get('/',              'App\Http\Controllers\Admin\PenyediaController@index')->name('index');
-        Route::get('/create',        'App\Http\Controllers\Admin\PenyediaController@create')->name('create');
-        Route::post('/',             'App\Http\Controllers\Admin\PenyediaController@store')->name('store');
-        Route::get('/{id}/edit',     'App\Http\Controllers\Admin\PenyediaController@edit')->name('edit');
-        Route::put('/{id}',          'App\Http\Controllers\Admin\PenyediaController@update')->name('update');
-        Route::patch('/{id}/toggle', 'App\Http\Controllers\Admin\PenyediaController@toggleStatus')->name('toggleStatus');
-    });
-});
-
-// ─── Legacy / misc ─────────────────────────────────────────────────────────────
-
-Route::post('/assign',      'App\Http\Controllers\PenugasanController@assign');
-Route::post('/respon/{id}', 'App\Http\Controllers\PenugasanController@respon');
-Route::post('/detail',      'App\Http\Controllers\PenugasanController@isiDetail');
-
-<<<<<<< Updated upstream
-// ─── Midtrans Webhook (CSRF exempt — lihat bootstrap/app.php) ─────────────────
+// ─── Midtrans Webhook (CSRF exempt) ───────────────────────────────────────────
 
 Route::post('/payments/midtrans-notification', [PaymentCallbackController::class, 'receive'])
     ->name('midtrans.callback');
-=======
-Route::post('/assign', [PenugasanController::class, 'assign']);
-Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
-Route::post('/detail', [PenugasanController::class, 'isiDetail']);
-
-// Midtrans
-Route::post('payments/midtrans-notification', [PaymentCallbackController::class, 'receive']);
->>>>>>> Stashed changes
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
