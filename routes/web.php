@@ -10,8 +10,7 @@ use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
 use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\PaymentCallbackController;
+
 
 // ─── Public ──────────────────────────────────────────────────────────────────
 
@@ -169,31 +168,4 @@ Route::post('/assign', [PenugasanController::class, 'assign']);
 Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
 Route::post('/detail', [PenugasanController::class, 'isiDetail']);
 
-// ─── Donasi (Authenticated) ──────────────────────────────────
-Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () {
-    Route::get('/p/{proyek}',     [OrderController::class, 'create'])->name('create');
-    Route::post('/p/{proyek}',    [OrderController::class, 'store'])->name('store');
-    Route::get('/{order}',        [OrderController::class, 'show'])->name('show');
-    Route::get('/{order}/status', [OrderController::class, 'status'])->name('status');
-});
 
-// ─── Midtrans Webhook (CSRF exempt) ─────────────────
-Route::post('/payments/midtrans-notification', [PaymentCallbackController::class, 'receive'])
-    ->name('midtrans.callback');
-
-// ─── Temporary Dev Route ──────────────────────────────────
-
-Route::get('/dev/migrate', function () {
-    try {
-        if (!\Illuminate\Support\Facades\Schema::hasColumn('orders', 'proyek_id')) {
-            \Illuminate\Support\Facades\Schema::table('orders', function (\Illuminate\Database\Schema\Blueprint $table) {
-                $table->unsignedBigInteger('proyek_id')->nullable()->after('user_id');
-                $table->foreign('proyek_id')->references('id')->on('proyeks')->onDelete('set null');
-            });
-            return 'Successfully added proyek_id to orders table.';
-        }
-        return 'proyek_id already exists in orders table.';
-    } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
-    }
-});
