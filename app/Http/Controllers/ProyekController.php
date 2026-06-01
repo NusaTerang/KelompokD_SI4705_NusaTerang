@@ -263,7 +263,12 @@ class ProyekController extends Controller
 
         // Jika ada jadwal → status terjadwal, jika tidak → aktif langsung
         $newStatus = $request->filled('jadwal_publikasi') ? 'terjadwal' : 'aktif_funding';
-        $proyek->update(['status' => $newStatus]);
+        $jadwal = $request->filled('jadwal_publikasi') ? \Carbon\Carbon::parse($request->jadwal_publikasi) : null;
+        
+        $proyek->update([
+            'status' => $newStatus,
+            'jadwal_publikasi' => $jadwal,
+        ]);
 
         $message = $newStatus === 'aktif_funding'
             ? 'Proyek berhasil dipublikasikan.'
