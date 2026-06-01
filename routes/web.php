@@ -10,6 +10,8 @@ use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
 use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentCallbackController;
 
 
 // ─── Public ──────────────────────────────────────────────────────────────────
@@ -69,6 +71,15 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
+
+// ─── Donasi (Authenticated) ───────────────────────────────────────────────────
+
+Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () {
+    Route::get('/',                      [OrderController::class, 'create'])->name('create');
+    Route::post('/{proyek}',             [OrderController::class, 'store'])->name('store');
+    Route::get('/{order}',               [OrderController::class, 'show'])->name('show');
+    Route::get('/{order}/status',        [OrderController::class, 'status'])->name('status');
+});
 
 // ─── Authenticated ────────────────────────────────────────────────────────────
 
@@ -168,4 +179,7 @@ Route::post('/assign', [PenugasanController::class, 'assign']);
 Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
 Route::post('/detail', [PenugasanController::class, 'isiDetail']);
 
+// ─── Midtrans Webhook (CSRF exempt — lihat bootstrap/app.php) ─────────────────
 
+Route::post('/payments/midtrans-notification', [PaymentCallbackController::class, 'receive'])
+    ->name('midtrans.callback');

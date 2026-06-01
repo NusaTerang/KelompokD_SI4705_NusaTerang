@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'payments/midtrans-notification',
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'payments/midtrans-notification',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
