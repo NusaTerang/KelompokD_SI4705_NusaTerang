@@ -5,10 +5,10 @@
     <span class="mx-1 text-slate-400">/</span>
     <span>Proyek Energi</span>
     <span class="mx-1 text-slate-400">/</span>
-    <span class="font-medium text-slate-700">Buat Proyek — Step 1</span>
+    <span class="font-medium text-slate-700">{{ $proyek ? 'Edit Proyek' : 'Buat Proyek' }} — Step 1</span>
 @endsection
 
-@section('page_heading', 'Buat Proyek Baru')
+@section('page_heading', $proyek ? 'Edit Proyek' : 'Buat Proyek Baru')
 
 @section('content')
     <div class="max-w-[800px] mx-auto mb-12">
@@ -64,7 +64,7 @@
                     <select name="desa_id" class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface {{ $errors->has('desa_id') ? 'border border-red-500' : 'border-0' }}">
                         <option value="">Pilih Desa</option>
                         @foreach($desas as $desa)
-                            <option value="{{ $desa->id_desa }}" {{ (old('desa_id', $proyek->desa_id ?? '') == $desa->id_desa) ? 'selected' : '' }}>
+                            <option value="{{ $desa->id_desa }}" {{ (old('desa_id', $proyek->desa_id ?? request('desa_id')) == $desa->id_desa) ? 'selected' : '' }}>
                                 {{ $desa->nama_desa }} - {{ $desa->provinsi }}
                             </option>
                         @endforeach

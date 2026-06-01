@@ -11,6 +11,7 @@ use App\Http\Controllers\PenyediaController;
 use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
 
+
 // ─── Public ──────────────────────────────────────────────────────────────────
 
 Route::get('/', function () {
@@ -77,7 +78,7 @@ Route::middleware('auth')->group(function () {
         $user = auth()->user();
 
         return match ($user->role) {
-            'admin'    => redirect()->route('desa.daftar'),
+            'admin'    => redirect()->route('admin.dashboard'),
             'penyedia' => redirect()->route('vendor.dashboard'),
             default    => redirect('/'),
         };
@@ -111,7 +112,8 @@ Route::middleware('auth')->get('/penyedia/dashboard', function () {
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
-Route::middleware('auth')->prefix('admin')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
     // Desa management
     Route::prefix('desa')->name('desa.')->group(function () {
@@ -119,6 +121,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('/', [DesaController::class, 'store'])->name('store');
         Route::get('kelola', [DesaController::class, 'kelola'])->name('kelola');
         Route::get('daftar', [DesaController::class, 'index'])->name('daftar');
+        Route::get('{id}', [DesaController::class, 'show'])->name('show');
 
         Route::get('{id}/edit', [DesaController::class, 'edit'])->name('edit');
         Route::put('{id}', [DesaController::class, 'update'])->name('update');
@@ -130,7 +133,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::get('buat', [ProyekController::class, 'create'])->name('create');
         Route::post('buat', [ProyekController::class, 'saveStep1'])->name('save.step1');
         Route::get('kelola', [ProyekController::class, 'kelola'])->name('kelola');
+        Route::get('{id}/edit', [ProyekController::class, 'edit'])->name('edit');
+        Route::put('{id}', [ProyekController::class, 'update'])->name('update');
         Route::get('{id}/detail', [ProyekController::class, 'adminShow'])->name('admin.show');
+        Route::get('{id}/publikasi', [ProyekController::class, 'publikasi'])->name('publikasi');
         Route::patch('{id}/publish', [ProyekController::class, 'publish'])->name('publish');
         Route::delete('{id}', [ProyekController::class, 'destroy'])->name('destroy');
 
@@ -139,6 +145,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
         Route::get('{id}/review', [ProyekController::class, 'review'])->name('review');
         Route::post('{id}/draft', [ProyekController::class, 'saveDraft'])->name('save.draft');
+        Route::patch('{id}/kembalikan', [ProyekController::class, 'kembalikan'])->name('kembalikan');
         Route::post('{id}/kirim', [ProyekController::class, 'kirimKePenyedia'])->name('kirim');
     });
 
@@ -160,3 +167,5 @@ Route::get('/profil-preview', [ProfileController::class, 'edit']);
 Route::post('/assign', [PenugasanController::class, 'assign']);
 Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
 Route::post('/detail', [PenugasanController::class, 'isiDetail']);
+
+

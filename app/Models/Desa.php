@@ -30,6 +30,6 @@ class Desa extends Model
 
     public function proyeks()
     {
-        return $this->hasMany(Proyek::class);
+        return $this->hasMany(Proyek::class, 'desa_id', 'id_desa');
     }
 }
