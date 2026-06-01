@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DesaController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PenugasanController;
@@ -97,6 +98,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
 // ─── Vendor (Penyedia Energi) ─────────────────────────────────────────────────
@@ -109,6 +114,9 @@ Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->grou
     Route::prefix('proyek')->name('proyek.')->controller(VendorProyekController::class)->group(function () {
         Route::get('/',            'index')->name('index');
         Route::get('/{id}',        'show')->name('show');
+        Route::get('/{id}/progress', 'progressShow')->name('progress.show');
+        Route::post('/{id}/progress', 'progressStore')->name('progress.store');
+        Route::post('/{id}/laporan-akhir', 'finalReportStore')->name('final-report.store');
         Route::get('/{id}/expiry-decision', 'expiryDecisionShow')->name('expiry-decision.show');
         Route::put('/{id}/detail', 'saveDetail')->name('detail');
         Route::post('/{id}/expiry-decision', 'expiryDecision')->name('expiry-decision');

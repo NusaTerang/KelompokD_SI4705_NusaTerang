@@ -19,6 +19,8 @@
                            request()->routeIs('proyek.review') ||
                            request()->routeIs('proyek.kelola');
         $vendorOpen      = request()->routeIs('admin.vendors.*');
+        $notificationOpen = request()->routeIs('notifications.*');
+        $unreadNotifications = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
     @endphp
 
     <div class="flex min-h-screen">
@@ -86,9 +88,15 @@
                     </span>
                     Donasi
                 </a>
-                <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+                <a href="{{ route('notifications.index') }}" class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ $notificationOpen ? 'bg-nt-navy-light text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }}">
+                    @if($notificationOpen)
+                        <span class="absolute left-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-r bg-nt-accent" aria-hidden="true"></span>
+                    @endif
+                    <span class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" /></svg>
+                        @if($unreadNotifications > 0)
+                            <span class="absolute -right-2 -top-2 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</span>
+                        @endif
                     </span>
                     Notifikasi
                 </a>

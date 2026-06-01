@@ -46,8 +46,15 @@
 
         <div class="flex items-center gap-4">
             @auth
+                @php($unreadNotifications = Auth::user()->unreadNotifications()->count())
                 <span class="text-sm font-semibold text-secondary">Hi, {{ Auth::user()->nama }}</span>
                 <a href="{{ route('dashboard') }}" class="text-sm font-bold text-secondary hover:text-on-secondary-container transition-colors">Dashboard</a>
+                <a href="{{ route('notifications.index') }}" class="relative w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors" aria-label="Notifikasi">
+                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant">notifications</span>
+                    @if($unreadNotifications > 0)
+                        <span class="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</span>
+                    @endif
+                </a>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors">

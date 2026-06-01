@@ -162,7 +162,7 @@ class ProyekKelolaPagesTest extends TestCase
         $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'aktif_funding']);
     }
 
-    public function test_publish_sets_draft_when_aktif_funding(): void
+    public function test_publish_starts_execution_when_aktif_funding(): void
     {
         $proyek = $this->makeProyek(['status' => 'aktif_funding']);
 
@@ -170,7 +170,18 @@ class ProyekKelolaPagesTest extends TestCase
             ->patch(route('proyek.publish', $proyek->id));
 
         $response->assertRedirect(route('proyek.kelola'));
-        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'draft']);
+        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'eksekusi']);
+    }
+
+    public function test_publish_sets_aktif_funding_when_menunggu_review_admin(): void
+    {
+        $proyek = $this->makeProyek(['status' => 'menunggu_review_admin']);
+
+        $response = $this->actingAs($this->admin)
+            ->patch(route('proyek.publish', $proyek->id));
+
+        $response->assertRedirect(route('proyek.kelola'));
+        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'aktif_funding']);
     }
 
     public function test_publish_forbidden_when_eksekusi(): void

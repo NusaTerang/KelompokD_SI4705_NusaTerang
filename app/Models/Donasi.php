@@ -9,14 +9,16 @@ class Donasi extends Model
 {
     protected $table = 'donasi';
 
+    protected $primaryKey = 'id_donasi';
+
     protected $fillable = [
-        'id_proyek',
         'id_donatur',
+        'id_proyek',
         'nominal',
         'status',
     ];
 
-    public function user(): BelongsTo
+    public function donatur(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_donatur', 'id_donatur');
     }

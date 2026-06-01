@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Proyek;
 use App\Models\Desa;
+use App\Notifications\ProyekDitugaskan;
+use App\Services\NotificationRecipientService;
 use App\Services\PenyediaRecommendationService;
 use Illuminate\Support\Facades\Gate;
 
@@ -98,7 +100,13 @@ class ProyekController extends Controller
 
     public function adminShow($id)
     {
-        $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
+        $proyek = Proyek::with([
+            'desa',
+            'penyedia',
+            'fotos',
+            'penugasan.detail',
+            'penugasan.submittedProgressUpdates',
+        ])->findOrFail($id);
 
         return view('admin.proyek.show', compact('proyek'));
     }
@@ -263,10 +271,9 @@ class ProyekController extends Controller
             return back()->withErrors(['error' => 'Proyek belum dapat dipublikasikan. Detail teknis belum lengkap.']);
         }
 
-        // Jika ada jadwal → status terjadwal, jika tidak → aktif langsung
         $newStatus = $request->filled('jadwal_publikasi') ? 'terjadwal' : 'aktif_funding';
         $jadwal = $request->filled('jadwal_publikasi') ? \Carbon\Carbon::parse($request->jadwal_publikasi) : null;
-        
+
         $proyek->update([
             'status' => $newStatus,
             'jadwal_publikasi' => $jadwal,
@@ -302,7 +309,7 @@ class ProyekController extends Controller
         return redirect()->route('proyek.kelola')->with('success', 'Proyek dikembalikan ke penyedia untuk direvisi.');
     }
 
-    public function kirimKePenyedia(Request $request, $id)
+    public function kirimKePenyedia(Request $request, $id, NotificationRecipientService $recipients)
     {
         $proyek = Proyek::findOrFail($id);
 
@@ -312,10 +319,13 @@ class ProyekController extends Controller
 
         $proyek->update(['status' => 'menunggu_konfirmasi_penyedia']);
 
-        \App\Models\PenugasanProyek::firstOrCreate([
+        $penugasan = \App\Models\PenugasanProyek::firstOrCreate([
             'id_proyek'   => $proyek->id,
             'id_penyedia' => $proyek->penyedia_id,
         ]);
+
+        $vendor = $recipients->vendorForProject($proyek);
+        $vendor?->notify(new ProyekDitugaskan($proyek, $penugasan));
 
         return redirect()->route('proyek.kelola')->with('success', 'Proyek berhasil dikirim ke penyedia!');
     }
@@ -339,7 +349,16 @@ class ProyekController extends Controller
 
     public function show($id)
     {
-        $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
+        $proyek = Proyek::with([
+            'desa',
+            'penyedia',
+            'fotos',
+            'donasis',
+            'submittedFinalReport',
+            'penugasan.submittedProgressUpdates',
+            'penugasan.detail',
+        ])->findOrFail($id);
+
         $detail = $proyek->penugasan->first()?->detail;
         $costBreakdown = $detail ? $detail->cost_breakdown : null;
 

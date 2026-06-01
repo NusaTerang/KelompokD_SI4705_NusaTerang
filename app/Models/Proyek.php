@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\TargetDanaTercapai;
+use App\Services\NotificationRecipientService;
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,9 +52,54 @@ class Proyek extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function progressUpdates()
+    {
+        return $this->hasManyThrough(
+            ProgressProyekVendor::class,
+            PenugasanProyek::class,
+            'id_proyek',
+            'id_penugasan',
+            'id',
+            'id_penugasan'
+        );
+    }
+
+    public function submittedProgressUpdates()
+    {
+        return $this->progressUpdates()
+            ->where('progress_proyek_vendor.status', 'submitted')
+            ->orderByDesc('progress_proyek_vendor.submitted_at');
+    }
+
+    public function finalReports()
+    {
+        return $this->hasMany(LaporanAkhirProyekVendor::class, 'id_proyek');
+    }
+
+    public function submittedFinalReport()
+    {
+        return $this->hasOne(LaporanAkhirProyekVendor::class, 'id_proyek')
+            ->where('status', 'submitted')
+            ->latestOfMany('submitted_at');
+    }
+
     public function donasis()
     {
         return $this->hasMany(Donasi::class, 'id_proyek');
+    }
+
+    public function recordFunding(float|int $amount): void
+    {
+        $wasBelowTarget = $this->dana_terkumpul < $this->target_dana;
+
+        $this->increment('dana_terkumpul', $amount);
+        $this->refresh();
+
+        if ($wasBelowTarget && $this->dana_terkumpul >= $this->target_dana) {
+            app(NotificationRecipientService::class)
+                ->adminsAndDonorsForProject($this)
+                ->each(fn ($recipient) => $recipient->notify(new TargetDanaTercapai($this)));
+        }
     }
 
     public function checkAndActivateInstalasi()

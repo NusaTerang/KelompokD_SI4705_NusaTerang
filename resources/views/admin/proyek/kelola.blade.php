@@ -262,16 +262,16 @@
 @push('scripts')
 <script>
 function openPublishModal(id, judul, status) {
-    const isAktif = status === 'aktif_funding';
+    const isFunding = status === 'aktif_funding';
     document.getElementById('publishForm').action = `/admin/proyek/${id}/publish`;
-    document.getElementById('publishModalIcon').textContent = isAktif ? 'unpublished' : 'publish';
-    document.getElementById('publishModalIcon').className = `material-symbols-outlined text-3xl ${isAktif ? 'text-error' : 'text-tertiary'}`;
-    document.getElementById('publishModalTitle').textContent = isAktif ? 'Batalkan Publikasi?' : 'Publikasikan Proyek?';
-    document.getElementById('publishModalDesc').textContent = isAktif
-        ? `"${judul}" akan dinonaktifkan dari halaman publik.`
+    document.getElementById('publishModalIcon').textContent = isFunding ? 'play_arrow' : 'publish';
+    document.getElementById('publishModalIcon').className = 'material-symbols-outlined text-3xl text-tertiary';
+    document.getElementById('publishModalTitle').textContent = isFunding ? 'Mulai Eksekusi?' : 'Publikasikan Proyek?';
+    document.getElementById('publishModalDesc').textContent = isFunding
+        ? `"${judul}" akan masuk fase eksekusi. Penyedia energi dapat mulai mengirim update progress.`
         : `"${judul}" akan dipublikasikan dan tampil di halaman publik.`;
-    document.getElementById('publishBtn').textContent = isAktif ? 'Batalkan Publikasi' : 'Publikasikan';
-    document.getElementById('publishBtn').className = `px-5 py-2 text-sm font-semibold rounded-lg hover:opacity-90 transition-colors ${isAktif ? 'bg-error text-white' : 'bg-tertiary text-white'}`;
+    document.getElementById('publishBtn').textContent = isFunding ? 'Mulai Eksekusi' : 'Publikasikan';
+    document.getElementById('publishBtn').className = 'px-5 py-2 text-sm font-semibold rounded-lg hover:opacity-90 transition-colors bg-tertiary text-white';
     document.getElementById('publishModal').classList.replace('hidden', 'flex');
 }
 
