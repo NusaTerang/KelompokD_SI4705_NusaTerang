@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'penyedia' => \App\Http\Middleware\EnsurePenyedia::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'payments/midtrans-notification',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

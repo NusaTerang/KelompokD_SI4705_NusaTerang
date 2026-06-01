@@ -167,28 +167,56 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 w-full">
-                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
-                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
-                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
-                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
-            </div>
+            @auth
+                <form action="{{ route('donasi.store', $proyek->id) }}" method="POST" class="flex flex-col gap-4 w-full">
+                    @csrf
+                    <div class="grid grid-cols-2 gap-3 w-full">
+                        <button type="button" onclick="document.getElementById('amount').value=50000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=100000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=250000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=500000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
+                    </div>
 
-            <div class="flex flex-col gap-2 w-full">
-                <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
-                <div class="relative w-full">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
-                    <input
-                        type="text"
-                        placeholder="0"
-                        class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none"
-                    />
+                    <div class="flex flex-col gap-2 w-full">
+                        <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                        <div class="relative w-full">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
+                            <input
+                                type="number"
+                                name="amount"
+                                id="amount"
+                                placeholder="0"
+                                required
+                                min="10000"
+                                class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none"
+                            />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
+                        Donasi Sekarang
+                    </button>
+                </form>
+            @else
+                <div class="grid grid-cols-2 gap-3 w-full opacity-50 pointer-events-none">
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 50k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 100k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 250k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 500k</button>
                 </div>
-            </div>
 
-            <a href="{{ route('login') }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
-                Donasi Sekarang
-            </a>
+                <div class="flex flex-col gap-2 w-full opacity-50 pointer-events-none">
+                    <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                    <div class="relative w-full">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
+                        <input type="text" placeholder="0" class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface border-none" disabled />
+                    </div>
+                </div>
+
+                <a href="{{ route('login') }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
+                    Login untuk Donasi
+                </a>
+            @endauth
 
             <div class="flex items-center gap-6 pt-2 border-t border-surface-container">
                 <div class="flex items-center gap-2">
