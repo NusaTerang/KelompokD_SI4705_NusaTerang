@@ -99,9 +99,11 @@ class ProyekController extends Controller
             $penugasan->proyek->update(['status' => 'menunggu_review_admin']);
         }
 
-        $msg = $isDraft ? 'Draft tersimpan.' : 'Rincian berhasil dikirim ke Admin untuk ditinjau!';
+        if ($isDraft) {
+            return redirect()->route('vendor.proyek.show', $id)->with('success', 'Draft tersimpan.');
+        }
 
-        return redirect()->route('vendor.proyek.show', $id)->with('success', $msg);
+        return redirect()->route('vendor.proyek.index')->with('success', 'Rincian berhasil dikirim ke Admin untuk ditinjau!');
     }
 
     public function expiryDecisionShow($id)

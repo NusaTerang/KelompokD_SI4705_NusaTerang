@@ -12,9 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->redirectGuestsTo(fn () => null);
+        $middleware->redirectGuestsTo(fn (\Illuminate\Http\Request $request) => $request->expectsJson() ? null : route('login'));
         $middleware->alias([
             'penyedia' => \App\Http\Middleware\EnsurePenyedia::class,
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+        ]);
+        $middleware->validateCsrfTokens(except: [
+            'payments/midtrans-notification',
         ]);
         $middleware->validateCsrfTokens(except: [
             'payments/midtrans-notification',

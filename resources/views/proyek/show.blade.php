@@ -16,7 +16,6 @@
     $statusMap = [
         'draft'                          => ['text' => 'DRAFT',              'bg' => 'bg-surface-container',    'color' => 'text-on-surface-variant'],
         'menunggu_konfirmasi_penyedia'   => ['text' => 'MENUNGGU PENYEDIA',  'bg' => 'bg-yellow-100',           'color' => 'text-yellow-800'],
-        'diterima_penyedia'              => ['text' => 'DITERIMA PENYEDIA',  'bg' => 'bg-secondary-fixed',      'color' => 'text-on-secondary-fixed'],
         'menunggu_review_admin'          => ['text' => 'MENUNGGU REVIEW',    'bg' => 'bg-yellow-100',           'color' => 'text-yellow-800'],
         'aktif_funding'                  => ['text' => 'SEDANG BERJALAN',    'bg' => 'bg-primary-container',    'color' => 'text-on-primary-fixed'],
         'eksekusi'                       => ['text' => 'DALAM EKSEKUSI',     'bg' => 'bg-secondary-container',  'color' => 'text-on-secondary-fixed'],
@@ -24,6 +23,17 @@
         'ditolak'                        => ['text' => 'DITOLAK',            'bg' => 'bg-error-container',      'color' => 'text-on-error-container'],
     ];
     $status = $statusMap[$proyek->status] ?? ['text' => strtoupper($proyek->status), 'bg' => 'bg-surface-container', 'color' => 'text-on-surface-variant'];
+
+    if (!function_exists('formatRupiahShort')) {
+        function formatRupiahShort($amount) {
+            if ($amount >= 1000000) {
+                return number_format($amount / 1000000, 1, ',', '.') . 'jt';
+            } elseif ($amount >= 1000) {
+                return number_format($amount / 1000, 0, ',', '.') . 'rb';
+            }
+            return number_format($amount, 0, ',', '.');
+        }
+    }
 @endphp
 
 <div class="w-full max-w-[1216px] mx-auto px-4 py-12 flex flex-col lg:flex-row gap-12 items-start">
@@ -180,6 +190,45 @@
             </div>
         </div>
 
+        {{-- Rincian Anggaran --}}
+        @if(!empty($costBreakdown))
+            <div class="flex flex-col gap-4 w-full">
+                <h2 class="text-secondary text-2xl font-headline font-semibold">Rincian Anggaran</h2>
+                <div class="bg-surface-container-lowest border border-surface-container rounded-xl overflow-hidden">
+                    <div class="divide-y divide-surface-container">
+                        @php
+                            $totalVendor = (float) ($proyek->penugasan->first()?->detail?->target_dana ?? 0);
+                        @endphp
+                        @foreach($costBreakdown as $item)
+                            <div class="flex justify-between items-center p-4 hover:bg-surface-container-low transition-colors">
+                                <span class="text-on-surface font-medium">{{ $item['nama'] }}</span>
+                                <span class="text-on-surface-variant font-bold">Rp {{ formatRupiahShort($item['nominal']) }}</span>
+                            </div>
+                        @endforeach
+                        
+                        {{-- Platform Fee --}}
+                        @php
+                            $platformFee = $totalVendor * 0.05;
+                            $grandTotal = $totalVendor + $platformFee;
+                        @endphp
+                        <div class="flex justify-between items-center p-4 bg-surface-container-low">
+                            <span class="text-on-surface font-medium flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px] text-tertiary">info</span>
+                                Total Platform Fee (5%)
+                            </span>
+                            <span class="text-on-surface-variant font-bold">Rp {{ formatRupiahShort($platformFee) }}</span>
+                        </div>
+                        
+                        {{-- Grand Total --}}
+                        <div class="flex justify-between items-center p-5 bg-surface-container border-t-2 border-primary/20">
+                            <span class="text-on-surface font-bold text-lg">Total Kebutuhan Dana</span>
+                            <span class="text-primary font-bold text-xl">Rp {{ formatRupiahShort($grandTotal) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Timeline Placeholder --}}
         {{-- Activity Feed --}}
         <div class="flex flex-col gap-6 w-full py-6">
@@ -278,29 +327,14 @@
                 </div>
             </div>
 
-<<<<<<< HEAD
-            <div class="grid grid-cols-2 gap-3 w-full">
-                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
-                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
-                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
-                <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
-            </div>
-
-            <div class="flex flex-col gap-2 w-full">
-                <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
-                <div class="relative w-full">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
-                    <input
-                        type="text"
-                        placeholder="0"
-                        class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none"
-                    />
-                </div>
-            </div>
-
             @if($proyek->status === 'eksekusi')
-=======
+                <button
+                    disabled
+                    class="w-full bg-gray-300 text-gray-600 font-headline font-extrabold text-lg py-4 rounded-xl cursor-not-allowed text-center block">
+                    Pendanaan Tercapai
+                </button>
             @auth
+            @else
                 <form action="{{ route('donasi.store', $proyek->id) }}" method="POST" class="flex flex-col gap-4 w-full">
                     @csrf
                     <div class="grid grid-cols-2 gap-3 w-full">
@@ -309,40 +343,49 @@
                         <button type="button" onclick="document.getElementById('amount').value=250000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
                         <button type="button" onclick="document.getElementById('amount').value=500000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
                     </div>
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 
-                <button
-                    disabled
-                    class="w-full bg-gray-300 text-gray-600 font-headline font-extrabold text-lg py-4 rounded-xl cursor-not-allowed text-center block">
+                    <div class="flex flex-col gap-2 w-full">
+                        <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                        <div class="relative w-full">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
+                            <input
+                                id="amount"
+                                name="nominal"
+                                type="text"
+                                placeholder="0"
+                                class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none"
+                            />
+                        </div>
+                    </div>
 
-                    Pendanaan Tercapai
-
-                </button>
-
-            @elseif(!auth()->check())
-
-                <a href="{{ route('login') }}"
-                class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
-
-                    Login untuk Donasi
-
-                </a>
-<<<<<<< HEAD
-
+                    <button
+                        id="donasi-button"
+                        type="submit"
+                        class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2">
+                        Donasi Sekarang
+                    </button>
+                </form>
             @else
+                <div class="grid grid-cols-2 gap-3 w-full opacity-50 pointer-events-none">
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 50k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 100k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 250k</button>
+                    <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 500k</button>
+                </div>
 
-                <button
-                    id="donasi-button"
-                    class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2">
+                <div class="flex flex-col gap-2 w-full opacity-50 pointer-events-none">
+                    <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                    <div class="relative w-full">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
+                        <input type="text" placeholder="0" class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface border-none" disabled />
+                    </div>
+                </div>
 
-                    Donasi Sekarang
-
-                </button>
-
-            @endif
-=======
+                <a href="{{ route('login') }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
+                    Login untuk Donasi
+                </a>
             @endauth
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
+            @endif
 
             <div class="flex items-center gap-6 pt-2 border-t border-surface-container">
                 <div class="flex items-center gap-2">

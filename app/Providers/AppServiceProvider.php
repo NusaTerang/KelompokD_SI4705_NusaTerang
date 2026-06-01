@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Proyek;
+use App\Observers\ProyekObserver;
 
 use Illuminate\Support\Facades\Gate;
 
@@ -31,5 +33,7 @@ class AppServiceProvider extends ServiceProvider
             \App\Events\PaymentConfirmed::class,
             \App\Listeners\UpdateProjectFunding::class
         );
+
+        Proyek::observe(ProyekObserver::class);
     }
 }
