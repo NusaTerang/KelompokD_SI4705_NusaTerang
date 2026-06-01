@@ -50,6 +50,11 @@ class Proyek extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function donasis()
+    {
+        return $this->hasMany(Donasi::class, 'id_proyek');
+    }
+
     public function checkAndActivateInstalasi()
     {
         if ($this->status === 'aktif_funding' && $this->dana_terkumpul >= $this->target_dana) {

@@ -60,7 +60,7 @@ Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('peny
 Route::get('/penyedia/{id}', [PenyediaController::class, 'show'])->name('penyedia.show');
 Route::get('/api/penyedia/rekomendasi', [PenyediaController::class, 'getRekomendasi'])->name('api.penyedia.rekomendasi');
 
-// ─── Auth (guest only) ────────────────────────────────────────────────────────
+// ─── Auth (guest only) ─────────────────────────────────────────────────────────
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -139,7 +139,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::delete('{id}', [DesaController::class, 'destroy'])->name('destroy');
     });
 
-    // Proyek creation wizard
+    // Proyek management
     Route::prefix('proyek')->name('proyek.')->group(function () {
         Route::get('buat', [ProyekController::class, 'create'])->name('create');
         Route::post('buat', [ProyekController::class, 'saveStep1'])->name('save.step1');
@@ -160,7 +160,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::post('{id}/kirim', [ProyekController::class, 'kirimKePenyedia'])->name('kirim');
     });
 
-    // Vendor / Penyedia Energi CRUD
+    // Vendor CRUD
     Route::prefix('vendors')->name('admin.vendors.')->group(function () {
         Route::get('/', [AdminPenyediaController::class, 'index'])->name('index');
         Route::get('/create', [AdminPenyediaController::class, 'create'])->name('create');
@@ -171,7 +171,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     });
 });
 
-// ─── Legacy / misc ────────────────────────────────────────────────────────────
+// ─── Legacy / misc ─────────────────────────────────────────────────────────────
 
 Route::get('/profil-preview', [ProfileController::class, 'edit']);
 

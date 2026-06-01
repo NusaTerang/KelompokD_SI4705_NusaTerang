@@ -28,6 +28,7 @@ class Order extends Model
         'pesan',
         'payment_status',
         'snap_token',
+        'proyek_id',
     ];
 
     protected $casts = [
@@ -37,7 +38,12 @@ class Order extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id_donatur');
+    }
+
+    public function proyek(): BelongsTo
+    {
+        return $this->belongsTo(Proyek::class, 'proyek_id');
     }
 
     public function proyek(): BelongsTo

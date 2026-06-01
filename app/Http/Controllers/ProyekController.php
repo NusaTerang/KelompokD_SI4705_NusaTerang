@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Proyek;
 use App\Models\Desa;
 use App\Services\PenyediaRecommendationService;
+use Illuminate\Support\Facades\Gate;
 
 class ProyekController extends Controller
 {
@@ -37,9 +38,6 @@ class ProyekController extends Controller
             'fotos'             => $requireFoto ? 'required|array|min:1' : 'nullable|array',
             'fotos.*'           => 'image|max:2048',
         ]);
-
-        // Fix logic for checkbox/radio that might not exist in form if unchecked
-        // But for required fields it's fine.
 
         $proyek = Proyek::updateOrCreate(
             ['id' => $request->draft_id],
@@ -344,14 +342,14 @@ class ProyekController extends Controller
         $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
         $detail = $proyek->penugasan->first()?->detail;
         $costBreakdown = $detail ? $detail->cost_breakdown : null;
-        
+
         return view('proyek.show', compact('proyek', 'costBreakdown'));
     }
 
     public function aktifkanInstalasi(Request $request, $id)
     {
         $proyek = Proyek::findOrFail($id);
-        
+
         if ($proyek->checkAndActivateInstalasi()) {
             return redirect()->back()->with('success', 'Instalasi diaktifkan! Penjadwalan timeline sedang diproses.');
         }

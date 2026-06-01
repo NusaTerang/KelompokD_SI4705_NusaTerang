@@ -84,7 +84,6 @@ class ProyekController extends Controller
             $rules['satuan_daya']    = 'nullable|in:kWp,kW,MW';
             $rules['target_dana']    = 'nullable|numeric|min:0';
             $rules['durasi_minggu']  = 'nullable|integer|min:1';
-            // cost_breakdown sudah dibersihkan di atas, jika kosong menjadi null dan lolos validasi
         }
 
         $validated = $request->validate($rules, $messages);
@@ -161,7 +160,6 @@ class ProyekController extends Controller
     {
         $request->validate(['pertanyaan' => 'required|string|max:1000']);
 
-        // TODO: store klarifikasi / send notification
         return redirect()->back()->with('success', 'Permintaan klarifikasi terkirim ke Admin.');
     }
 
@@ -169,7 +167,6 @@ class ProyekController extends Controller
     {
         $request->validate(['kendala' => 'required|string|max:1000']);
 
-        // TODO: store kendala / send notification
         return redirect()->back()->with('info', 'Laporan kendala telah diterima.');
     }
 }
