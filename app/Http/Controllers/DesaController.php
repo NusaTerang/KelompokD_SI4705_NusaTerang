@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-<<<<<<< HEAD
 use App\Http\Requests\StoreDesaRequest;
 use App\Models\Desa;
 use Illuminate\Http\RedirectResponse;
@@ -168,18 +167,3 @@ class DesaController extends Controller
         };
     }
 }
-=======
-use Illuminate\Http\Request;
-
-/** Stub — akan diimplementasi oleh tim */
-class DesaController extends Controller
-{
-    public function index() { abort(501, 'Belum diimplementasi'); }
-    public function create() { abort(501, 'Belum diimplementasi'); }
-    public function store(Request $request) { abort(501, 'Belum diimplementasi'); }
-    public function kelola() { abort(501, 'Belum diimplementasi'); }
-    public function edit($id) { abort(501, 'Belum diimplementasi'); }
-    public function update(Request $request, $id) { abort(501, 'Belum diimplementasi'); }
-    public function destroy($id) { abort(501, 'Belum diimplementasi'); }
-}
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb

@@ -28,6 +28,45 @@ class ProyekController extends Controller
         return response()->json(['data' => $proyek]);
     }
 
+    public function funding($id)
+    {
+        $proyek = Proyek::with(['donasis.user', 'desa'])->findOrFail($id);
+
+        $progress = $proyek->target_dana > 0 
+            ? (int) min(round(($proyek->dana_terkumpul / $proyek->target_dana) * 100), 100)
+            : 0;
+
+        $donasiTerbaru = $proyek->donasis()
+            ->where('status', 'success')
+            ->with('user')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($d) {
+                return [
+                    'id' => $d->id,
+                    'nominal' => $d->nominal,
+                    'user' => [
+                        'name' => $d->user->nama ?? 'Donatur',
+                    ],
+                    'created_at_relative' => $d->created_at ? $d->created_at->locale('id')->diffForHumans() : 'baru saja',
+                ];
+            });
+
+        $jumlahDonatur = $proyek->donasis()->where('status', 'success')->distinct('id_donatur')->count('id_donatur');
+
+        $statusPendanaan = $proyek->dana_terkumpul >= $proyek->target_dana ? 'target_tercapai' : 'funding';
+
+        return response()->json([
+            'dana_terkumpul' => (float) $proyek->dana_terkumpul,
+            'target_dana' => (float) $proyek->target_dana,
+            'persentase' => $progress,
+            'jumlah_donatur' => $jumlahDonatur,
+            'status' => $statusPendanaan,
+            'donasi_terbaru' => $donasiTerbaru,
+        ]);
+    }
+
     // Wizard Step 1: Create Basic Info
     public function createStep1(Request $request)
     {

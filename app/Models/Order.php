@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-<<<<<<< Updated upstream
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +29,7 @@ class Order extends Model
         'pesan',
         'payment_status',
         'snap_token',
+        'proyek_id',
     ];
 
     // ── Casts ──────────────────────────────────────────────────────
@@ -41,7 +41,12 @@ class Order extends Model
     // ── Relationships ──────────────────────────────────────────────
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id_donatur');
+    }
+
+    public function proyek(): BelongsTo
+    {
+        return $this->belongsTo(Proyek::class, 'proyek_id');
     }
 
     // ── Helpers ────────────────────────────────────────────────────
@@ -63,31 +68,5 @@ class Order extends Model
     public function isCancelled(): bool
     {
         return $this->payment_status === self::STATUS_CANCELLED;
-=======
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Order extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'number',
-        'total_price',
-        'payment_status',
-        'snap_token',
-        'proyek_id',
-        'user_id'
-    ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id', 'id_donatur');
-    }
-
-    public function proyek()
-    {
-        return $this->belongsTo(Proyek::class);
->>>>>>> Stashed changes
     }
 }

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-<<<<<<< HEAD
 use App\Models\Proyek;
 use App\Models\Desa;
 use App\Services\PenyediaRecommendationService;
+use Illuminate\Support\Facades\Gate;
 
 class ProyekController extends Controller
 {
@@ -38,9 +38,6 @@ class ProyekController extends Controller
             'fotos'             => $requireFoto ? 'required|array|min:1' : 'nullable|array',
             'fotos.*'           => 'image|max:2048',
         ]);
-
-        // Fix logic for checkbox/radio that might not exist in form if unchecked
-        // But for required fields it's fine.
 
         $proyek = Proyek::updateOrCreate(
             ['id' => $request->draft_id],
@@ -199,24 +196,9 @@ class ProyekController extends Controller
     public function show($id)
     {
         $proyek = Proyek::with(['desa', 'penyedia', 'fotos'])->findOrFail($id);
+        
+        Gate::authorize('view', $proyek);
+        
         return view('proyek.show', compact('proyek'));
     }
-=======
-
-/** Stub — akan diimplementasi oleh tim */
-class ProyekController extends Controller
-{
-    public function show($id) { abort(501, 'Belum diimplementasi'); }
-    public function create() { abort(501, 'Belum diimplementasi'); }
-    public function saveStep1(Request $request) { abort(501, 'Belum diimplementasi'); }
-    public function kelola() { abort(501, 'Belum diimplementasi'); }
-    public function adminShow($id) { abort(501, 'Belum diimplementasi'); }
-    public function publish($id) { abort(501, 'Belum diimplementasi'); }
-    public function destroy($id) { abort(501, 'Belum diimplementasi'); }
-    public function step2($id) { abort(501, 'Belum diimplementasi'); }
-    public function saveStep2(Request $request, $id) { abort(501, 'Belum diimplementasi'); }
-    public function review($id) { abort(501, 'Belum diimplementasi'); }
-    public function saveDraft(Request $request, $id) { abort(501, 'Belum diimplementasi'); }
-    public function kirimKePenyedia(Request $request, $id) { abort(501, 'Belum diimplementasi'); }
->>>>>>> 979a3705ef00246dd71606744f415d8c1390f4cb
 }
