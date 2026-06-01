@@ -44,7 +44,7 @@
                     <tbody class="divide-y divide-slate-100 bg-white text-slate-700">
                         @forelse (($desas ?? collect()) as $d)
                             <tr class="hover:bg-slate-50/80">
-                                <td class="whitespace-nowrap px-4 py-3 font-mono text-xs">{{ $d->id_desa }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 font-mono text-xs">{{ $loop->iteration }}</td>
                                 <td class="px-4 py-3 font-medium text-nt-navy">{{ $d->nama_desa }}</td>
                                 <td class="px-4 py-3">{{ $d->provinsi }}</td>
                                 <td class="px-4 py-3">{{ $d->kabupaten }}</td>

@@ -111,6 +111,55 @@ class ProyekController extends Controller
         return view('admin.proyek.create_step3', compact('proyek'));
     }
 
+    public function edit($id)
+    {
+        $proyek = Proyek::findOrFail($id);
+        $desas = Desa::all();
+        $allPenyedia = \App\Models\PenyediaEnergi::where('status', 'aktif')->orderBy('nama')->get();
+
+        return view('admin.proyek.edit', compact('proyek', 'desas', 'allPenyedia'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $proyek = Proyek::findOrFail($id);
+
+        $validated = $request->validate([
+            'judul'             => 'required|string|max:255',
+            'desa_id'           => 'required|exists:desa,id_desa',
+            'jenis_energi'      => 'required|in:panel_surya,mikro_hidro,biogas,hybrid_solar_baterai',
+            'deskripsi'         => 'required|string',
+            'estimasi_mulai'    => 'required|date',
+            'estimasi_selesai'  => 'required|date|after_or_equal:estimasi_mulai',
+            'penyedia_id'       => 'nullable|exists:penyedia_energis,id',
+            'fotos'             => 'nullable|array',
+            'fotos.*'           => 'image|max:2048',
+        ]);
+
+        $proyek->update([
+            'judul' => $validated['judul'],
+            'desa_id' => $validated['desa_id'],
+            'jenis_energi' => $validated['jenis_energi'],
+            'deskripsi' => $validated['deskripsi'],
+            'estimasi_mulai' => $validated['estimasi_mulai'],
+            'estimasi_selesai' => $validated['estimasi_selesai'],
+            'penyedia_id' => $validated['penyedia_id'] ?? null,
+        ]);
+
+        if ($request->hasFile('fotos')) {
+            $count = $proyek->fotos()->count();
+            foreach ($request->file('fotos') as $foto) {
+                if ($count >= 5) break;
+                
+                $path = $foto->store('proyek_fotos', 'public');
+                $proyek->fotos()->create(['path' => $path]);
+                $count++;
+            }
+        }
+
+        return redirect()->route('proyek.kelola')->with('success', 'Proyek berhasil diperbarui.');
+    }
+
     public function kelola(Request $request)
     {
         $query = Proyek::with(['desa', 'penyedia', 'fotos']);
@@ -136,28 +185,123 @@ class ProyekController extends Controller
         return view('admin.proyek.kelola', compact('proyeks'));
     }
 
-    public function publish($id)
+    public function publikasi($id)
     {
-        $proyek = Proyek::findOrFail($id);
+        $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
 
+        if (!in_array($proyek->status, ['draft', 'menunggu_review_admin', 'menunggu_konfirmasi_penyedia'])) {
+            return redirect()->route('proyek.kelola')->with('error', 'Status proyek tidak valid untuk publikasi.');
+        }
+
+        $penugasan = $proyek->penugasan->first();
+        $detail = $penugasan?->detail;
+
+        // Auto-sinkronisasi target_dana dari input vendor + 5% platform fee
+        if ($detail && (empty($proyek->target_dana) || $proyek->target_dana <= 0)) {
+            $baseDana = (float)($detail->target_dana ?? 0);
+            if ($baseDana > 0) {
+                $platformFee = $baseDana * 0.05;
+                $calculatedTargetDana = $baseDana + $platformFee;
+                $proyek->update(['target_dana' => $calculatedTargetDana]);
+                $proyek->refresh();
+            }
+        }
+
+        // 5 kriteria kelengkapan
+        $reqDetail   = !empty($proyek->judul) && !empty($proyek->deskripsi) && !empty($proyek->desa_id);
+        $reqFoto     = $proyek->fotos->count() > 0;
+        $reqPenyedia = !empty($proyek->penyedia_id);
+        $reqRincian  = !empty($detail) && !empty($detail->kapasitas_daya);
+        $reqTarget   = !empty($proyek->target_dana) && $proyek->target_dana > 0;
+
+        $completedCount = (int)$reqDetail + (int)$reqFoto + (int)$reqPenyedia + (int)$reqRincian + (int)$reqTarget;
+        $isLengkap = $completedCount === 5;
+
+        return view('admin.proyek.publikasi', compact(
+            'proyek', 'detail',
+            'reqDetail', 'reqFoto', 'reqPenyedia', 'reqRincian', 'reqTarget',
+            'completedCount', 'isLengkap'
+        ));
+    }
+
+    public function publish(Request $request, $id)
+    {
+        $proyek = Proyek::with(['fotos', 'penugasan.detail'])->findOrFail($id);
+
+        // Proyek yang sudah berjalan/selesai tidak bisa diubah
         if (in_array($proyek->status, ['eksekusi', 'selesai', 'refund'])) {
             abort(403, 'Proyek yang sedang berjalan, selesai, atau refund tidak dapat diubah statusnya.');
         }
 
-        $newStatus = $proyek->status === 'aktif_funding' ? 'draft' : 'aktif_funding';
-        $proyek->update(['status' => $newStatus]);
+        // UN-PUBLISH: Jika proyek sudah aktif, kembalikan ke draft
+        if (in_array($proyek->status, ['aktif_funding', 'terjadwal'])) {
+            $proyek->update(['status' => 'draft']);
+            return redirect()->route('proyek.kelola')->with('success', 'Proyek berhasil dibatalkan publikasinya.');
+        }
+
+        // PUBLISH: Validasi kelengkapan
+        $penugasan = $proyek->penugasan->first();
+        $detail = $penugasan?->detail;
+
+        if ($detail) {
+            $baseDana = (float)($detail->target_dana ?? 0);
+            if ($baseDana > 0) {
+                $platformFee = $baseDana * 0.05;
+                $calculatedTargetDana = $baseDana + $platformFee;
+                $proyek->update(['target_dana' => $calculatedTargetDana]);
+                $proyek->refresh();
+            }
+        }
+
+        $reqDetail   = !empty($proyek->judul) && !empty($proyek->deskripsi) && !empty($proyek->desa_id);
+        $reqFoto     = $proyek->fotos->count() > 0;
+        $reqPenyedia = !empty($proyek->penyedia_id);
+        $reqRincian  = !empty($detail) && !empty($detail->kapasitas_daya);
+        $reqTarget   = !empty($proyek->target_dana) && $proyek->target_dana > 0;
+
+        $isLengkap = $reqDetail && $reqFoto && $reqPenyedia && $reqRincian && $reqTarget;
+
+        if (!$isLengkap) {
+            return back()->withErrors(['error' => 'Proyek belum dapat dipublikasikan. Detail teknis belum lengkap.']);
+        }
+
+        // Jika ada jadwal → status terjadwal, jika tidak → aktif langsung
+        $newStatus = $request->filled('jadwal_publikasi') ? 'terjadwal' : 'aktif_funding';
+        $jadwal = $request->filled('jadwal_publikasi') ? \Carbon\Carbon::parse($request->jadwal_publikasi) : null;
+        
+        $proyek->update([
+            'status' => $newStatus,
+            'jadwal_publikasi' => $jadwal,
+        ]);
 
         $message = $newStatus === 'aktif_funding'
             ? 'Proyek berhasil dipublikasikan.'
-            : 'Proyek berhasil dibatalkan publikasinya.';
+            : 'Proyek berhasil dijadwalkan publikasinya.';
 
         return redirect()->route('proyek.kelola')->with('success', $message);
     }
 
     public function saveDraft($id)
     {
-        Proyek::findOrFail($id);
+        $proyek = Proyek::findOrFail($id);
+        $proyek->update(['status' => 'draft']);
         return redirect()->route('proyek.kelola')->with('success', 'Proyek disimpan sebagai draft.');
+    }
+
+    public function kembalikan($id)
+    {
+        $proyek = Proyek::with('penugasan.detail')->findOrFail($id);
+        $proyek->update(['status' => 'menunggu_konfirmasi_penyedia']);
+
+        $penugasan = $proyek->penugasan->first();
+        if ($penugasan && $penugasan->detail) {
+            $penugasan->detail->update([
+                'status' => 'draft',
+                'catatan' => request('catatan_revisi')
+            ]);
+        }
+
+        return redirect()->route('proyek.kelola')->with('success', 'Proyek dikembalikan ke penyedia untuk direvisi.');
     }
 
     public function kirimKePenyedia(Request $request, $id)
@@ -197,7 +341,21 @@ class ProyekController extends Controller
 
     public function show($id)
     {
-        $proyek = Proyek::with(['desa', 'penyedia', 'fotos'])->findOrFail($id);
-        return view('proyek.show', compact('proyek'));
+        $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
+        $detail = $proyek->penugasan->first()?->detail;
+        $costBreakdown = $detail ? $detail->cost_breakdown : null;
+        
+        return view('proyek.show', compact('proyek', 'costBreakdown'));
+    }
+
+    public function aktifkanInstalasi(Request $request, $id)
+    {
+        $proyek = Proyek::findOrFail($id);
+        
+        if ($proyek->checkAndActivateInstalasi()) {
+            return redirect()->back()->with('success', 'Instalasi diaktifkan! Penjadwalan timeline sedang diproses.');
+        }
+
+        return redirect()->back()->withErrors(['msg' => 'Gagal mengaktifkan instalasi. Pastikan dana sudah terkumpul dan penyedia aktif.']);
     }
 }

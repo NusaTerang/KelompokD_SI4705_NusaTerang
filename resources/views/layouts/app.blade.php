@@ -25,7 +25,7 @@
             @auth
                 @if(Auth::user()->isAdmin())
                     <a href="{{ route('dashboard') }}" class="{{ request()->is('admin*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Dashboard Admin</a>
-                    <a href="{{ url('/#proyek') }}" class="text-slate-600 hover:text-primary-container transition-colors">Proyek Energi</a>
+                    <a href="{{ url('/proyek') }}" class="{{ request()->is('proyek*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Proyek Energi</a>
                     <a href="{{ route('desa.daftar') }}" class="{{ request()->is('desa*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Data Desa</a>
                     <a href="{{ url('/penyedia/daftar') }}" class="{{ request()->is('penyedia*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Penyedia Energi</a>
                 @elseif(Auth::user()->isPenyedia())
@@ -33,12 +33,12 @@
                     <a href="{{ url('/penyedia/daftar') }}" class="{{ request()->is('penyedia*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Penyedia Energi</a>
                 @else
                     <a href="{{ url('/') }}" class="{{ request()->is('/') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Beranda</a>
-                    <a href="{{ url('/#proyek') }}" class="{{ request()->is('proyek*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Proyek</a>
+                    <a href="{{ url('/proyek') }}" class="{{ request()->is('proyek*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Proyek</a>
                     <a href="{{ url('/penyedia/daftar') }}" class="{{ request()->is('penyedia*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Penyedia Energi</a>
                 @endif
             @else
                 <a href="{{ url('/') }}" class="{{ request()->is('/') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Beranda</a>
-                <a href="{{ url('/#proyek') }}" class="{{ request()->is('proyek*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Proyek</a>
+                <a href="{{ url('/proyek') }}" class="{{ request()->is('proyek*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Proyek</a>
                 <a href="{{ url('/penyedia/daftar') }}" class="{{ request()->is('penyedia*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Penyedia Energi</a>
                 <a href="#" class="text-slate-600 hover:text-primary-container transition-colors">Tentang</a>
             @endauth

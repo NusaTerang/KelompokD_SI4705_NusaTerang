@@ -4,13 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Proyek extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'desa_id', 'penyedia_id', 'judul', 'deskripsi', 'jenis_energi',
         'estimasi_mulai', 'estimasi_selesai', 'target_dana', 'dana_terkumpul',
         'expired_extension_pending', 'expired_original_end_date', 'expired_extended_at', 'expired_vendor_decision',
-        'status', 'created_by',
+        'status', 'created_by', 'jadwal_publikasi'
     ];
 
     protected $casts = [
@@ -19,6 +22,7 @@ class Proyek extends Model
         'expired_extension_pending' => 'boolean',
         'expired_original_end_date' => 'date',
         'expired_extended_at' => 'datetime',
+        'jadwal_publikasi' => 'datetime',
     ];
 
     public function penugasan()
@@ -44,5 +48,14 @@ class Proyek extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function checkAndActivateInstalasi()
+    {
+        if ($this->status === 'aktif_funding' && $this->dana_terkumpul >= $this->target_dana) {
+            $this->update(['status' => 'eksekusi']);
+            return true;
+        }
+        return false;
     }
 }

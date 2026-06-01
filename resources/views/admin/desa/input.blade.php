@@ -267,24 +267,29 @@
             <div class="rounded-2xl border border-slate-200 bg-slate-100/80 p-5 shadow-sm">
                 <h3 class="mb-3 text-sm font-semibold text-nt-navy">Aktivitas Terakhir</h3>
                 <ul class="space-y-3 text-xs">
-                    <li class="flex gap-3">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                        </span>
-                        <div>
-                            <p class="font-medium text-slate-800">Desa Mandiri Sejahtera</p>
-                            <p class="text-slate-500">Baru saja diajukan</p>
-                        </div>
-                    </li>
-                    <li class="flex gap-3">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" /></svg>
-                        </span>
-                        <div>
-                            <p class="font-medium text-slate-800">Draft: Desa Sukajaya</p>
-                            <p class="text-slate-500">2 jam yang lalu</p>
-                        </div>
-                    </li>
+                    @forelse ($aktivitasTerakhir as $aktivitas)
+                        <li class="flex gap-3">
+                            @if (($aktivitas->status_verifikasi ?? '') === 'draft')
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" /></svg>
+                                </span>
+                                <div>
+                                    <p class="font-medium text-slate-800">Draft: {{ $aktivitas->nama_desa }}</p>
+                                    <p class="text-slate-500">{{ $aktivitas->created_at ? $aktivitas->created_at->diffForHumans() : 'Baru saja' }}</p>
+                                </div>
+                            @else
+                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                </span>
+                                <div>
+                                    <p class="font-medium text-slate-800">{{ $aktivitas->nama_desa }}</p>
+                                    <p class="text-slate-500">{{ $aktivitas->created_at ? $aktivitas->created_at->diffForHumans() : 'Baru saja diajukan' }}</p>
+                                </div>
+                            @endif
+                        </li>
+                    @empty
+                        <li class="text-slate-500">Belum ada aktivitas.</li>
+                    @endforelse
                 </ul>
             </div>
         </aside>

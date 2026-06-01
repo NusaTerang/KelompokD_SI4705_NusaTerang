@@ -19,7 +19,8 @@ class DesaController extends Controller
 
     public function create(): View
     {
-        return view('admin.desa.input');
+        $aktivitasTerakhir = Desa::orderBy('created_at', 'desc')->take(5)->get();
+        return view('admin.desa.input', compact('aktivitasTerakhir'));
     }
 
     public function store(StoreDesaRequest $request): RedirectResponse
@@ -33,9 +34,8 @@ class DesaController extends Controller
         // Gabungkan data input tambahan ke kolom kondisi_desa (Textarea)
         $kondisiGabungan = $this->gabungKondisiDesa($request, $validated['kondisi_desa'] ?? '');
 
-        // Bersihkan field yang tidak ada di tabel database (karena digabung ke kondisi_desa)
         $dataToSave = collect($validated)->except([
-            'kecamatan', 'kode_wilayah', 'kondisi_desa', 'jumlah_penduduk', 
+            'kecamatan', 'kode_wilayah', 'kondisi_desa', 
             'jumlah_kk', 'status_elektrifikasi', 'estimasi_kebutuhan_daya', 'catatan_tambahan'
         ])->toArray();
 
@@ -50,6 +50,12 @@ class DesaController extends Controller
             : 'Data desa berhasil diajukan untuk verifikasi.';
 
         return redirect()->route('desa.daftar')->with('success', $message);
+    }
+
+    public function show($id): View
+    {
+        $desa = Desa::findOrFail($id);
+        return view('admin.desa.show', compact('desa'));
     }
 
     public function edit($id): View
@@ -69,7 +75,7 @@ class DesaController extends Controller
         $kondisiGabungan = $this->gabungKondisiDesa($request, $validated['kondisi_desa'] ?? '');
 
         $dataToUpdate = collect($validated)->except([
-            'kecamatan', 'kode_wilayah', 'kondisi_desa', 'jumlah_penduduk', 
+            'kecamatan', 'kode_wilayah', 'kondisi_desa', 
             'jumlah_kk', 'status_elektrifikasi', 'estimasi_kebutuhan_daya', 'catatan_tambahan'
         ])->toArray();
 
@@ -115,56 +121,88 @@ class DesaController extends Controller
         return $hasil;
     }
 
-    public function kelola(): View
+    public function kelola(Request $request)
     {
-        $desas = Desa::query()->orderByDesc('created_at')->get();
-        
-        $desaPrioritas = $desas->map(function (Desa $d, int $i) {
-            $meta = $this->metaDariKondisi($d->kondisi_desa);
+        $query = Desa::query()->withExists('proyeks');
+
+        if ($request->filled('q')) {
+            $query->where('nama_desa', 'like', '%' . $request->q . '%');
+        }
+
+        if ($request->filled('provinsi')) {
+            $query->where('provinsi', $request->provinsi);
+        }
+
+        $desas = $query->get();
+        $availableProvinces = Desa::select('provinsi')->whereNotNull('provinsi')->distinct()->pluck('provinsi')->sort();
+
+        $desaPrioritas = $desas->map(function ($d) {
+            $skor = 0;
+            // 1. Rasio Elektrifikasi (Max 30)
+            if (str_contains(strtolower($d->kondisi_desa ?? ''), 'belum_teraliri')) $skor += 30;
+            elseif (str_contains(strtolower($d->kondisi_desa ?? ''), 'sebagian')) $skor += 20;
+            
+            // 2. Populasi Produktif (Max 25)
+            $populasiProduktif = $d->jumlah_penduduk * 0.67;
+            $skor += min(($populasiProduktif / 500) * 25, 25);
+
+            // 3. Potensi Surya (Max 25)
+            if ($d->koordinat) {
+                $lat = abs((float) explode(',', $d->koordinat)[0]);
+                if ($lat <= 3.0) $skor += 25;
+                elseif ($lat <= 6.0) $skor += 20;
+                else $skor += 15;
+            }
+            
+            // 4. Kesiapan Infrastruktur (Max 20)
+            $kesiapan_infrastruktur = !empty($d->kondisi_desa) ? 15 : 10;
+            $skor += $kesiapan_infrastruktur;
+
+            $statusListrik = str_contains(strtolower($d->kondisi_desa ?? ''), 'belum_teraliri') ? 'OFF-GRID' 
+                : (str_contains(strtolower($d->kondisi_desa ?? ''), 'sebagian') ? 'TERBATAS' : 'TERALIRI');
+
+            $tipeEnergi = match (strtolower($d->sumber ?? '')) {
+                'solar_panel', 'panel_surya' => 'panel_surya',
+                'mikro_hidro' => 'mikro_hidro',
+                'biogas' => 'biogas',
+                'hybrid_solar_baterai', 'hybrid' => 'hybrid_solar_baterai',
+                default => 'lainnya',
+            };
+
             return [
-                'rank' => $i + 1,
+                'id_desa' => $d->id_desa,
                 'nama_desa' => $d->nama_desa,
+                'skor_prioritas' => min($skor, 100), // Max 100
+                'populasi' => $d->jumlah_penduduk,
                 'lokasi' => $d->kabupaten . ', ' . $d->provinsi,
-                'skor_prioritas' => $this->placeholderPriorityScore($d),
-                'populasi' => $meta['penduduk'],
-                'status_listrik' => $this->elektrifikasiLabel($meta['elektrifikasi']),
-                'yield_kwp' => $meta['yield_kwp'],
+                'status_listrik' => $statusListrik,
+                'tipe_energi' => $tipeEnergi,
+                'yield_kwp' => 0,
                 'gambar' => 'https://picsum.photos/seed/desa' . $d->id_desa . '/640/360',
                 'solar_optimized' => $d->sumber === 'solar_panel',
-                'url_detail' => '#',
-                'url_proyek' => '#',
+                'url_detail' => route('desa.show', $d->id_desa),
+                'url_proyek' => route('proyek.create', ['desa_id' => $d->id_desa]),
+                'has_project' => $d->proyeks_exists,
             ];
-        })->toArray();
+        });
 
-        return view('admin.desa.kelola', compact('desaPrioritas'));
-    }
+        if ($request->filled('status_listrik')) {
+            $filterStatus = strtoupper($request->status_listrik);
+            $desaPrioritas = $desaPrioritas->filter(fn($d) => strtoupper($d['status_listrik']) === $filterStatus);
+        }
 
-    private function metaDariKondisi(?string $kondisi): array
-    {
-        $teks = $kondisi ?? '';
-        preg_match('/Penduduk \(jiwa\):\s*(\d+)/u', $teks, $m1);
-        preg_match('/Status elektrifikasi:\s*(\S+)/u', $teks, $m2);
-        preg_match('/Estimasi kebutuhan daya \(kW\):\s*([0-9]+(?:\.[0-9]+)?)/u', $teks, $m3);
+        if ($request->filled('tipe_energi')) {
+            $filterEnergi = strtolower($request->tipe_energi);
+            $desaPrioritas = $desaPrioritas->filter(fn($d) => strtolower($d['tipe_energi']) === $filterEnergi);
+        }
 
-        return [
-            'penduduk' => (int)($m1[1] ?? 0),
-            'elektrifikasi' => $m2[1] ?? null,
-            'yield_kwp' => round((float)($m3[1] ?? 0), 1),
-        ];
-    }
+        $desaPrioritas = $desaPrioritas->sortByDesc('skor_prioritas')->values();
 
-    private function placeholderPriorityScore(Desa $desa): float
-    {
-        return round(55.0 + (crc32($desa->id_desa . $desa->nama_desa) % 450) / 10, 1);
-    }
+        $desaPrioritas = $desaPrioritas->map(function ($item, $index) {
+            $item['rank'] = $index + 1;
+            return $item;
+        });
 
-    private function elektrifikasiLabel(?string $status): string
-    {
-        return match ($status) {
-            'belum_teraliri' => 'OFF-GRID',
-            'sebagian' => 'TERBATAS',
-            'sudah_teraliri' => 'TERALIRI',
-            default => '—',
-        };
+        return view('admin.desa.kelola', compact('desaPrioritas', 'availableProvinces'));
     }
 }
