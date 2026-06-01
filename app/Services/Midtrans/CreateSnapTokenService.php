@@ -12,6 +12,7 @@ class CreateSnapTokenService extends Midtrans
     {
         parent::__construct();
         $this->order = $order;
+<<<<<<< HEAD
     }
 
     public function getSnapToken()
@@ -42,3 +43,35 @@ class CreateSnapTokenService extends Midtrans
         return Snap::getSnapToken($params);
     }
 }
+=======
+    }
+
+    public function getSnapToken(): string
+    {
+        $params = [
+            'transaction_details' => [
+                'order_id'     => $this->order->number,
+                'gross_amount' => (int) $this->order->total_price,
+            ],
+            'item_details' => [
+                [
+                    'id'       => 'DONASI-' . $this->order->id,
+                    'price'    => (int) $this->order->total_price,
+                    'quantity' => 1,
+                    'name'     => 'Donasi NusaTerang',
+                    'category' => 'Donation',
+                ],
+            ],
+            'customer_details' => [
+                'first_name' => $this->order->donatur_name,
+                'email'      => $this->order->donatur_email,
+                'phone'      => $this->order->donatur_phone ?? '',
+            ],
+            // Batasi ke QRIS saja agar sesuai requirement
+            'enabled_payments' => ['qris'],
+        ];
+
+        return Snap::getSnapToken($params);
+    }
+}
+>>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd

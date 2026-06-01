@@ -278,6 +278,7 @@
                 </div>
             </div>
 
+<<<<<<< HEAD
             <div class="grid grid-cols-2 gap-3 w-full">
                 <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
                 <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
@@ -298,6 +299,17 @@
             </div>
 
             @if($proyek->status === 'eksekusi')
+=======
+            @auth
+                <form action="{{ route('donasi.store', $proyek->id) }}" method="POST" class="flex flex-col gap-4 w-full">
+                    @csrf
+                    <div class="grid grid-cols-2 gap-3 w-full">
+                        <button type="button" onclick="document.getElementById('amount').value=50000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=100000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=250000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
+                        <button type="button" onclick="document.getElementById('amount').value=500000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
+                    </div>
+>>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 
                 <button
                     disabled
@@ -315,6 +327,7 @@
                     Login untuk Donasi
 
                 </a>
+<<<<<<< HEAD
 
             @else
 
@@ -327,6 +340,9 @@
                 </button>
 
             @endif
+=======
+            @endauth
+>>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 
             <div class="flex items-center gap-6 pt-2 border-t border-surface-container">
                 <div class="flex items-center gap-2">

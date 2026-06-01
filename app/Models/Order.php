@@ -12,15 +12,14 @@ class Order extends Model
     /** @use HasFactory<OrderFactory> */
     use HasFactory;
 
-    // ── Status constants ───────────────────────────────────────────
-    const STATUS_PENDING   = 1; // menunggu pembayaran
-    const STATUS_SUCCESS   = 2; // sudah dibayar
-    const STATUS_EXPIRED   = 3; // kadaluarsa
-    const STATUS_CANCELLED = 4; // dibatalkan
+    const STATUS_PENDING   = 1;
+    const STATUS_SUCCESS   = 2;
+    const STATUS_EXPIRED   = 3;
+    const STATUS_CANCELLED = 4;
 
-    // ── Mass-assignable fields ─────────────────────────────────────
     protected $fillable = [
         'user_id',
+        'proyek_id',
         'number',
         'total_price',
         'donatur_name',
@@ -32,13 +31,11 @@ class Order extends Model
         'proyek_id',
     ];
 
-    // ── Casts ──────────────────────────────────────────────────────
     protected $casts = [
         'total_price'    => 'integer',
         'payment_status' => 'integer',
     ];
 
-    // ── Relationships ──────────────────────────────────────────────
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id_donatur');
@@ -49,7 +46,11 @@ class Order extends Model
         return $this->belongsTo(Proyek::class, 'proyek_id');
     }
 
-    // ── Helpers ────────────────────────────────────────────────────
+    public function proyek(): BelongsTo
+    {
+        return $this->belongsTo(Proyek::class);
+    }
+
     public function isPending(): bool
     {
         return $this->payment_status === self::STATUS_PENDING;
