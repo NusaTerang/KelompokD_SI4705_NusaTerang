@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             DesaDummySeeder::class,
             PenyediaDummySeeder::class,
             ProyekDummySeeder::class,
+            FakeDonationSeeder::class,
         ]);
     }
 }

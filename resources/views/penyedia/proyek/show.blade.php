@@ -57,7 +57,17 @@
     </div>
 
     {{-- Alert Banner --}}
-    @if($penugasan->status_penugasan === 'pending')
+    @if($detail?->catatan)
+    <div class="bg-error/10 rounded-2xl p-5 flex items-start gap-4 mb-8 border border-error/20 shadow-sm">
+        <div class="w-10 h-10 rounded-full bg-error/20 flex items-center justify-center text-error shrink-0 mt-1">
+            <span class="material-symbols-outlined active-fill">error</span>
+        </div>
+        <div class="flex-1">
+            <p class="text-sm text-error font-bold">Revisi Diperlukan dari Admin</p>
+            <p class="text-sm text-error/80 font-medium mt-1 whitespace-pre-wrap">{{ $detail->catatan }}</p>
+        </div>
+    </div>
+    @elseif($penugasan->status_penugasan === 'pending')
     <div class="bg-solar-gold/10 rounded-2xl p-5 flex items-center justify-between mb-8 border border-solar-gold/20 shadow-sm">
         <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-full bg-solar-gold flex items-center justify-center text-deep-navy shrink-0">

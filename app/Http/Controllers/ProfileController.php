@@ -10,18 +10,16 @@ class ProfileController extends Controller
 {
 public function edit()
 {
-    $user = auth()->user();
+    $user = auth()->user() ?? (object)[
+        'nama' => 'Preview User',
+        'email' => 'preview@example.com',
+        'no_telepon' => '081234567890',
+        'created_at' => now(),
+    ];
 
-    // Jika belum login → pakai dummy user
-    if (!$user) {
-        $user = (object)[
-            'name' => 'Preview User',
-            'email' => 'preview@example.com',
-            'created_at' => now(),
-        ];
-    }
+    $bergabung = $user->created_at->format('d M Y');
 
-    return view('profil.edit', compact('user'));
+    return view('profil.edit', compact('user', 'bergabung'));
 }
 
     public function update(UpdateProfileRequest $request): RedirectResponse

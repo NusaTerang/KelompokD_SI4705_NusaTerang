@@ -13,13 +13,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <div class="mb-6 flex items-center gap-3 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
-        <span class="material-symbols-outlined text-green-600 text-base">check_circle</span>
-        {{ session('success') }}
-    </div>
-@endif
-
 {{-- Header --}}
 <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
     <div>
@@ -61,8 +54,7 @@
             <option value="">Semua Status</option>
             <option value="draft"                          {{ request('status') === 'draft'                          ? 'selected' : '' }}>Draft</option>
             <option value="menunggu_konfirmasi_penyedia"   {{ request('status') === 'menunggu_konfirmasi_penyedia'   ? 'selected' : '' }}>Menunggu Konfirmasi</option>
-            <option value="diterima_penyedia"              {{ request('status') === 'diterima_penyedia'              ? 'selected' : '' }}>Diterima Penyedia</option>
-            <option value="menunggu_review_admin"          {{ request('status') === 'menunggu_review_admin'          ? 'selected' : '' }}>Menunggu Review Admin</option>
+            <option value="menunggu_review_admin"          {{ request('status') === 'menunggu_review_admin'          ? 'selected' : '' }}>Menunggu Review</option>
             <option value="aktif_funding"                  {{ request('status') === 'aktif_funding'                  ? 'selected' : '' }}>Aktif Funding</option>
             <option value="eksekusi"                       {{ request('status') === 'eksekusi'                       ? 'selected' : '' }}>Eksekusi</option>
             <option value="selesai"                        {{ request('status') === 'selesai'                        ? 'selected' : '' }}>Selesai</option>
@@ -103,9 +95,8 @@
                     default                => ['label' => $proyek->jenis_energi,  'icon' => 'energy_savings_leaf', 'class' => 'bg-slate-100 text-slate-600'],
                 };
                 $statusLabel = match($proyek->status) {
-                    'draft'                       => ['label' => 'Draft',               'class' => 'bg-slate-100 text-slate-600',                          'dot' => 'bg-slate-400'],
+                    'draft'                        => ['label' => 'Draft',               'class' => 'bg-slate-100 text-slate-600',                          'dot' => 'bg-slate-400'],
                     'menunggu_konfirmasi_penyedia' => ['label' => 'Menunggu Konfirmasi', 'class' => 'bg-amber-50 text-amber-700',                           'dot' => 'bg-amber-400'],
-                    'diterima_penyedia'            => ['label' => 'Diterima Penyedia',  'class' => 'bg-blue-50 text-blue-700',                             'dot' => 'bg-blue-400'],
                     'menunggu_review_admin'        => ['label' => 'Menunggu Review',    'class' => 'bg-purple-50 text-purple-700',                         'dot' => 'bg-purple-400'],
                     'aktif_funding'                => ['label' => 'Aktif Funding',      'class' => 'bg-tertiary-container/30 text-on-tertiary-container',  'dot' => 'bg-tertiary'],
                     'eksekusi'                     => ['label' => 'Eksekusi',           'class' => 'bg-teal-50 text-teal-700',                             'dot' => 'bg-teal-400'],
@@ -114,9 +105,7 @@
                     'ditolak'                      => ['label' => 'Ditolak',            'class' => 'bg-red-50 text-red-700',                               'dot' => 'bg-red-400'],
                     default                        => ['label' => $proyek->status,      'class' => 'bg-slate-100 text-slate-500',                          'dot' => 'bg-slate-400'],
                 };
-                $canTogglePublish = in_array($proyek->status, ['draft', 'diterima_penyedia', 'menunggu_review_admin', 'aktif_funding']);
-                $publishTitle     = $proyek->status === 'aktif_funding' ? 'Mulai Eksekusi' : 'Publikasikan';
-                $publishIcon      = $proyek->status === 'aktif_funding' ? 'play_arrow' : 'publish';
+                $canTogglePublish = in_array($proyek->status, ['menunggu_review_admin', 'aktif_funding', 'terjadwal']);
                 $canDelete        = $proyek->status === 'draft';
             @endphp
             <tr class="hover:bg-surface-container-low/50 transition-colors">
@@ -145,12 +134,12 @@
                         {{-- View detail --}}
                         <a href="{{ route('proyek.admin.show', $proyek->id) }}"
                            class="p-1.5 text-secondary hover:bg-secondary/10 rounded transition-colors"
-                           title="Lihat Detail">
+                           title="Lihat Detail Admin">
                             <span class="material-symbols-outlined text-sm">visibility</span>
                         </a>
 
                         {{-- Edit --}}
-                        <a href="{{ route('proyek.create', ['draft_id' => $proyek->id]) }}"
+                        <a href="{{ route('proyek.edit', $proyek->id) }}"
                            class="p-1.5 text-secondary hover:bg-secondary/10 rounded transition-colors"
                            title="Edit">
                             <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">edit</span>
@@ -158,14 +147,22 @@
 
                         {{-- Publish toggle --}}
                         @if($canTogglePublish)
-                            <button type="button"
-                                    onclick="openPublishModal({{ $proyek->id }}, '{{ addslashes($proyek->judul) }}', '{{ $proyek->status }}')"
-                                    class="p-1.5 rounded transition-colors text-slate-400 hover:bg-tertiary-container/30 hover:text-tertiary"
-                                    title="{{ $publishTitle }}">
-                                <span class="material-symbols-outlined text-sm">{{ $publishIcon }}</span>
-                            </button>
+                            @if($proyek->status === 'aktif_funding' || $proyek->status === 'terjadwal')
+                                <button type="button"
+                                        onclick="openPublishModal({{ $proyek->id }}, '{{ addslashes($proyek->judul) }}', '{{ $proyek->status }}')"
+                                        class="p-1.5 rounded transition-colors text-slate-400 hover:bg-red-50 hover:text-error"
+                                        title="Batalkan Publikasi">
+                                    <span class="material-symbols-outlined text-sm">unpublished</span>
+                                </button>
+                            @else
+                                <a href="{{ route('proyek.publikasi', $proyek->id) }}"
+                                   class="p-1.5 rounded transition-colors inline-block text-slate-400 hover:bg-tertiary-container/30 hover:text-tertiary"
+                                   title="Halaman Publikasi">
+                                    <span class="material-symbols-outlined text-sm">publish</span>
+                                </a>
+                            @endif
                         @else
-                            <span class="p-1.5 text-slate-200 cursor-not-allowed" title="Tidak dapat diubah">
+                            <span class="p-1.5 text-slate-200 cursor-not-allowed" title="Belum dapat dipublikasi">
                                 <span class="material-symbols-outlined text-sm">lock</span>
                             </span>
                         @endif

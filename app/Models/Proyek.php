@@ -6,13 +6,16 @@ use App\Notifications\TargetDanaTercapai;
 use App\Services\NotificationRecipientService;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Proyek extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'desa_id', 'penyedia_id', 'judul', 'deskripsi', 'jenis_energi',
         'estimasi_mulai', 'estimasi_selesai', 'target_dana', 'dana_terkumpul',
         'expired_extension_pending', 'expired_original_end_date', 'expired_extended_at', 'expired_vendor_decision',
-        'status', 'created_by',
+        'status', 'created_by', 'jadwal_publikasi'
     ];
 
     protected $casts = [
@@ -21,6 +24,7 @@ class Proyek extends Model
         'expired_extension_pending' => 'boolean',
         'expired_original_end_date' => 'date',
         'expired_extended_at' => 'datetime',
+        'jadwal_publikasi' => 'datetime',
     ];
 
     public function penugasan()
@@ -79,7 +83,7 @@ class Proyek extends Model
             ->latestOfMany('submitted_at');
     }
 
-    public function donasi()
+    public function donasis()
     {
         return $this->hasMany(Donasi::class, 'id_proyek');
     }
@@ -96,5 +100,14 @@ class Proyek extends Model
                 ->adminsAndDonorsForProject($this)
                 ->each(fn ($recipient) => $recipient->notify(new TargetDanaTercapai($this)));
         }
+    }
+
+    public function checkAndActivateInstalasi()
+    {
+        if ($this->status === 'aktif_funding' && $this->dana_terkumpul >= $this->target_dana) {
+            $this->update(['status' => 'eksekusi']);
+            return true;
+        }
+        return false;
     }
 }

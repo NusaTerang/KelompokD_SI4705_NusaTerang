@@ -11,6 +11,9 @@ use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
 use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentCallbackController;
+
 
 // ─── Public ──────────────────────────────────────────────────────────────────
 
@@ -58,7 +61,7 @@ Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('peny
 Route::get('/penyedia/{id}', [PenyediaController::class, 'show'])->name('penyedia.show');
 Route::get('/api/penyedia/rekomendasi', [PenyediaController::class, 'getRekomendasi'])->name('api.penyedia.rekomendasi');
 
-// ─── Auth (guest only) ────────────────────────────────────────────────────────
+// ─── Auth (guest only) ─────────────────────────────────────────────────────────
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -70,6 +73,15 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
 
+// ─── Donasi (Authenticated) ───────────────────────────────────────────────────
+
+Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () {
+    Route::get('/',                      [OrderController::class, 'create'])->name('create');
+    Route::post('/{proyek}',             [OrderController::class, 'store'])->name('store');
+    Route::get('/{order}',               [OrderController::class, 'show'])->name('show');
+    Route::get('/{order}/status',        [OrderController::class, 'status'])->name('status');
+});
+
 // ─── Authenticated ────────────────────────────────────────────────────────────
 
 Route::middleware('auth')->group(function () {
@@ -78,7 +90,7 @@ Route::middleware('auth')->group(function () {
         $user = auth()->user();
 
         return match ($user->role) {
-            'admin'    => redirect()->route('desa.daftar'),
+            'admin'    => redirect()->route('admin.dashboard'),
             'penyedia' => redirect()->route('vendor.dashboard'),
             default    => redirect('/'),
         };
@@ -119,7 +131,8 @@ Route::middleware('auth')->get('/penyedia/dashboard', function () {
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
-Route::middleware('auth')->prefix('admin')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
     // Desa management
     Route::prefix('desa')->name('desa.')->group(function () {
@@ -127,18 +140,22 @@ Route::middleware('auth')->prefix('admin')->group(function () {
         Route::post('/', [DesaController::class, 'store'])->name('store');
         Route::get('kelola', [DesaController::class, 'kelola'])->name('kelola');
         Route::get('daftar', [DesaController::class, 'index'])->name('daftar');
+        Route::get('{id}', [DesaController::class, 'show'])->name('show');
 
         Route::get('{id}/edit', [DesaController::class, 'edit'])->name('edit');
         Route::put('{id}', [DesaController::class, 'update'])->name('update');
         Route::delete('{id}', [DesaController::class, 'destroy'])->name('destroy');
     });
 
-    // Proyek creation wizard
+    // Proyek management
     Route::prefix('proyek')->name('proyek.')->group(function () {
         Route::get('buat', [ProyekController::class, 'create'])->name('create');
         Route::post('buat', [ProyekController::class, 'saveStep1'])->name('save.step1');
         Route::get('kelola', [ProyekController::class, 'kelola'])->name('kelola');
+        Route::get('{id}/edit', [ProyekController::class, 'edit'])->name('edit');
+        Route::put('{id}', [ProyekController::class, 'update'])->name('update');
         Route::get('{id}/detail', [ProyekController::class, 'adminShow'])->name('admin.show');
+        Route::get('{id}/publikasi', [ProyekController::class, 'publikasi'])->name('publikasi');
         Route::patch('{id}/publish', [ProyekController::class, 'publish'])->name('publish');
         Route::delete('{id}', [ProyekController::class, 'destroy'])->name('destroy');
 
@@ -147,10 +164,11 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
         Route::get('{id}/review', [ProyekController::class, 'review'])->name('review');
         Route::post('{id}/draft', [ProyekController::class, 'saveDraft'])->name('save.draft');
+        Route::patch('{id}/kembalikan', [ProyekController::class, 'kembalikan'])->name('kembalikan');
         Route::post('{id}/kirim', [ProyekController::class, 'kirimKePenyedia'])->name('kirim');
     });
 
-    // Vendor / Penyedia Energi CRUD
+    // Vendor CRUD
     Route::prefix('vendors')->name('admin.vendors.')->group(function () {
         Route::get('/', [AdminPenyediaController::class, 'index'])->name('index');
         Route::get('/create', [AdminPenyediaController::class, 'create'])->name('create');
@@ -161,10 +179,15 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     });
 });
 
-// ─── Legacy / misc ────────────────────────────────────────────────────────────
+// ─── Legacy / misc ─────────────────────────────────────────────────────────────
 
 Route::get('/profil-preview', [ProfileController::class, 'edit']);
 
 Route::post('/assign', [PenugasanController::class, 'assign']);
 Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
 Route::post('/detail', [PenugasanController::class, 'isiDetail']);
+
+// ─── Midtrans Webhook (CSRF exempt — lihat bootstrap/app.php) ─────────────────
+
+Route::post('/payments/midtrans-notification', [PaymentCallbackController::class, 'receive'])
+    ->name('midtrans.callback');

@@ -69,7 +69,7 @@
             </div>
             <div>
                 <h3 class="text-xl font-extrabold text-deep-navy">Lanjutkan Proyek</h3>
-                <p class="text-sm text-on-surface-variant font-medium mt-2">Proyek kembali aktif funding dengan dana terkumpul saat ini.</p>
+                <p class="text-sm text-on-surface-variant font-medium mt-2">Proyek diselesaikan dengan jumlah dana yang sudah terkumpul saat ini.</p>
             </div>
             <button type="submit" class="w-full py-4 bg-solar-gold text-deep-navy rounded-xl font-bold text-sm hover:brightness-105 transition-all">
                 Lanjutkan Proyek

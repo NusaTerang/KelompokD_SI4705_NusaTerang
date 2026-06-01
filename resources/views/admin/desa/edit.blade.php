@@ -49,7 +49,7 @@
 
     <div class="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-start">
         <div class="min-w-0 flex-1 space-y-6">
-            <form action="{{ route('desa.update', ['id' => $desa->id_desa]) }}" method="post" class="space-y-8">
+            <form action="{{ route('desa.update', $desa->id_desa) }}" method="post" class="space-y-8">
                 @csrf
                 @method('PUT')
 
@@ -260,10 +260,12 @@
                 </section>
 
                 <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-between">
-                    <button type="submit" name="action" value="submit" class="inline-flex items-center justify-center gap-1 rounded-lg bg-nt-accent px-6 py-2.5 text-sm font-bold text-nt-navy shadow-sm hover:bg-nt-accent-hover">
-                        Update Data
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                    <button type="submit" name="action" value="submit" class="inline-flex items-center justify-center rounded-lg bg-nt-navy px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nt-navy/90 focus:outline-none focus:ring-2 focus:ring-nt-navy focus:ring-offset-2">
+                        Simpan Perubahan
                     </button>
+                    <a href="{{ route('desa.daftar') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+                        Batal
+                    </a>
                 </div>
             </form>
         </div>
@@ -274,8 +276,8 @@
                 <h3 class="mb-3 text-sm font-semibold">Panduan Edit</h3>
                 <ul class="space-y-2 text-xs leading-relaxed text-white/85">
                     <li class="flex gap-2"><span class="text-nt-accent">✓</span> Pastikan koordinat GPS akurat (min. 4 desimal).</li>
-                    <li class="flex gap-2"><span class="text-nt-accent">✓</span> Perbarui data kependudukan jika ada perubahan.</li>
-                    <li class="flex gap-2"><span class="text-nt-accent">✓</span> Pastikan estimasi kebutuhan daya sudah sesuai dengan kondisi terkini.</li>
+                    <li class="flex gap-2"><span class="text-nt-accent">✓</span> Gunakan data kependudukan resmi desa / BPS jika ada.</li>
+                    <li class="flex gap-2"><span class="text-nt-accent">✓</span> Jika status berubah menjadi "Sudah Teraliri", pastikan memberikan alasan valid di Catatan.</li>
                 </ul>
             </div>
         </aside>
