@@ -5,24 +5,15 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DesaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
-use App\Http\Controllers\PaymentCallbackController;
-=======
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 use App\Http\Controllers\PenugasanController;
 use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\PenyediaController;
 use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
 use App\Http\Controllers\OrderController;
-<<<<<<< HEAD
-
-// ─── Public ───────────────────────────────────────────────────────────────────
-=======
 use App\Http\Controllers\PaymentCallbackController;
 
 // ─── Public ──────────────────────────────────────────────────────────────────
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 
 Route::get('/', function () {
     $query = \App\Models\Proyek::with(['desa', 'fotos']);
@@ -63,10 +54,7 @@ Route::get('/', function () {
     return view('welcome', compact('projects', 'provinceOptions'));
 });
 
-<<<<<<< HEAD
-=======
 Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('penyedia.daftar');
 Route::get('/penyedia/{id}', [PenyediaController::class, 'show'])->name('penyedia.show');
 Route::get('/api/penyedia/rekomendasi', [PenyediaController::class, 'getRekomendasi'])->name('api.penyedia.rekomendasi');
@@ -83,18 +71,6 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout')->middleware('auth');
 
-<<<<<<< HEAD
-// ─── Authenticated ─────────────────────────────────────────────────────────────
-
-Route::middleware('auth')->group(function () {
-    // Project detail is protected (only accessible to logged-in users)
-    Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
-
-    // Donation routes
-    Route::post('/donasi/{proyek_id}', [OrderController::class, 'store'])->name('donasi.store');
-    Route::get('/order/{order}', [OrderController::class, 'show'])->name('order.show');
-
-=======
 // ─── Donasi (Authenticated) ───────────────────────────────────────────────────
 
 Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () {
@@ -107,7 +83,6 @@ Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () 
 // ─── Authenticated ────────────────────────────────────────────────────────────
 
 Route::middleware('auth')->group(function () {
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
     Route::get('/dashboard', function () {
         /** @var \App\Models\User $user */
         $user = auth()->user();
@@ -123,11 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
 });
 
-<<<<<<< HEAD
-// ─── Vendor (Penyedia Energi) ──────────────────────────────────────────────────
-=======
 // ─── Vendor (Penyedia Energi) ─────────────────────────────────────────────────
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 
 Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->group(function () {
     Route::get('/dashboard', function () {
@@ -149,11 +120,7 @@ Route::middleware('auth')->get('/penyedia/dashboard', function () {
     return redirect()->route('vendor.dashboard');
 })->name('penyedia.dashboard');
 
-<<<<<<< HEAD
-// ─── Admin ─────────────────────────────────────────────────────────────────────
-=======
 // ─── Admin ────────────────────────────────────────────────────────────────────
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
@@ -205,11 +172,7 @@ Route::post('/assign', [PenugasanController::class, 'assign']);
 Route::post('/respon/{id}', [PenugasanController::class, 'respon']);
 Route::post('/detail', [PenugasanController::class, 'isiDetail']);
 
-<<<<<<< HEAD
-// ─── Midtrans Webhook (CSRF exempt) ───────────────────────────────────────────
-=======
 // ─── Midtrans Webhook (CSRF exempt — lihat bootstrap/app.php) ─────────────────
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
 
 Route::post('/payments/midtrans-notification', [PaymentCallbackController::class, 'receive'])
     ->name('midtrans.callback');

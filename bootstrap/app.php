@@ -15,14 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => null);
         $middleware->alias([
             'penyedia' => \App\Http\Middleware\EnsurePenyedia::class,
-<<<<<<< HEAD
-            'admin' => \App\Http\Middleware\EnsureAdmin::class,
         ]);
-        
-        // Midtrans webhook tidak bisa kirim CSRF token, jadi harus diexclude
-=======
-        ]);
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
         $middleware->validateCsrfTokens(except: [
             'payments/midtrans-notification',
         ]);

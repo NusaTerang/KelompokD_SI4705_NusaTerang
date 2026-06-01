@@ -9,12 +9,8 @@
         "php": "^8.3",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.3",
-<<<<<<< HEAD
-        "laravel/tinker": "^3.0"
-=======
         "laravel/tinker": "^3.0",
         "midtrans/midtrans-php": "^2.6"
->>>>>>> 9e75b2c7211ecd112192778de4861ab8d620a9fd
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
