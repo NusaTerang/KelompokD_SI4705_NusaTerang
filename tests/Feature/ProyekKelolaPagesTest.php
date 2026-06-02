@@ -151,18 +151,18 @@ class ProyekKelolaPagesTest extends TestCase
         );
     }
 
-    public function test_publish_sets_aktif_funding_when_draft(): void
+    public function test_publish_rejects_incomplete_draft(): void
     {
         $proyek = $this->makeProyek(['status' => 'draft']);
 
         $response = $this->actingAs($this->admin)
             ->patch(route('proyek.publish', $proyek->id));
 
-        $response->assertRedirect(route('proyek.kelola'));
-        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'aktif_funding']);
+        $response->assertRedirect();
+        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'draft']);
     }
 
-    public function test_publish_starts_execution_when_aktif_funding(): void
+    public function test_publish_unpublishes_when_aktif_funding(): void
     {
         $proyek = $this->makeProyek(['status' => 'aktif_funding']);
 
@@ -170,18 +170,18 @@ class ProyekKelolaPagesTest extends TestCase
             ->patch(route('proyek.publish', $proyek->id));
 
         $response->assertRedirect(route('proyek.kelola'));
-        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'eksekusi']);
+        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'draft']);
     }
 
-    public function test_publish_sets_aktif_funding_when_menunggu_review_admin(): void
+    public function test_publish_rejects_incomplete_menunggu_review_admin(): void
     {
         $proyek = $this->makeProyek(['status' => 'menunggu_review_admin']);
 
         $response = $this->actingAs($this->admin)
             ->patch(route('proyek.publish', $proyek->id));
 
-        $response->assertRedirect(route('proyek.kelola'));
-        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'aktif_funding']);
+        $response->assertRedirect();
+        $this->assertDatabaseHas('proyeks', ['id' => $proyek->id, 'status' => 'menunggu_review_admin']);
     }
 
     public function test_publish_forbidden_when_eksekusi(): void
@@ -226,7 +226,7 @@ class ProyekKelolaPagesTest extends TestCase
         $response->assertOk();
         $response->assertSee('Refund');
         $response->assertDontSee("openPublishModal({$proyek->id}", false);
-        $response->assertSee('Tidak dapat diubah');
+        $response->assertSee('Belum dapat dipublikasi');
     }
 
     public function test_kelola_visibility_link_points_to_admin_project_show_page(): void

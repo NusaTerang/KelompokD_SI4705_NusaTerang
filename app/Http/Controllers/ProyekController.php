@@ -12,6 +12,35 @@ use Illuminate\Support\Facades\Gate;
 
 class ProyekController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = Proyek::with(['desa', 'fotos'])->where('status', 'aktif_funding');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhereHas('desa', fn ($dq) => $dq->where('nama_desa', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($request->filled('wilayah')) {
+            $query->whereHas('desa', fn ($dq) => $dq->where('provinsi', $request->wilayah));
+        }
+
+        $provinceOptions = Proyek::where('status', 'aktif_funding')
+            ->whereHas('desa')
+            ->join('desa', 'proyeks.desa_id', '=', 'desa.id_desa')
+            ->select('desa.provinsi')
+            ->distinct()
+            ->orderBy('desa.provinsi')
+            ->pluck('desa.provinsi');
+
+        $projects = $query->latest('proyeks.created_at')->paginate(12)->withQueryString();
+
+        return view('proyek.index', compact('projects', 'provinceOptions'));
+    }
+
     public function create()
     {
         $desas = Desa::all();

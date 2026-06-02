@@ -56,6 +56,7 @@ Route::get('/', function () {
     return view('welcome', compact('projects', 'provinceOptions'));
 });
 
+Route::get('/proyek', [ProyekController::class, 'index'])->name('proyek.index');
 Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
 Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('penyedia.daftar');
 Route::get('/penyedia/{id}', [PenyediaController::class, 'show'])->name('penyedia.show');
@@ -76,10 +77,10 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name
 // ─── Donasi (Authenticated) ───────────────────────────────────────────────────
 
 Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () {
-    Route::get('/',                      [OrderController::class, 'create'])->name('create');
-    Route::post('/{proyek}',             [OrderController::class, 'store'])->name('store');
-    Route::get('/{order}',               [OrderController::class, 'show'])->name('show');
-    Route::get('/{order}/status',        [OrderController::class, 'status'])->name('status');
+    Route::get('/',                [OrderController::class, 'create'])->name('create');
+    Route::post('/',               [OrderController::class, 'store'])->name('store');
+    Route::get('/{order}',         [OrderController::class, 'show'])->name('show');
+    Route::get('/{order}/status',  [OrderController::class, 'status'])->name('status');
 });
 
 // ─── Authenticated ────────────────────────────────────────────────────────────

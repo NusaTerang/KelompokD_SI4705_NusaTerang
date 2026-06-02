@@ -28,7 +28,6 @@ class Order extends Model
         'pesan',
         'payment_status',
         'snap_token',
-        'proyek_id',
     ];
 
     protected $casts = [
@@ -44,11 +43,6 @@ class Order extends Model
     public function proyek(): BelongsTo
     {
         return $this->belongsTo(Proyek::class, 'proyek_id');
-    }
-
-    public function proyek(): BelongsTo
-    {
-        return $this->belongsTo(Proyek::class);
     }
 
     public function isPending(): bool

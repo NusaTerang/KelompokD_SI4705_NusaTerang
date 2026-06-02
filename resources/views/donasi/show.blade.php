@@ -109,6 +109,12 @@
     const origLabel = payBtn.innerHTML;
     const loadLabel = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".8s" repeatCount="indefinite"/></path></svg> Membuka Pembayaran...';
 
+    if (!snapToken) {
+        payBtn.disabled = true;
+        payBtn.textContent = 'Token tidak tersedia';
+        return;
+    }
+
     payBtn.addEventListener('click', function() {
         payBtn.disabled = true;
         payBtn.innerHTML = loadLabel;
