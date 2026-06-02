@@ -410,39 +410,35 @@
             </div>
 
             @if($proyek->status === 'eksekusi')
-                <button
-                    disabled
-                    class="w-full bg-gray-300 text-gray-600 font-headline font-extrabold text-lg py-4 rounded-xl cursor-not-allowed text-center block">
+                <button disabled class="w-full bg-gray-300 text-gray-600 font-headline font-extrabold text-lg py-4 rounded-xl cursor-not-allowed text-center block">
                     Pendanaan Tercapai
                 </button>
-            @auth
             @else
-                <form action="{{ route('donasi.store', $proyek->id) }}" method="POST" class="flex flex-col gap-4 w-full">
+            @auth
+                <form action="{{ route('donasi.store') }}" method="POST" class="flex flex-col gap-4 w-full">
                     @csrf
+                    <input type="hidden" name="proyek_id" value="{{ $proyek->id }}">
+                    <input type="hidden" name="donatur_name" value="{{ auth()->user()->name }}">
+                    <input type="hidden" name="donatur_email" value="{{ auth()->user()->email }}">
+                    <input type="hidden" name="donatur_phone" value="{{ auth()->user()->no_telepon ?? '' }}">
+
                     <div class="grid grid-cols-2 gap-3 w-full">
-                        <button type="button" onclick="document.getElementById('amount').value=50000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
-                        <button type="button" onclick="document.getElementById('amount').value=100000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
-                        <button type="button" onclick="document.getElementById('amount').value=250000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
-                        <button type="button" onclick="document.getElementById('amount').value=500000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
+                        <button type="button" onclick="document.getElementById('total_price').value=50000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
+                        <button type="button" onclick="document.getElementById('total_price').value=100000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
+                        <button type="button" onclick="document.getElementById('total_price').value=250000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
+                        <button type="button" onclick="document.getElementById('total_price').value=500000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
-                        <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                        <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi</label>
                         <div class="relative w-full">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
-                            <input
-                                id="amount"
-                                name="nominal"
-                                type="text"
-                                placeholder="0"
-                                class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none"
-                            />
+                            <input id="total_price" name="total_price" type="number" placeholder="0" min="10000"
+                                class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none" />
                         </div>
                     </div>
 
-                    <button
-                        id="donasi-button"
-                        type="submit"
+                    <button id="donasi-button" type="submit"
                         class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2">
                         Donasi Sekarang
                     </button>
@@ -454,15 +450,13 @@
                     <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 250k</button>
                     <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 500k</button>
                 </div>
-
                 <div class="flex flex-col gap-2 w-full opacity-50 pointer-events-none">
-                    <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                    <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi</label>
                     <div class="relative w-full">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
                         <input type="text" placeholder="0" class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface border-none" disabled />
                     </div>
                 </div>
-
                 <a href="{{ route('login') }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
                     Login untuk Donasi
                 </a>

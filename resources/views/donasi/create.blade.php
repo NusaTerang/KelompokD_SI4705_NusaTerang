@@ -13,6 +13,7 @@
 
         <form method="POST" action="{{ route('donasi.store') }}" id="form-donasi">
             @csrf
+            <input type="hidden" name="proyek_id" value="{{ $proyek->id ?? old('proyek_id') }}">
 
             {{-- Nama Donatur --}}
             <div class="form-group">
