@@ -415,6 +415,11 @@
                 </button>
             @else
             @auth
+                @if($errors->has('payment'))
+                    <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                        ⚠️ {{ $errors->first('payment') }}
+                    </div>
+                @endif
                 <form action="{{ route('donasi.store') }}" method="POST" class="flex flex-col gap-4 w-full">
                     @csrf
                     <input type="hidden" name="proyek_id" value="{{ $proyek->id }}">
@@ -478,120 +483,6 @@
     </div>
 
 </div>
-
-<script>
-
-async function refreshFundingData()
-{
-    try {
-
-        const response = await fetch(
-            '/api/v1/proyek/{{ $proyek->id }}/funding',
-            {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            }
-        );
-
-        const data = await response.json();
-
-        // Funding
-        document.getElementById('funding-amount').innerText =
-            'Rp ' + Number(data.dana_terkumpul)
-                .toLocaleString('id-ID');
-
-        // Stats Funding
-        document.getElementById('stats-funding').innerText =
-            'Rp ' +
-            (data.dana_terkumpul / 1000000).toFixed(1)
-            + 'jt';
-
-        // Donatur
-        document.getElementById('donatur-count').innerText =
-            data.jumlah_donatur;
-
-        // Progress Text
-        document.getElementById('progress-text').innerText =
-            data.persentase + '%';
-
-        // Main Progress Bar
-        document.getElementById('progress-bar').style.width =
-            data.persentase + '%';
-
-        // Side Progress Bar
-        document.getElementById('side-progress-bar').style.width =
-            data.persentase + '%';
-
-        // Auto Disable Button
-        if (data.status === 'eksekusi') {
-
-            const button = document.getElementById('donasi-button');
-
-            if (button) {
-
-                button.disabled = true;
-
-                button.innerText = 'Pendanaan Tercapai';
-
-                button.classList.remove(
-                    'bg-primary-container'
-                );
-
-                button.classList.add(
-                    'bg-gray-300',
-                    'text-gray-600',
-                    'cursor-not-allowed'
-                );
-            }
-        }
-
-        // Activity Feed
-        const activityFeed =
-            document.getElementById('activity-feed');
-
-        if (data.donasi_terbaru.length > 0) {
-
-            activityFeed.innerHTML = '';
-
-            data.donasi_terbaru.forEach((donasi) => {
-
-                activityFeed.innerHTML += `
-                    <div class="bg-surface-container-low p-5 rounded-xl border border-surface-container">
-
-                        <div class="flex items-center justify-between">
-
-                            <div class="flex flex-col gap-1">
-
-                                <p class="text-on-surface font-semibold">
-                                    ${donasi.user?.name ?? 'Donatur'}
-                                </p>
-
-                                <p class="text-sm text-on-surface-variant">
-                                    Berdonasi sebesar
-                                    <span class="font-bold">
-                                        Rp ${Number(donasi.nominal)
-                                            .toLocaleString('id-ID')}
-                                    </span>
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                `;
-            });
-        }
-
-    } catch (error) {
-
-        console.error(
-            'Funding realtime error:',
-            error
-        );
-    }
-}
 
 <script>
 
