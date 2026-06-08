@@ -226,6 +226,93 @@ class VendorProjectProgressTest extends TestCase
         $response->assertSee('65%');
     }
 
+    // TC-03: foto opsional
+    public function test_submit_without_photo_succeeds_because_foto_is_optional(): void
+    {
+        [$vendorUser, $penugasan] = $this->createAssignedExecutionProject();
+
+        $response = $this->actingAs($vendorUser)
+            ->post(route('vendor.proyek.progress.store', $penugasan->id_penugasan), [
+                'persentase' => 30,
+                'deskripsi' => 'Update tanpa foto.',
+                'status_progress' => 'berjalan',
+            ]);
+
+        $response->assertRedirect(route('vendor.proyek.progress.show', $penugasan->id_penugasan));
+        $this->assertDatabaseHas('progress_proyek_vendor', [
+            'id_penugasan' => $penugasan->id_penugasan,
+            'persentase' => 30,
+            'status' => 'submitted',
+        ]);
+    }
+
+    // TC-05: persentase < 0
+    public function test_submitted_progress_rejects_negative_percentage(): void
+    {
+        [$vendorUser, $penugasan] = $this->createAssignedExecutionProject();
+
+        $response = $this->actingAs($vendorUser)
+            ->from(route('vendor.proyek.progress.show', $penugasan->id_penugasan))
+            ->post(route('vendor.proyek.progress.store', $penugasan->id_penugasan), [
+                'persentase' => -5,
+                'deskripsi' => 'Persentase negatif tidak valid.',
+                'status_progress' => 'berjalan',
+            ]);
+
+        $response->assertRedirect(route('vendor.proyek.progress.show', $penugasan->id_penugasan));
+        $response->assertSessionHasErrors('persentase');
+    }
+
+    // TC-08: donatur (non-vendor) akses form → 403
+    public function test_donatur_gets_forbidden_accessing_progress_form(): void
+    {
+        [, $penugasan] = $this->createAssignedExecutionProject();
+
+        $donaturUser = User::factory()->create(['role' => 'donatur']);
+
+        $response = $this->actingAs($donaturUser)
+            ->get(route('vendor.proyek.progress.show', $penugasan->id_penugasan));
+
+        $response->assertForbidden();
+    }
+
+    // TC-10: riwayat tampil kronologis (terbaru di atas)
+    public function test_progress_history_is_ordered_newest_first(): void
+    {
+        [$vendorUser, $penugasan] = $this->createAssignedExecutionProject();
+
+        $this->actingAs($vendorUser)
+            ->post(route('vendor.proyek.progress.store', $penugasan->id_penugasan), [
+                'persentase' => 20,
+                'deskripsi' => 'Update pertama.',
+                'status_progress' => 'berjalan',
+            ]);
+
+        $this->travel(1)->minutes();
+
+        $this->actingAs($vendorUser)
+            ->post(route('vendor.proyek.progress.store', $penugasan->id_penugasan), [
+                'persentase' => 50,
+                'deskripsi' => 'Update kedua.',
+                'status_progress' => 'berjalan',
+            ]);
+
+        $this->travel(1)->minutes();
+
+        $this->actingAs($vendorUser)
+            ->post(route('vendor.proyek.progress.store', $penugasan->id_penugasan), [
+                'persentase' => 80,
+                'deskripsi' => 'Update ketiga.',
+                'status_progress' => 'berjalan',
+            ]);
+
+        $updates = $penugasan->fresh()->submittedProgressUpdates;
+
+        $this->assertCount(3, $updates);
+        $this->assertTrue($updates[0]->submitted_at >= $updates[1]->submitted_at);
+        $this->assertTrue($updates[1]->submitted_at >= $updates[2]->submitted_at);
+    }
+
     private function createAssignedExecutionProject(): array
     {
         $penyedia = PenyediaEnergi::create([
