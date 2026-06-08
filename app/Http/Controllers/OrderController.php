@@ -12,7 +12,7 @@ class OrderController extends Controller
 {
     public function create()
     {
-        $user   = auth()->user();
+        $user   = auth()->user()->load('saldoDonatur');
         $proyek = request()->filled('proyek') ? Proyek::find(request('proyek')) : null;
         return view('donasi.create', compact('user', 'proyek'));
     }
@@ -46,17 +46,6 @@ class OrderController extends Controller
             'payment_status' => Order::STATUS_PENDING,
         ]);
 
-        try {
-            $midtrans  = new CreateSnapTokenService($order);
-            $snapToken = $midtrans->getSnapToken();
-            $order->update(['snap_token' => $snapToken]);
-        } catch (\Exception $e) {
-            $order->delete();
-            return back()
-                ->withInput()
-                ->withErrors(['payment' => 'Gagal menghubungi gateway pembayaran: ' . $e->getMessage()]);
-        }
-
         return redirect()->route('donasi.show', $order);
     }
 
@@ -68,19 +57,155 @@ class OrderController extends Controller
             return redirect()->route('donasi.status', $order);
         }
 
-        if (is_null($order->snap_token)) {
-            try {
-                $midtrans  = new CreateSnapTokenService($order);
-                $snapToken = $midtrans->getSnapToken();
-                $order->update(['snap_token' => $snapToken]);
-            } catch (\Exception $e) {
-                return back()->withErrors(['payment' => 'Gagal generate token pembayaran.']);
+        $user = auth()->user();
+        $saldo = $user->saldo;
+
+        // Auto-select QRIS if balance is 0 and method not yet selected
+        if (is_null($order->payment_method) && $saldo <= 0) {
+            $order->update([
+                'payment_method' => 'qris',
+                'amount_saldo' => 0,
+                'amount_qris' => $order->total_price,
+            ]);
+        }
+
+        // If payment method is already selected (e.g. qris or kombinasi), generate snap token if not present
+        if (!is_null($order->payment_method) && $order->payment_method !== 'saldo') {
+            if (is_null($order->snap_token)) {
+                try {
+                    $midtrans  = new CreateSnapTokenService($order);
+                    $snapToken = $midtrans->getSnapToken();
+                    $order->update(['snap_token' => $snapToken]);
+                } catch (\Exception $e) {
+                    return back()->withErrors(['payment' => 'Gagal generate token pembayaran: ' . $e->getMessage()]);
+                }
             }
         }
 
         $snapToken = $order->snap_token;
 
-        return view('donasi.show', compact('order', 'snapToken'));
+        return view('donasi.show', compact('order', 'snapToken', 'saldo'));
+    }
+
+    public function selectMethod(Order $order, Request $request)
+    {
+        abort_unless($order->user_id === auth()->id(), 403);
+        abort_unless($order->isPending(), 400);
+
+        $validated = $request->validate([
+            'payment_method' => 'required|in:saldo,qris,kombinasi',
+        ]);
+
+        $method = $validated['payment_method'];
+        $user = auth()->user();
+        $saldo = $user->saldo;
+
+        if ($method === 'saldo') {
+            if ($saldo < $order->total_price) {
+                return back()->withErrors(['payment' => 'Saldo tidak mencukupi untuk pembayaran saldo penuh.']);
+            }
+            
+            $order->update([
+                'payment_method' => 'saldo',
+                'amount_saldo' => $order->total_price,
+                'amount_qris' => 0,
+                'snap_token' => null,
+            ]);
+        } elseif ($method === 'qris') {
+            $order->update([
+                'payment_method' => 'qris',
+                'amount_saldo' => 0,
+                'amount_qris' => $order->total_price,
+                'snap_token' => null,
+            ]);
+        } elseif ($method === 'kombinasi') {
+            if ($saldo <= 0) {
+                return back()->withErrors(['payment' => 'Saldo Anda 0, tidak dapat memilih opsi kombinasi.']);
+            }
+            if ($saldo >= $order->total_price) {
+                return back()->withErrors(['payment' => 'Saldo Anda mencukupi, silakan gunakan opsi Bayar dengan Saldo.']);
+            }
+
+            $order->update([
+                'payment_method' => 'kombinasi',
+                'amount_saldo' => $saldo,
+                'amount_qris' => $order->total_price - $saldo,
+                'snap_token' => null,
+            ]);
+        }
+
+        return redirect()->route('donasi.show', $order);
+    }
+
+    public function confirmSaldo(Order $order)
+    {
+        abort_unless($order->user_id === auth()->id(), 403);
+        abort_unless($order->isPending(), 400);
+        abort_unless($order->payment_method === 'saldo', 400);
+
+        $user = auth()->user();
+        if ($user->saldo < $order->total_price) {
+            return back()->withErrors(['payment' => 'Saldo tidak mencukupi.']);
+        }
+
+        $proyek = $order->proyek;
+        if (!$proyek) {
+            return back()->withErrors(['payment' => 'Proyek tidak ditemukan.']);
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($order, $user, $proyek) {
+                // Deduct balance
+                $user->kurangiSaldo($order->total_price, "Donasi saldo untuk proyek: {$proyek->judul}");
+
+                // Update order status
+                $order->update([
+                    'payment_status' => Order::STATUS_SUCCESS,
+                ]);
+
+                // Create success Donasi record
+                \App\Models\Donasi::updateOrCreate(
+                    [
+                        'id_proyek' => $proyek->id,
+                        'id_donatur' => $order->user_id,
+                        'created_at' => $order->created_at ?? now(),
+                    ],
+                    [
+                        'nominal' => $order->total_price,
+                        'status' => 'success',
+                    ]
+                );
+
+                // Increment the project's collected funding
+                $proyek->increment('dana_terkumpul', $order->total_price);
+                $proyek->refresh();
+
+                // Transition status: only change to eksekusi when target reached
+                if ($proyek->dana_terkumpul >= $proyek->target_dana) {
+                    $proyek->update(['status' => 'eksekusi']);
+                }
+                // Otherwise, tetap aktif_funding (no need to update)
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['payment' => 'Terjadi kesalahan saat memproses pembayaran saldo: ' . $e->getMessage()]);
+        }
+
+        return redirect()->route('donasi.status', $order);
+    }
+
+    public function resetMethod(Order $order)
+    {
+        abort_unless($order->user_id === auth()->id(), 403);
+        abort_unless($order->isPending(), 400);
+
+        $order->update([
+            'payment_method' => null,
+            'snap_token' => null,
+            'amount_saldo' => 0,
+            'amount_qris' => 0,
+        ]);
+
+        return redirect()->route('donasi.show', $order);
     }
 
     public function status(Order $order)

@@ -3,17 +3,26 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\SaldoDonatur;
 use Illuminate\Database\Seeder;
 
 class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'nama' => 'Admin NusaTerang',
-            'email' => 'admin@nusaterang.id',
-            'password' => bcrypt('password'),
-            'role' => 'admin',
-        ]);
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@nusaterang.id'],
+            [
+                'nama' => 'Admin NusaTerang',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+            ]
+        );
+
+        // Pastikan admin memiliki saldo (meskipun admin biasanya tidak perlu saldo)
+        SaldoDonatur::firstOrCreate(
+            ['id_donatur' => $admin->id_donatur],
+            ['saldo' => 0.00]
+        );
     }
 }

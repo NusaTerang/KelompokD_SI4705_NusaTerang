@@ -28,6 +28,9 @@ class Order extends Model
         'pesan',
         'payment_status',
         'snap_token',
+        'payment_method',
+        'amount_saldo',
+        'amount_qris',
     ];
 
     protected $casts = [

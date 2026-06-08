@@ -9,7 +9,7 @@ class Donasi extends Model
 {
     protected $table = 'donasi';
 
-    protected $primaryKey = 'id_donasi';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'id_donatur',

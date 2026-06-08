@@ -379,11 +379,27 @@ class ProyekController extends Controller
             abort(403, 'Proyek tidak menunggu keputusan vendor.');
         }
 
-        $proyek->update([
-            'status' => $validated['decision'] === 'refund' ? 'refund' : 'selesai',
-            'expired_vendor_decision' => $validated['decision'],
-            'expired_extension_pending' => false,
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($proyek, $validated) {
+            $proyek->update([
+                'status' => $validated['decision'] === 'refund' ? 'refund' : 'selesai',
+                'expired_vendor_decision' => $validated['decision'],
+                'expired_extension_pending' => false,
+            ]);
+
+            if ($validated['decision'] === 'refund') {
+                $donasis = \App\Models\Donasi::where('id_proyek', $proyek->id)
+                    ->where('status', 'success')
+                    ->get();
+
+                foreach ($donasis as $donasi) {
+                    $donatur = $donasi->donatur;
+                    if ($donatur) {
+                        $donatur->tambahSaldo($donasi->nominal, "Pengembalian dana donasi untuk proyek: {$proyek->judul}");
+                    }
+                    $donasi->update(['status' => 'refunded']);
+                }
+            }
+        });
 
         $message = $validated['decision'] === 'refund'
             ? 'Status proyek diubah menjadi refund.'

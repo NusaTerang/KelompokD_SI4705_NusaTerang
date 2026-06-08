@@ -16,17 +16,21 @@ class CreateSnapTokenService extends Midtrans
 
     public function getSnapToken(): string
     {
+        $price = $this->order->payment_method === 'kombinasi'
+            ? (int) $this->order->amount_qris
+            : (int) $this->order->total_price;
+
         $params = [
             'transaction_details' => [
                 'order_id'     => $this->order->number,
-                'gross_amount' => (int) $this->order->total_price,
+                'gross_amount' => $price,
             ],
             'item_details' => [
                 [
                     'id'       => 'DONASI-' . $this->order->id,
-                    'price'    => (int) $this->order->total_price,
+                    'price'    => $price,
                     'quantity' => 1,
-                    'name'     => 'Donasi NusaTerang',
+                    'name'     => $this->order->payment_method === 'kombinasi' ? 'Kekurangan Donasi NusaTerang' : 'Donasi NusaTerang',
                     'category' => 'Donation',
                 ],
             ],
@@ -35,8 +39,7 @@ class CreateSnapTokenService extends Midtrans
                 'email'      => $this->order->donatur_email,
                 'phone'      => $this->order->donatur_phone ?? '',
             ],
-            // Batasi ke QRIS saja agar sesuai requirement
-            'enabled_payments' => ['qris'],
+            // Tampilkan semua payment method yang tersedia (remove specific channel restrictions)
         ];
 
         return Snap::getSnapToken($params);

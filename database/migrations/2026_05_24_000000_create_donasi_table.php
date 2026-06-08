@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('id_proyek')->constrained('proyeks')->cascadeOnDelete();
             $table->foreignId('id_donatur')->constrained('users', 'id_donatur')->cascadeOnDelete();
             $table->decimal('nominal', 15, 2);
-            $table->enum('status', ['success', 'pending', 'failed'])->default('pending');
+            $table->enum('status', ['success', 'pending', 'failed', 'refunded'])->default('pending');
             $table->timestamps();
         });
     }

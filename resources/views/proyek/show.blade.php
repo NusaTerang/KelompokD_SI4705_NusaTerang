@@ -420,12 +420,21 @@
                         ⚠️ {{ $errors->first('payment') }}
                     </div>
                 @endif
-                <form action="{{ route('donasi.store') }}" method="POST" class="flex flex-col gap-4 w-full">
+
+                {{-- Active user balance display --}}
+                @if(auth()->user()->isDonatur())
+                    <div class="text-sm text-on-surface-variant font-medium mb-1 flex items-center gap-1.5 bg-surface-container-low p-3 rounded-xl border border-surface-container">
+                        <span>💰</span> Saldo kamu: <span class="font-bold text-primary">Rp {{ number_format(auth()->user()->saldo, 0, ',', '.') }}</span>
+                    </div>
+                @endif
+
+                <form id="donation-form" action="{{ route('donasi.store') }}" method="POST" class="flex flex-col gap-4 w-full">
                     @csrf
                     <input type="hidden" name="proyek_id" value="{{ $proyek->id }}">
                     <input type="hidden" name="donatur_name" value="{{ auth()->user()->name }}">
                     <input type="hidden" name="donatur_email" value="{{ auth()->user()->email }}">
                     <input type="hidden" name="donatur_phone" value="{{ auth()->user()->no_telepon ?? '' }}">
+                    <input type="hidden" name="payment_method" value="qris" id="hidden-payment-method">
 
                     <div class="grid grid-cols-2 gap-3 w-full">
                         <button type="button" onclick="document.getElementById('total_price').value=50000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
@@ -443,11 +452,46 @@
                         </div>
                     </div>
 
+                    {{-- Payment method selector --}}
+                    @if(auth()->user()->isDonatur())
+                    <div class="flex flex-col gap-2 w-full">
+                        <label class="text-on-surface-variant text-sm font-bold">Metode Pembayaran</label>
+                        <div class="flex flex-col gap-2">
+                            <label class="flex items-center gap-2.5 p-3.5 rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container-low transition-colors">
+                                <input type="radio" name="temp_payment_method" value="qris" checked class="text-primary focus:ring-primary" onclick="document.getElementById('hidden-payment-method').value='qris'">
+                                <span class="text-sm font-bold text-on-surface">📱 Bayar dengan QRIS</span>
+                            </label>
+                            @if(auth()->user()->saldo > 0)
+                            <label class="flex items-center gap-2.5 p-3.5 rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container-low transition-colors">
+                                <input type="radio" name="temp_payment_method" value="saldo" class="text-primary focus:ring-primary" onclick="document.getElementById('hidden-payment-method').value='saldo'">
+                                <span class="text-sm font-bold text-on-surface">💰 Bayar dengan Saldo</span>
+                            </label>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+
                     <button id="donasi-button" type="submit"
                         class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2">
                         Donasi Sekarang
                     </button>
                 </form>
+
+                <script>
+                document.getElementById('donation-form')?.addEventListener('submit', function(e) {
+                    const selectedMethod = document.querySelector('input[name="temp_payment_method"]:checked')?.value;
+                    if (selectedMethod === 'saldo') {
+                        e.preventDefault();
+                        const nominal = document.getElementById('total_price').value;
+                        if (!nominal || nominal < 10000) {
+                            alert('Nominal donasi minimal Rp 10.000');
+                            return;
+                        }
+                        const proyekId = "{{ $proyek->id }}";
+                        window.location.href = "{{ route('donasi.create') }}?proyek=" + proyekId + "&nominal=" + nominal + "&payment_method=saldo";
+                    }
+                });
+                </script>
             @else
                 <div class="grid grid-cols-2 gap-3 w-full opacity-50 pointer-events-none">
                     <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 50k</button>

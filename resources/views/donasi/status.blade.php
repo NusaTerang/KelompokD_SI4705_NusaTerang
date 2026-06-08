@@ -169,8 +169,26 @@
             </div>
             <div class="receipt-row">
                 <span class="receipt-key">Metode</span>
-                <span class="receipt-val">QRIS</span>
+                <span class="receipt-val">
+                    @if($order->payment_method === 'saldo')
+                        Saldo NusaTerang
+                    @elseif($order->payment_method === 'kombinasi')
+                        Saldo + QRIS
+                    @else
+                        QRIS
+                    @endif
+                </span>
             </div>
+            @if($order->payment_method === 'kombinasi')
+            <div class="receipt-row">
+                <span class="receipt-key">Rincian Saldo</span>
+                <span class="receipt-val">Rp {{ number_format($order->amount_saldo, 0, ',', '.') }}</span>
+            </div>
+            <div class="receipt-row">
+                <span class="receipt-key">Rincian QRIS</span>
+                <span class="receipt-val">Rp {{ number_format($order->amount_qris, 0, ',', '.') }}</span>
+            </div>
+            @endif
             <div class="receipt-row">
                 <span class="receipt-key">Status</span>
                 <span class="receipt-val">
