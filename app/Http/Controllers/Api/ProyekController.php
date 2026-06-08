@@ -44,7 +44,7 @@ class ProyekController extends Controller
             ->get()
             ->map(function ($d) {
                 return [
-                    'id' => $d->id,
+                    'id' => $d->getKey(),
                     'nominal' => $d->nominal,
                     'user' => [
                         'name' => $d->user->nama ?? 'Donatur',

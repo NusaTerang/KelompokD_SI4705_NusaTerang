@@ -98,6 +98,21 @@
                     </div>
                 </div>
 
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Dana Terkumpul</label>
+                        <input value="Rp {{ number_format($proyek->dana_terkumpul, 0, ',', '.') }}" disabled
+                            class="w-full bg-surface-container rounded-lg px-4 py-4 text-on-surface-variant border-0" type="text" />
+                    </div>
+                    <div class="space-y-3">
+                        <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Dana Terpakai <span class="text-slate-400 font-normal ml-1">(untuk refund)</span></label>
+                        <input name="dana_terpakai" value="{{ old('dana_terpakai', $proyek->dana_terpakai) }}" min="0" step="1000"
+                            class="w-full bg-surface-container-low rounded-lg px-4 py-4 focus:ring-2 focus:ring-solar-gold transition-all text-on-surface {{ $errors->has('dana_terpakai') ? 'border border-red-500' : 'border-0' }}"
+                            placeholder="0" type="number" />
+                        <p class="text-xs text-on-surface-variant">Sisa (terkumpul − terpakai) dapat direfund donatur saat proyek berakhir.</p>
+                    </div>
+                </div>
+
                 <div class="space-y-3">
                     <label class="text-xs font-bold text-deep-navy uppercase tracking-widest">Tambah Foto Baru (Opsional)</label>
                     <input type="file" name="fotos[]" multiple accept="image/*"
