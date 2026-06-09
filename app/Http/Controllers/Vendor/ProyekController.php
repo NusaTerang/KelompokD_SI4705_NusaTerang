@@ -170,9 +170,9 @@ class ProyekController extends Controller
             ->where('status', 'draft')
             ->delete();
 
-        $proyek->update([
-            'status' => 'eksekusi',
-        ]);
+        if ($proyek->dana_terkumpul >= $proyek->target_dana && $proyek->target_dana > 0) {
+            $proyek->update(['status' => 'eksekusi']);
+        }
 
         $recipients->adminsAndDonorsForProject($proyek)
             ->each(fn ($recipient) => $recipient->notify(new ProgressProyekDikirim($proyek)));
