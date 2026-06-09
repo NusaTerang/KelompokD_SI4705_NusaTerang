@@ -107,10 +107,10 @@ class ProyekController extends Controller
         $hasDraftPhotos = ! empty($draft?->foto_paths);
 
         $rules = [
-            'persentase' => $isDraft ? 'nullable|integer|in:' . $allowedValuesStr : 'required|integer|in:' . $allowedValuesStr,
+            'persentase' => $isDraft ? 'nullable|integer|min:0|max:100' : 'required|integer|in:' . $allowedValuesStr,
             'deskripsi' => $isDraft ? 'nullable|string|max:2000' : 'required|string|max:2000',
             'status_progress' => $isDraft ? 'nullable|in:dijadwalkan,berjalan,selesai' : 'required|in:dijadwalkan,berjalan,selesai',
-            'fotos' => $isDraft ? 'nullable|array|max:5' : ($hasDraftPhotos ? 'nullable|array|max:5' : 'required|array|min:1|max:5'),
+            'fotos' => 'nullable|array|max:5',
             'fotos.*' => 'image|max:2048',
         ];
 

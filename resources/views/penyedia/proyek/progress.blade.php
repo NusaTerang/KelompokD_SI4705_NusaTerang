@@ -248,6 +248,17 @@
                     </div>
                 </form>
             </div>
+
+            @if($penugasan->hasCompletedProgress())
+            <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden border border-[#27AE60]/30 p-6">
+                <h3 class="font-bold text-[#0F4C81] text-lg mb-2">Laporan Akhir</h3>
+                <p class="text-sm text-on-surface-variant mb-4">Progress proyek telah mencapai 100%. Silakan isi dan kirimkan Laporan Akhir proyek.</p>
+                <a href="{{ route('vendor.proyek.show', $penugasan->id_penugasan) }}"
+                   class="inline-block bg-[#27AE60] text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-[#219150] transition-all">
+                    Isi Laporan Akhir
+                </a>
+            </div>
+            @endif
         </div>
 
         <div class="col-span-12 lg:col-span-5 space-y-6">
