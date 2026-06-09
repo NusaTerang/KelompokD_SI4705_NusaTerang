@@ -16,18 +16,22 @@ class CreateSnapTokenService extends Midtrans
 
     public function getSnapToken(): string
     {
+        $price = $this->order->payment_method === 'kombinasi'
+            ? (int) $this->order->amount_qris
+            : (int) $this->order->total_price;
+
         $params = [
             'transaction_details' => [
-                'order_id' => $this->order->number,
-                'gross_amount' => (int) $this->order->total_price,
+                'order_id'     => $this->order->number,
+                'gross_amount' => $price,
             ],
             'item_details' => [
                 [
-                    'id'       => 'TRX-' . $this->order->id,
-                    'price'    => (int) $this->order->total_price,
+                    'id'       => 'DONASI-' . $this->order->id,
+                    'price'    => $price,
                     'quantity' => 1,
-                    'name'     => $this->order->snap_item_name ?? 'Donasi NusaTerang',
-                    'category' => 'NusaTerang',
+                    'name'     => $this->order->payment_method === 'kombinasi' ? 'Kekurangan Donasi NusaTerang' : 'Donasi NusaTerang',
+                    'category' => 'Donation',
                 ],
             ],
             'customer_details' => [
@@ -35,11 +39,7 @@ class CreateSnapTokenService extends Midtrans
                 'email' => $this->order->donatur_email,
                 'phone' => $this->order->donatur_phone ?? '',
             ],
-            // Batasi ke QRIS saja agar sesuai requirement.
-            // Channel "Other QRIS" di dashboard Midtrans = kode 'other_qris'.
-            // 'qris' (QRIS-via-GoPay) disertakan sebagai cadangan; hanya channel
-            // yang aktif di dashboard yang akan tampil di Snap.
-            'enabled_payments' => ['other_qris', 'qris'],
+            // Tampilkan semua payment method yang tersedia (remove specific channel restrictions)
         ];
 
         return Snap::getSnapToken($params);

@@ -82,6 +82,9 @@ Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () 
     Route::post('/',               [OrderController::class, 'store'])->name('store');
     Route::get('/{order}',         [OrderController::class, 'show'])->name('show');
     Route::get('/{order}/status',  [OrderController::class, 'status'])->name('status');
+    Route::post('/{order}/select-method', [OrderController::class, 'selectMethod'])->name('select-method');
+    Route::post('/{order}/reset-method',  [OrderController::class, 'resetMethod'])->name('reset-method');
+    Route::post('/{order}/confirm-saldo', [OrderController::class, 'confirmSaldo'])->name('confirm-saldo');
 });
 
 // ─── Authenticated ────────────────────────────────────────────────────────────

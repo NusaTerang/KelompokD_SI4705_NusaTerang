@@ -94,4 +94,50 @@ class User extends Authenticatable
     {
         return $this->hasRole('donatur');
     }
+
+    public function saldoDonatur(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SaldoDonatur::class, 'id_donatur', 'id_donatur');
+    }
+
+    public function getSaldoAttribute(): float
+    {
+        return $this->saldoDonatur ? $this->saldoDonatur->saldo : 0.0;
+    }
+
+    public function tambahSaldo(float $nominal, ?string $keterangan = null): void
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($nominal, $keterangan) {
+            $saldoRecord = SaldoDonatur::firstOrCreate(
+                ['id_donatur' => $this->id_donatur],
+                ['saldo' => 0]
+            );
+            $saldoRecord->increment('saldo', $nominal);
+
+            MutasiSaldo::create([
+                'id_donatur' => $this->id_donatur,
+                'nominal' => $nominal,
+                'tipe' => 'masuk',
+                'keterangan' => $keterangan,
+            ]);
+        });
+    }
+
+    public function kurangiSaldo(float $nominal, ?string $keterangan = null): void
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($nominal, $keterangan) {
+            $saldoRecord = SaldoDonatur::firstOrCreate(
+                ['id_donatur' => $this->id_donatur],
+                ['saldo' => 0]
+            );
+            $saldoRecord->decrement('saldo', $nominal);
+
+            MutasiSaldo::create([
+                'id_donatur' => $this->id_donatur,
+                'nominal' => $nominal,
+                'tipe' => 'keluar',
+                'keterangan' => $keterangan,
+            ]);
+        });
+    }
 }
