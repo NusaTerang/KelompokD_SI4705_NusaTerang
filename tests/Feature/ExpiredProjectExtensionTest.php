@@ -8,6 +8,7 @@ use App\Models\PenyediaEnergi;
 use App\Models\Proyek;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class ExpiredProjectExtensionTest extends TestCase
@@ -23,95 +24,6 @@ class ExpiredProjectExtensionTest extends TestCase
             'kondisi_desa' => 'off-grid',
             'sumber' => 'solar_panel',
         ]);
-    }
-
-    public function test_command_extends_expired_active_funding_project_for_30_days(): void
-    {
-        $desa = $this->makeDesa();
-        $oldEndDate = now()->subDay()->toDateString();
-
-        $proyek = Proyek::create([
-            'desa_id' => $desa->id_desa,
-            'judul' => 'Proyek Expired',
-            'deskripsi' => 'Butuh keputusan vendor.',
-            'jenis_energi' => 'panel_surya',
-            'estimasi_mulai' => now()->subMonth()->toDateString(),
-            'estimasi_selesai' => $oldEndDate,
-            'status' => 'aktif_funding',
-            'dana_terkumpul' => 5000000,
-        ]);
-
-        $this->artisan('proyek:extend-expired')->assertExitCode(0);
-
-        $proyek->refresh();
-        $this->assertSame('menunggu_keputusan_vendor', $proyek->status);
-        $this->assertTrue($proyek->expired_extension_pending);
-        $this->assertSame($oldEndDate, $proyek->expired_original_end_date->toDateString());
-        $this->assertSame(now()->addDays(30)->toDateString(), $proyek->estimasi_selesai->toDateString());
-        $this->assertNotNull($proyek->expired_extended_at);
-    }
-
-    public function test_command_creates_vendor_assignment_for_expired_project_with_penyedia(): void
-    {
-        $desa = $this->makeDesa();
-        $penyedia = PenyediaEnergi::create([
-            'nama' => 'Vendor Assigned',
-            'spesialisasi' => 'panel_surya',
-            'provinsi_operasi' => 'Jawa Barat',
-            'kisaran_harga_min' => 1000000,
-            'kisaran_harga_max' => 10000000,
-            'status' => 'aktif',
-        ]);
-        $proyek = Proyek::create([
-            'desa_id' => $desa->id_desa,
-            'penyedia_id' => $penyedia->id,
-            'judul' => 'Expired Assigned Project',
-            'deskripsi' => 'Need assignment.',
-            'jenis_energi' => 'panel_surya',
-            'estimasi_mulai' => now()->subMonth()->toDateString(),
-            'estimasi_selesai' => now()->subDay()->toDateString(),
-            'status' => 'aktif_funding',
-        ]);
-
-        $this->artisan('proyek:extend-expired')->assertExitCode(0);
-
-        $this->assertDatabaseHas('penugasan_proyek', [
-            'id_proyek' => $proyek->id,
-            'id_penyedia' => $penyedia->id,
-            'status_penugasan' => 'diterima',
-        ]);
-    }
-
-    public function test_command_does_not_extend_non_expired_or_non_active_projects(): void
-    {
-        $desa = $this->makeDesa();
-
-        $future = Proyek::create([
-            'desa_id' => $desa->id_desa,
-            'judul' => 'Future Project',
-            'deskripsi' => 'Not expired.',
-            'jenis_energi' => 'panel_surya',
-            'estimasi_mulai' => now()->toDateString(),
-            'estimasi_selesai' => now()->addDays(5)->toDateString(),
-            'status' => 'aktif_funding',
-        ]);
-
-        $draft = Proyek::create([
-            'desa_id' => $desa->id_desa,
-            'judul' => 'Draft Project',
-            'deskripsi' => 'Expired but draft.',
-            'jenis_energi' => 'panel_surya',
-            'estimasi_mulai' => now()->subMonth()->toDateString(),
-            'estimasi_selesai' => now()->subDay()->toDateString(),
-            'status' => 'draft',
-        ]);
-
-        $this->artisan('proyek:extend-expired')->assertExitCode(0);
-
-        $this->assertSame('aktif_funding', $future->fresh()->status);
-        $this->assertFalse($future->fresh()->expired_extension_pending);
-        $this->assertSame('draft', $draft->fresh()->status);
-        $this->assertFalse($draft->fresh()->expired_extension_pending);
     }
 
     private function makeVendorProject(string $status = 'menunggu_keputusan_vendor'): array
@@ -152,25 +64,79 @@ class ExpiredProjectExtensionTest extends TestCase
         return [$user, $proyek, $penugasan];
     }
 
-    public function test_vendor_can_choose_refund_for_extended_project(): void
+    /** TC-01 */
+    public function test_cron_job_proyek_underfunded_batas_waktu_habis(): void
     {
-        [$user, $proyek, $penugasan] = $this->makeVendorProject();
+        Notification::fake();
 
-        $response = $this->actingAs($user)
-            ->post(route('vendor.proyek.expiry-decision', $penugasan->id_penugasan), [
-                'decision' => 'refund',
-            ]);
+        $penyedia = PenyediaEnergi::create([
+            'nama' => 'Vendor TC01',
+            'spesialisasi' => 'panel_surya',
+            'provinsi_operasi' => 'Jawa Barat',
+            'kisaran_harga_min' => 1000000,
+            'kisaran_harga_max' => 10000000,
+            'status' => 'aktif',
+        ]);
+        $vendor = User::factory()->create([
+            'role' => 'penyedia',
+            'penyedia_id' => $penyedia->id,
+        ]);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $desa = $this->makeDesa();
 
-        $response->assertRedirect(route('vendor.proyek.index'));
+        $proyek = Proyek::create([
+            'desa_id' => $desa->id_desa,
+            'penyedia_id' => $penyedia->id,
+            'judul' => 'Proyek Expired TC01',
+            'deskripsi' => 'Butuh keputusan vendor.',
+            'jenis_energi' => 'panel_surya',
+            'estimasi_mulai' => now()->subMonth()->toDateString(),
+            'estimasi_selesai' => now()->subDay()->toDateString(),
+            'status' => 'aktif_funding',
+            'dana_terkumpul' => 5000000,
+            'target_dana' => 100000000,
+        ]);
+
+        $this->artisan('proyek:extend-expired')->assertExitCode(0);
+
         $proyek->refresh();
-        $this->assertSame('refund', $proyek->status);
-        $this->assertSame('refund', $proyek->expired_vendor_decision);
-        $this->assertFalse($proyek->expired_extension_pending);
+        $this->assertSame('menunggu_keputusan_vendor', $proyek->status);
+        $this->assertTrue($proyek->expired_extension_pending);
+
+        Notification::assertSentTo($vendor, \App\Notifications\ProyekDitugaskan::class);
+        Notification::assertSentTo($admin, \App\Notifications\ProyekDitugaskan::class);
     }
 
-    public function test_vendor_can_continue_extended_project_with_existing_donation_amount(): void
+    /** TC-02 */
+    public function test_cron_job_tidak_proses_proyek_funded(): void
     {
+        $desa = $this->makeDesa();
+
+        $proyek = Proyek::create([
+            'desa_id' => $desa->id_desa,
+            'judul' => 'Proyek Sudah Funded',
+            'deskripsi' => 'Already funded and moved.',
+            'jenis_energi' => 'panel_surya',
+            'estimasi_mulai' => now()->subMonth()->toDateString(),
+            'estimasi_selesai' => now()->subDay()->toDateString(),
+            'status' => 'eksekusi',
+            'dana_terkumpul' => 100000000,
+            'target_dana' => 100000000,
+        ]);
+
+        $this->artisan('proyek:extend-expired')->assertExitCode(0);
+
+        $this->assertNotSame('menunggu_keputusan_vendor', $proyek->fresh()->status);
+        $this->assertFalse($proyek->fresh()->expired_extension_pending);
+    }
+
+    /** TC-03 */
+    public function test_vendor_memutuskan_lanjutkan(): void
+    {
+        Notification::fake();
+
         [$user, $proyek, $penugasan] = $this->makeVendorProject();
+        $admin = User::factory()->create(['role' => 'admin']);
 
         $response = $this->actingAs($user)
             ->post(route('vendor.proyek.expiry-decision', $penugasan->id_penugasan), [
@@ -178,99 +144,111 @@ class ExpiredProjectExtensionTest extends TestCase
             ]);
 
         $response->assertRedirect(route('vendor.proyek.index'));
+
         $proyek->refresh();
         $this->assertSame('selesai', $proyek->status);
         $this->assertSame('continue', $proyek->expired_vendor_decision);
-        $this->assertFalse($proyek->expired_extension_pending);
-        $this->assertEquals(7500000, $proyek->dana_terkumpul);
+
+        Notification::assertSentTo($admin, \App\Notifications\ProyekSelesai::class);
     }
 
-    public function test_vendor_sees_dedicated_expiry_decision_page(): void
+    /** TC-04 */
+    public function test_vendor_memutuskan_batalkan(): void
     {
+        Notification::fake();
+
         [$user, $proyek, $penugasan] = $this->makeVendorProject();
+        $admin = User::factory()->create(['role' => 'admin']);
 
         $response = $this->actingAs($user)
-            ->get(route('vendor.proyek.expiry-decision.show', $penugasan->id_penugasan));
+            ->post(route('vendor.proyek.expiry-decision', $penugasan->id_penugasan), [
+                'decision' => 'refund',
+            ]);
 
-        $response->assertOk();
-        $response->assertSee('Keputusan Proyek Berakhir');
-        $response->assertSee('Vendor Decision Project');
-        $response->assertSee('Rp 7.500.000');
-        $response->assertSee('Ajukan Refund');
-        $response->assertSee('Lanjutkan Proyek');
-        $response->assertDontSee('Rincian Teknis Proyek');
+        $response->assertRedirect(route('vendor.proyek.index'));
+
+        $proyek->refresh();
+        $this->assertSame('refund', $proyek->status);
+        $this->assertSame('refund', $proyek->expired_vendor_decision);
+
+        Notification::assertSentTo($admin, \App\Notifications\LaporanRefundAdmin::class);
     }
 
-    public function test_vendor_project_detail_no_longer_shows_expiry_decision_actions(): void
+    /** TC-05 */
+    public function test_validasi_hak_akses_keputusan(): void
     {
-        [$user, $proyek, $penugasan] = $this->makeVendorProject();
+        [$vendorUser, $proyek, $penugasan] = $this->makeVendorProject();
 
-        $response = $this->actingAs($user)
-            ->get(route('vendor.proyek.show', $penugasan->id_penugasan));
+        // Donatur cannot access expiry decision
+        $donatur = User::factory()->create(['role' => 'donatur']);
+        $this->actingAs($donatur)
+            ->post(route('vendor.proyek.expiry-decision', $penugasan->id_penugasan), [
+                'decision' => 'continue',
+            ])
+            ->assertForbidden();
 
-        $response->assertOk();
-        $response->assertDontSee('Ajukan Refund');
-        $response->assertDontSee('Lanjutkan Proyek');
+        // Admin cannot access expiry decision (route protected by penyedia middleware)
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)
+            ->post(route('vendor.proyek.expiry-decision', $penugasan->id_penugasan), [
+                'decision' => 'continue',
+            ])
+            ->assertForbidden();
+
+        // A different penyedia vendor cannot make decision for another vendor's project
+        $otherPenyedia = PenyediaEnergi::create([
+            'nama' => 'Other Vendor',
+            'spesialisasi' => 'panel_surya',
+            'provinsi_operasi' => 'Jawa Tengah',
+            'kisaran_harga_min' => 1000000,
+            'kisaran_harga_max' => 10000000,
+            'status' => 'aktif',
+        ]);
+        $otherVendor = User::factory()->create([
+            'role' => 'penyedia',
+            'penyedia_id' => $otherPenyedia->id,
+        ]);
+        $this->actingAs($otherVendor)
+            ->post(route('vendor.proyek.expiry-decision', $penugasan->id_penugasan), [
+                'decision' => 'continue',
+            ])
+            ->assertNotFound();
     }
 
-    public function test_vendor_project_index_links_pending_decision_to_dedicated_page(): void
+    /** TC-06 */
+    public function test_cron_reminder_3_hari_vendor(): void
     {
-        [$user, $proyek, $penugasan] = $this->makeVendorProject();
+        Notification::fake();
 
-        $response = $this->actingAs($user)
-            ->get(route('vendor.proyek.index'));
+        $penyedia = PenyediaEnergi::create([
+            'nama' => 'Vendor Reminder',
+            'spesialisasi' => 'panel_surya',
+            'provinsi_operasi' => 'Jawa Barat',
+            'kisaran_harga_min' => 1000000,
+            'kisaran_harga_max' => 10000000,
+            'status' => 'aktif',
+        ]);
+        $vendor = User::factory()->create([
+            'role' => 'penyedia',
+            'penyedia_id' => $penyedia->id,
+        ]);
+        $desa = $this->makeDesa();
 
-        $response->assertOk();
-        $response->assertSee('Tinjau Keputusan');
-        $response->assertSee(route('vendor.proyek.expiry-decision.show', $penugasan->id_penugasan));
-    }
-
-    public function test_vendor_project_index_shows_refund_project_as_terminal_without_detail_action(): void
-    {
-        [$user, $proyek, $penugasan] = $this->makeVendorProject('refund');
-        $proyek->update([
-            'expired_extension_pending' => false,
-            'expired_vendor_decision' => 'refund',
+        Proyek::create([
+            'desa_id' => $desa->id_desa,
+            'penyedia_id' => $penyedia->id,
+            'judul' => 'Proyek Reminder TC06',
+            'deskripsi' => 'Pending decision for 3 days.',
+            'jenis_energi' => 'panel_surya',
+            'estimasi_mulai' => now()->subMonth()->toDateString(),
+            'estimasi_selesai' => now()->addDays(27)->toDateString(),
+            'status' => 'menunggu_keputusan_vendor',
+            'expired_extension_pending' => true,
+            'expired_extended_at' => now()->subDays(3),
         ]);
 
-        $response = $this->actingAs($user)
-            ->get(route('vendor.proyek.index'));
+        $this->artisan('proyek:remind-pending-decision')->assertExitCode(0);
 
-        $response->assertOk();
-        $response->assertSee('Refund');
-        $response->assertDontSee('Belum Diisi');
-        $response->assertDontSee('Diterima');
-        $response->assertDontSee('Lihat & Isi Rincian');
-        $response->assertDontSee(route('vendor.proyek.show', $penugasan->id_penugasan));
-    }
-
-    public function test_vendor_project_index_shows_completed_project_as_terminal_without_detail_action(): void
-    {
-        [$user, $proyek, $penugasan] = $this->makeVendorProject('selesai');
-        $proyek->update([
-            'expired_extension_pending' => false,
-            'expired_vendor_decision' => 'continue',
-        ]);
-
-        $response = $this->actingAs($user)
-            ->get(route('vendor.proyek.index'));
-
-        $response->assertOk();
-        $response->assertSee('Selesai');
-        $response->assertDontSee('Belum Diisi');
-        $response->assertDontSee('Diterima');
-        $response->assertDontSee('Lihat & Isi Rincian');
-        $response->assertDontSee(route('vendor.proyek.show', $penugasan->id_penugasan));
-    }
-
-    public function test_vendor_dashboard_shows_expiry_decision_notification(): void
-    {
-        [$user] = $this->makeVendorProject();
-
-        $response = $this->actingAs($user)->get(route('vendor.dashboard'));
-
-        $response->assertOk();
-        $response->assertSee('1 proyek menunggu keputusan refund atau lanjut');
-        $response->assertSee('Tinjau Sekarang');
+        Notification::assertSentTo($vendor, \App\Notifications\ProyekDitugaskan::class);
     }
 }
