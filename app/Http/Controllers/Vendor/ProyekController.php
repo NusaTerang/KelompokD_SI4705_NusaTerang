@@ -418,6 +418,17 @@ class ProyekController extends Controller
             }
         });
 
+        $recipients = app(\App\Services\NotificationRecipientService::class);
+        if ($validated['decision'] === 'continue') {
+            $recipients->adminsAndDonorsForProject($proyek)
+                ->each(fn($user) => $user->notify(new \App\Notifications\ProyekSelesai($proyek)));
+        } else {
+            // refund decision — admins will get LaporanRefundAdmin via ProcessRefundDonatur listener
+            // For donors, send a specific notification
+            $recipients->donorsForProject($proyek)
+                ->each(fn($user) => $user->notify(new \App\Notifications\RefundDonaturNotification($proyek, 0)));
+        }
+
         $message = $validated['decision'] === 'refund'
             ? 'Status proyek diubah menjadi refund.'
             : 'Proyek dilanjutkan dengan dana terkumpul saat ini.';

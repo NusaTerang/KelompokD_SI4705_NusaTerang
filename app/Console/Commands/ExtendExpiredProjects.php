@@ -44,6 +44,17 @@ class ExtendExpiredProjects extends Command
                         );
                     }
 
+                    // Notify vendor
+                    if ($proyek->penyedia_id) {
+                        $vendorUser = \App\Models\User::where('penyedia_id', $proyek->penyedia_id)->first();
+                        if ($vendorUser) {
+                            $vendorUser->notify(new \App\Notifications\ProyekDitugaskan($proyek));
+                        }
+                    }
+                    // Notify admins
+                    \App\Models\User::where('role', 'admin')->get()
+                        ->each(fn($admin) => $admin->notify(new \App\Notifications\ProyekDitugaskan($proyek)));
+
                     $count++;
                 }
             });
