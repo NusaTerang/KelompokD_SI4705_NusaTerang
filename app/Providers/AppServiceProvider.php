@@ -36,10 +36,8 @@ class AppServiceProvider extends ServiceProvider
             \App\Events\PaymentConfirmed::class,
             \App\Listeners\UpdateProjectFunding::class
         );
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\ProyekDibatalkan::class,
-            \App\Listeners\ProcessRefundDonatur::class
-        );
+        // ProcessRefundDonatur is auto-discovered via its handle(ProyekDibatalkan)
+        // type-hint — no manual Event::listen() needed here.
 
         Proyek::observe(ProyekObserver::class);
         User::observe(UserObserver::class);

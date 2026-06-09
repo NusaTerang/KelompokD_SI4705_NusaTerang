@@ -107,10 +107,10 @@ class ProyekController extends Controller
         $hasDraftPhotos = ! empty($draft?->foto_paths);
 
         $rules = [
-            'persentase' => $isDraft ? 'nullable|integer|in:' . $allowedValuesStr : 'required|integer|in:' . $allowedValuesStr,
+            'persentase' => $isDraft ? 'nullable|integer|min:0|max:100' : 'required|integer|in:' . $allowedValuesStr,
             'deskripsi' => $isDraft ? 'nullable|string|max:2000' : 'required|string|max:2000',
             'status_progress' => $isDraft ? 'nullable|in:dijadwalkan,berjalan,selesai' : 'required|in:dijadwalkan,berjalan,selesai',
-            'fotos' => $isDraft ? 'nullable|array|max:5' : ($hasDraftPhotos ? 'nullable|array|max:5' : 'required|array|min:1|max:5'),
+            'fotos' => 'nullable|array|max:5',
             'fotos.*' => 'image|max:2048',
         ];
 
@@ -138,6 +138,10 @@ class ProyekController extends Controller
             }
         } elseif (! $isDraft && $hasDraftPhotos) {
             $fotoPaths = $draft->foto_paths;
+        }
+
+        if ((int) ($validated['persentase'] ?? 0) === 100) {
+            $validated['status_progress'] = 'selesai';
         }
 
         $payload = [
@@ -417,6 +421,17 @@ class ProyekController extends Controller
                 }
             }
         });
+
+        $recipients = app(\App\Services\NotificationRecipientService::class);
+        if ($validated['decision'] === 'continue') {
+            $recipients->adminsAndDonorsForProject($proyek)
+                ->each(fn($user) => $user->notify(new \App\Notifications\ProyekSelesai($proyek)));
+        } else {
+            // refund decision — admins will get LaporanRefundAdmin via ProcessRefundDonatur listener
+            // For donors, send a specific notification
+            $recipients->donorsForProject($proyek)
+                ->each(fn($user) => $user->notify(new \App\Notifications\RefundDonaturNotification($proyek, 0)));
+        }
 
         $message = $validated['decision'] === 'refund'
             ? 'Status proyek diubah menjadi refund.'

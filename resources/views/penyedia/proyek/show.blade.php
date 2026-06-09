@@ -500,7 +500,13 @@
                     </div>
                 </div>
 
-                @if(in_array($proyek->status, ['eksekusi', 'selesai']))
+                @if($proyek->status === 'menunggu_keputusan_vendor' && $proyek->expired_extension_pending)
+                    <a href="{{ route('vendor.proyek.expiry-decision.show', $penugasan->id_penugasan) }}"
+                       class="w-full py-4 bg-red-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all mb-6">
+                        <span class="material-symbols-outlined text-sm">warning</span>
+                        Tinjau Keputusan Refund / Lanjut
+                    </a>
+                @elseif(in_array($proyek->status, ['eksekusi', 'selesai']))
                     <a href="{{ route('vendor.proyek.progress.show', $penugasan->id_penugasan) }}" class="w-full py-4 bg-deep-navy text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all mb-6">
                         <span class="material-symbols-outlined text-sm">timeline</span>
                         Update Progress

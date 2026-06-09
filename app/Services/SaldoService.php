@@ -2,65 +2,115 @@
 
 namespace App\Services;
 
-use App\Models\SaldoMutasi;
-use App\Models\User;
+use App\Models\MutasiSaldo;
+use App\Models\SaldoDonatur;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 
 class SaldoService
 {
     /**
-     * Menambah saldo donatur dan mencatat mutasinya. Atomik.
+     * Ambil atau buat record saldo untuk donatur.
      */
-    public function credit(User $user, float $amount, string $tipe, ?string $keterangan = null, ?int $proyekId = null): SaldoMutasi
+    public function getOrCreateSaldo(int $idDonatur): SaldoDonatur
     {
-        if ($amount <= 0) {
-            throw new RuntimeException('Nominal kredit saldo harus lebih dari 0.');
-        }
-
-        return $this->record($user, $amount, $tipe, $keterangan, $proyekId);
+        return SaldoDonatur::firstOrCreate(
+            ['id_donatur' => $idDonatur],
+            ['saldo' => 0]
+        );
     }
 
     /**
-     * Mengurangi saldo donatur dan mencatat mutasinya. Atomik.
-     * Melempar exception bila saldo tidak cukup.
+     * Ambil saldo saat ini.
      */
-    public function debit(User $user, float $amount, string $tipe, ?string $keterangan = null, ?int $proyekId = null): SaldoMutasi
+    public function getSaldo(int $idDonatur): float
     {
-        if ($amount <= 0) {
-            throw new RuntimeException('Nominal debit saldo harus lebih dari 0.');
-        }
+        $saldo = SaldoDonatur::where('id_donatur', $idDonatur)->value('saldo');
 
-        return $this->record($user, -$amount, $tipe, $keterangan, $proyekId);
+        return (float) ($saldo ?? 0);
     }
 
     /**
-     * @param float $signedAmount positif = masuk, negatif = keluar
+     * Cek apakah saldo cukup untuk nominal tertentu.
      */
-    protected function record(User $user, float $signedAmount, string $tipe, ?string $keterangan, ?int $proyekId): SaldoMutasi
+    public function cukupUntuk(int $idDonatur, float $nominal): bool
     {
-        return DB::transaction(function () use ($user, $signedAmount, $tipe, $keterangan, $proyekId) {
-            // Kunci baris user agar tidak ada balapan saldo.
-            $fresh = User::whereKey($user->getKey())->lockForUpdate()->firstOrFail();
+        return $this->getSaldo($idDonatur) >= $nominal;
+    }
 
-            $before = (float) $fresh->saldo;
-            $after  = round($before + $signedAmount, 2);
+    /**
+     * Credit (tambah) saldo.
+     * Dipakai oleh: PBI-30 (refund), PBI-33 (top-up).
+     *
+     * @param  int         $idDonatur   ID donatur
+     * @param  float       $nominal     Jumlah dana yang ditambahkan
+     * @param  string      $tipe        Tipe mutasi: 'refund' atau 'topup'
+     * @param  int|null    $proyekId    ID proyek terkait (nullable)
+     * @param  string      $keterangan  Deskripsi mutasi
+     * @return MutasiSaldo Record mutasi yang dibuat
+     */
+    public function credit(int $idDonatur, float $nominal, string $tipe, ?int $proyekId, string $keterangan): MutasiSaldo
+    {
+        return DB::transaction(function () use ($idDonatur, $nominal, $tipe, $proyekId, $keterangan) {
+            // Lock row untuk mencegah race condition
+            $saldoRecord = SaldoDonatur::lockForUpdate()->firstOrCreate(
+                ['id_donatur' => $idDonatur],
+                ['saldo' => 0]
+            );
 
-            if ($after < 0) {
-                throw new RuntimeException('Saldo tidak mencukupi.');
+            $saldoSebelum = (float) $saldoRecord->saldo;
+            $saldoSesudah = $saldoSebelum + $nominal;
+
+            $saldoRecord->update(['saldo' => $saldoSesudah]);
+
+            return MutasiSaldo::create([
+                'id_donatur'          => $idDonatur,
+                'tipe'                => $tipe,
+                'nominal'             => $nominal,
+                'saldo_sebelum'       => $saldoSebelum,
+                'saldo_sesudah'       => $saldoSesudah,
+                'referensi_proyek_id' => $proyekId,
+                'keterangan'          => $keterangan,
+            ]);
+        });
+    }
+
+    /**
+     * Debit (kurangi) saldo.
+     * Dipakai oleh: PBI-32 (bayar donasi pakai saldo).
+     *
+     * @param  int         $idDonatur   ID donatur
+     * @param  float       $nominal     Jumlah dana yang dikurangi
+     * @param  string      $tipe        Tipe mutasi: 'donasi'
+     * @param  int|null    $proyekId    ID proyek terkait (nullable)
+     * @param  string      $keterangan  Deskripsi mutasi
+     * @return MutasiSaldo Record mutasi yang dibuat
+     *
+     * @throws \RuntimeException Jika saldo tidak mencukupi
+     */
+    public function debit(int $idDonatur, float $nominal, string $tipe, ?int $proyekId, string $keterangan): MutasiSaldo
+    {
+        return DB::transaction(function () use ($idDonatur, $nominal, $tipe, $proyekId, $keterangan) {
+            $saldoRecord = SaldoDonatur::lockForUpdate()
+                ->where('id_donatur', $idDonatur)
+                ->first();
+
+            if (! $saldoRecord || (float) $saldoRecord->saldo < $nominal) {
+                throw new \RuntimeException('Saldo tidak mencukupi.');
             }
 
-            $fresh->update(['saldo' => $after]);
-            $user->setAttribute('saldo', $after);
+            $saldoSebelum = (float) $saldoRecord->saldo;
+            $saldoSesudah = $saldoSebelum - $nominal;
 
-            return SaldoMutasi::create([
-                'id_donatur'    => $fresh->getKey(),
-                'tipe'          => $tipe,
-                'nominal'       => round($signedAmount, 2),
-                'saldo_sebelum' => $before,
-                'saldo_sesudah' => $after,
-                'keterangan'    => $keterangan,
-                'proyek_id'     => $proyekId,
+            $saldoRecord->update(['saldo' => $saldoSesudah]);
+
+            return MutasiSaldo::create([
+                'id_donatur'          => $idDonatur,
+                'tipe'                => $tipe,
+                'nominal'             => $nominal,
+                'saldo_sebelum'       => $saldoSebelum,
+                'saldo_sesudah'       => $saldoSesudah,
+                'referensi_proyek_id' => $proyekId,
+                'keterangan'          => $keterangan,
             ]);
         });
     }

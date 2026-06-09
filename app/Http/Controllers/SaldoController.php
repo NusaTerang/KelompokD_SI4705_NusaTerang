@@ -2,21 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MutasiSaldo;
 use App\Models\Proyek;
 use App\Services\RefundService;
+use App\Services\SaldoService;
 
 class SaldoController extends Controller
 {
-    public function index()
+    public function index(SaldoService $saldoService)
     {
+        /** @var \App\Models\User $user */
         $user = auth()->user();
+        $saldo = $saldoService->getSaldo($user->id_donatur);
 
-        $mutasi = $user->saldoMutasi()
-            ->with('proyek')
+        $mutasiList = MutasiSaldo::where('id_donatur', $user->id_donatur)
+            ->with('proyek:id,judul')
             ->latest()
-            ->paginate(15);
+            ->paginate(10);
 
-        return view('donatur.saldo', compact('user', 'mutasi'));
+        return view('donatur.saldo.index', compact('saldo', 'mutasiList'));
     }
 
     public function refund(Proyek $proyek, RefundService $refunds)

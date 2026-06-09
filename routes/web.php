@@ -21,7 +21,8 @@ use App\Http\Controllers\Admin\UserManagementController;
 // ─── Public ──────────────────────────────────────────────────────────────────
 
 Route::get('/', function () {
-    $query = \App\Models\Proyek::with(['desa', 'fotos']);
+    $query = \App\Models\Proyek::with(['desa', 'fotos'])
+        ->whereIn('status', ['aktif_funding', 'eksekusi', 'selesai']);
 
     if (request()->filled('search')) {
         $search = request('search');

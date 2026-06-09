@@ -19,7 +19,48 @@ class VendorFinalReportTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_vendor_can_save_final_report_draft_without_completing_project(): void
+    // TC-01
+    public function test_vendor_berhasil_submit_laporan_akhir(): void
+    {
+        Storage::fake('public');
+        Notification::fake();
+
+        [$vendorUser, $penugasan, $proyek, , $adminUser] = $this->createProjectWithCompletedProgress();
+
+        $response = $this->actingAs($vendorUser)
+            ->post(route('vendor.proyek.final-report.store', $penugasan->id_penugasan), [
+                'deskripsi' => 'Seluruh instalasi panel surya selesai.',
+                'kapasitas_terpasang' => 15,
+                'satuan_kapasitas' => 'kWp',
+                'catatan' => 'Sistem siap digunakan warga.',
+                'fotos' => [UploadedFile::fake()->image('laporan-final.jpg')],
+            ]);
+
+        $response->assertRedirect(route('vendor.proyek.show', $penugasan->id_penugasan));
+
+        $this->assertDatabaseHas('laporan_akhir_proyek_vendor', [
+            'id_penugasan' => $penugasan->id_penugasan,
+            'id_proyek' => $proyek->id,
+            'deskripsi' => 'Seluruh instalasi panel surya selesai.',
+            'kapasitas_terpasang' => 15,
+            'satuan_kapasitas' => 'kWp',
+            'status' => 'submitted',
+        ]);
+
+        $this->assertDatabaseHas('proyeks', [
+            'id' => $proyek->id,
+            'status' => 'selesai',
+        ]);
+
+        Notification::assertSentTo($adminUser, ProyekSelesai::class);
+
+        $publicResponse = $this->get(route('proyek.show', $proyek->id));
+        $publicResponse->assertSee('Laporan Akhir');
+        $publicResponse->assertSee('Seluruh instalasi panel surya selesai.');
+    }
+
+    // TC-02
+    public function test_vendor_simpan_draft_laporan_akhir(): void
     {
         Storage::fake('public');
 
@@ -51,42 +92,8 @@ class VendorFinalReportTest extends TestCase
         ]);
     }
 
-    public function test_vendor_can_submit_final_report_and_complete_project(): void
-    {
-        Storage::fake('public');
-        Notification::fake();
-
-        [$vendorUser, $penugasan, $proyek, , $adminUser] = $this->createProjectWithCompletedProgress();
-
-        $response = $this->actingAs($vendorUser)
-            ->post(route('vendor.proyek.final-report.store', $penugasan->id_penugasan), [
-                'deskripsi' => 'Seluruh instalasi panel surya selesai dan berfungsi.',
-                'kapasitas_terpasang' => 15,
-                'satuan_kapasitas' => 'kWp',
-                'catatan' => 'Sistem siap digunakan warga.',
-                'fotos' => [UploadedFile::fake()->image('laporan-final.jpg')],
-            ]);
-
-        $response->assertRedirect(route('vendor.proyek.show', $penugasan->id_penugasan));
-
-        $this->assertDatabaseHas('laporan_akhir_proyek_vendor', [
-            'id_penugasan' => $penugasan->id_penugasan,
-            'id_proyek' => $proyek->id,
-            'deskripsi' => 'Seluruh instalasi panel surya selesai dan berfungsi.',
-            'kapasitas_terpasang' => 15,
-            'satuan_kapasitas' => 'kWp',
-            'status' => 'submitted',
-        ]);
-
-        $this->assertDatabaseHas('proyeks', [
-            'id' => $proyek->id,
-            'status' => 'selesai',
-        ]);
-
-        Notification::assertSentTo($adminUser, ProyekSelesai::class);
-    }
-
-    public function test_submitted_final_report_requires_description_and_photo(): void
+    // TC-03
+    public function test_validasi_field_wajib(): void
     {
         [$vendorUser, $penugasan] = $this->createProjectWithCompletedProgress();
 
@@ -101,7 +108,8 @@ class VendorFinalReportTest extends TestCase
         $response->assertSessionHasErrors(['deskripsi', 'fotos']);
     }
 
-    public function test_vendor_cannot_submit_final_report_twice(): void
+    // TC-04
+    public function test_validasi_pencegahan_duplikasi_laporan(): void
     {
         Storage::fake('public');
 
@@ -130,7 +138,8 @@ class VendorFinalReportTest extends TestCase
         $response->assertSessionHasErrors('laporan_akhir');
     }
 
-    public function test_other_vendor_cannot_submit_final_report_for_unowned_project(): void
+    // TC-05
+    public function test_validasi_hak_akses(): void
     {
         [, $penugasan] = $this->createProjectWithCompletedProgress();
         [$otherVendorUser] = $this->createOtherVendor();
@@ -143,29 +152,17 @@ class VendorFinalReportTest extends TestCase
             ]);
 
         $response->assertForbidden();
-    }
 
-    public function test_final_report_is_visible_on_public_project_detail(): void
-    {
-        Storage::fake('public');
+        $adminUser = User::factory()->create(['role' => 'admin']);
 
-        [$vendorUser, $penugasan, $proyek] = $this->createProjectWithCompletedProgress();
-
-        $this->actingAs($vendorUser)
+        $response = $this->actingAs($adminUser)
             ->post(route('vendor.proyek.final-report.store', $penugasan->id_penugasan), [
-                'deskripsi' => 'Laporan publik terlihat di detail proyek.',
-                'kapasitas_terpasang' => 20,
+                'deskripsi' => 'Admin mencoba submit laporan.',
+                'kapasitas_terpasang' => 10,
                 'satuan_kapasitas' => 'kWp',
-                'catatan' => 'Dokumentasi lengkap.',
-                'fotos' => [UploadedFile::fake()->image('laporan-public.jpg')],
             ]);
 
-        $response = $this->get(route('proyek.show', $proyek->id));
-
-        $response->assertOk();
-        $response->assertSee('Laporan Akhir');
-        $response->assertSee('Laporan publik terlihat di detail proyek.');
-        $response->assertSee('20 kWp');
+        $response->assertForbidden();
     }
 
     private function createProjectWithCompletedProgress(): array

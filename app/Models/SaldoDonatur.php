@@ -9,9 +9,14 @@ class SaldoDonatur extends Model
 {
     protected $table = 'saldo_donatur';
 
-    protected $fillable = ['id_donatur', 'saldo'];
+    protected $fillable = [
+        'id_donatur',
+        'saldo',
+    ];
 
-    protected $casts = ['saldo' => 'float'];
+    protected $casts = [
+        'saldo' => 'decimal:2',
+    ];
 
     public function donatur(): BelongsTo
     {

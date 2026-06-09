@@ -8,30 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('saldo_donatur', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id_donatur')->unique();
-            $table->decimal('saldo', 15, 2)->default(0.00);
-            $table->timestamps();
-
-            $table->foreign('id_donatur')->references('id_donatur')->on('users')->cascadeOnDelete();
-        });
-
-        Schema::create('mutasi_saldo', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id_donatur');
-            $table->decimal('nominal', 15, 2);
-            $table->enum('tipe', ['masuk', 'keluar']);
-            $table->string('keterangan')->nullable();
-            $table->timestamps();
-
-            $table->foreign('id_donatur')->references('id_donatur')->on('users')->cascadeOnDelete();
-        });
+        // Superseded by 2026_06_09_000001 and 2026_06_09_000002
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('mutasi_saldo');
-        Schema::dropIfExists('saldo_donatur');
+        //
     }
 };

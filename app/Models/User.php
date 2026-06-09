@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -95,14 +96,21 @@ class User extends Authenticatable
         return $this->hasRole('donatur');
     }
 
-    public function saldoDonatur(): \Illuminate\Database\Eloquent\Relations\HasOne
+    // ─── Saldo (PBI-31) ──────────────────────────────────────────────
+
+    public function saldoDonatur(): HasOne
     {
         return $this->hasOne(SaldoDonatur::class, 'id_donatur', 'id_donatur');
     }
 
+    public function mutasiSaldo(): HasMany
+    {
+        return $this->hasMany(MutasiSaldo::class, 'id_donatur', 'id_donatur');
+    }
+
     public function getSaldoAttribute(): float
     {
-        return $this->saldoDonatur ? $this->saldoDonatur->saldo : 0.0;
+        return (float) ($this->saldoDonatur?->saldo ?? 0);
     }
 
     public function tambahSaldo(float $nominal, ?string $keterangan = null): void
