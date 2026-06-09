@@ -161,4 +161,34 @@ class Proyek extends Model
         }
         return false;
     }
+
+    public function checkAndExtendIfExpired(): bool
+    {
+        if (
+            $this->status === 'aktif_funding'
+            && ! $this->expired_extension_pending
+            && $this->isPastDeadline()
+        ) {
+            $this->update([
+                'expired_original_end_date' => $this->estimasi_selesai,
+                'estimasi_selesai'          => now()->addDays(30)->toDateString(),
+                'expired_extended_at'       => now(),
+                'expired_extension_pending' => true,
+                'expired_vendor_decision'   => null,
+                'status'                    => 'menunggu_keputusan_vendor',
+            ]);
+
+            if ($this->penyedia_id) {
+                $vendorUser = \App\Models\User::where('penyedia_id', $this->penyedia_id)->first();
+                $vendorUser?->notify(new \App\Notifications\ProyekDitugaskan($this));
+            }
+
+            \App\Models\User::where('role', 'admin')->get()
+                ->each(fn ($admin) => $admin->notify(new \App\Notifications\ProyekDitugaskan($this)));
+
+            return true;
+        }
+
+        return false;
+    }
 }

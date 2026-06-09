@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
-class NotificationTest extends TestCase
+class PBI23_NotificationTest extends TestCase
 {
     use RefreshDatabase;
 

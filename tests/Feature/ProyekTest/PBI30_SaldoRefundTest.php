@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
-class SaldoRefundTest extends TestCase
+class PBI30_SaldoRefundTest extends TestCase
 {
     use RefreshDatabase;
 

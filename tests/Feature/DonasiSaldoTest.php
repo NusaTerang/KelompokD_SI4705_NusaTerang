@@ -344,8 +344,8 @@ class DonasiSaldoTest extends TestCase
         $this->assertDatabaseHas('mutasi_saldo', [
             'id_donatur' => $user->id_donatur,
             'nominal' => 75000,
-            'tipe' => 'masuk',
-            'keterangan' => 'Pengembalian dana donasi untuk proyek: ' . $proyek->judul,
+            'tipe' => 'refund',
+            'keterangan' => 'Refund donasi proyek: ' . $proyek->judul,
         ]);
     }
 

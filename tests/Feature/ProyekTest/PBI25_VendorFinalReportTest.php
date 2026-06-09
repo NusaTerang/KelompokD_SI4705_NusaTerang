@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
-class VendorFinalReportTest extends TestCase
+class PBI25_VendorFinalReportTest extends TestCase
 {
     use RefreshDatabase;
 

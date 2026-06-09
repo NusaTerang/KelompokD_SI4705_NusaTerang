@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
-class ExpiredProjectExtensionTest extends TestCase
+class PBI29_ExpiredProjectExtensionTest extends TestCase
 {
     use RefreshDatabase;
 

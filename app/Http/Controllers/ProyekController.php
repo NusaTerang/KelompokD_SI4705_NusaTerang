@@ -390,6 +390,11 @@ class ProyekController extends Controller
             'penugasan.detail',
         ])->findOrFail($id);
 
+        // Lazy expiry check: catches natural deadline pass without waiting for cron
+        if ($proyek->checkAndExtendIfExpired()) {
+            return redirect()->route('proyek.show', $id);
+        }
+
         $detail = $proyek->penugasan->first()?->detail;
         $costBreakdown = $detail ? $detail->cost_breakdown : null;
 

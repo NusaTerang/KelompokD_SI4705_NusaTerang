@@ -13,6 +13,13 @@ class ProyekObserver
             $proyek->checkAndActivateInstalasi();
         }
 
+        if (
+            $proyek->wasChanged('estimasi_selesai')
+            || ($proyek->wasChanged('status') && $proyek->status === 'aktif_funding')
+        ) {
+            $proyek->checkAndExtendIfExpired();
+        }
+
         if ($proyek->wasChanged('status') && $proyek->status === 'refund') {
             event(new ProyekDibatalkan($proyek));
         }

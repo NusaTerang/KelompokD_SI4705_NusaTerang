@@ -13,7 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
-class VendorProjectProgressTest extends TestCase
+class PBI21_VendorProjectProgressTest extends TestCase
 {
     use RefreshDatabase;
 

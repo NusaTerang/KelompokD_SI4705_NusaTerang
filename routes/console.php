@@ -8,5 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('proyek:extend-expired')->daily();
+Schedule::command('proyek:extend-expired')->everyMinute();
 Schedule::command('proyek:publish-scheduled')->everyMinute();

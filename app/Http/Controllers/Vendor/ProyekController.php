@@ -7,6 +7,7 @@ use App\Models\DetailProyekVendor;
 use App\Models\LaporanAkhirProyekVendor;
 use App\Models\PenugasanProyek;
 use App\Models\ProgressProyekVendor;
+use App\Models\Proyek;
 use App\Notifications\DetailProyekDiisi;
 use App\Notifications\ProgressProyekDikirim;
 use App\Notifications\ProyekSelesai;
@@ -19,12 +20,36 @@ class ProyekController extends Controller
     {
         $penyedia = auth()->user()->penyedia;
 
+        $this->ensurePendingDecisionAssignments($penyedia->id);
+
         $penugasans = PenugasanProyek::with(['proyek.desa', 'proyek.fotos', 'detail'])
             ->where('id_penyedia', $penyedia->id)
             ->latest()
             ->get();
 
         return view('penyedia.proyek.index', compact('penugasans'));
+    }
+
+    private function ensurePendingDecisionAssignments(int $penyediaId): void
+    {
+        Proyek::query()
+            ->where('penyedia_id', $penyediaId)
+            ->where('status', 'menunggu_keputusan_vendor')
+            ->where('expired_extension_pending', true)
+            ->whereDoesntHave('penugasan', fn ($query) => $query->where('id_penyedia', $penyediaId))
+            ->get()
+            ->each(function (Proyek $proyek) use ($penyediaId) {
+                PenugasanProyek::firstOrCreate(
+                    [
+                        'id_proyek' => $proyek->id,
+                        'id_penyedia' => $penyediaId,
+                    ],
+                    [
+                        'status_penugasan' => 'diterima',
+                        'tanggal_respon' => now(),
+                    ]
+                );
+            });
     }
 
     public function show($id)
@@ -406,31 +431,12 @@ class ProyekController extends Controller
                 'expired_vendor_decision' => $validated['decision'],
                 'expired_extension_pending' => false,
             ]);
-
-            if ($validated['decision'] === 'refund') {
-                $donasis = \App\Models\Donasi::where('id_proyek', $proyek->id)
-                    ->where('status', 'success')
-                    ->get();
-
-                foreach ($donasis as $donasi) {
-                    $donatur = $donasi->donatur;
-                    if ($donatur) {
-                        $donatur->tambahSaldo($donasi->nominal, "Pengembalian dana donasi untuk proyek: {$proyek->judul}");
-                    }
-                    $donasi->update(['status' => 'refunded']);
-                }
-            }
         });
 
         $recipients = app(\App\Services\NotificationRecipientService::class);
         if ($validated['decision'] === 'continue') {
             $recipients->adminsAndDonorsForProject($proyek)
                 ->each(fn($user) => $user->notify(new \App\Notifications\ProyekSelesai($proyek)));
-        } else {
-            // refund decision — admins will get LaporanRefundAdmin via ProcessRefundDonatur listener
-            // For donors, send a specific notification
-            $recipients->donorsForProject($proyek)
-                ->each(fn($user) => $user->notify(new \App\Notifications\RefundDonaturNotification($proyek, 0)));
         }
 
         $message = $validated['decision'] === 'refund'
