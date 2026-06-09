@@ -19,7 +19,6 @@ class AdminSeeder extends Seeder
             ]
         );
 
-        // Pastikan admin memiliki saldo (meskipun admin biasanya tidak perlu saldo)
         SaldoDonatur::firstOrCreate(
             ['id_donatur' => $admin->id_donatur],
             ['saldo' => 0.00]

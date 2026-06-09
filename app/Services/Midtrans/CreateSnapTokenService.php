@@ -36,8 +36,8 @@ class CreateSnapTokenService extends Midtrans
             ],
             'customer_details' => [
                 'first_name' => $this->order->donatur_name,
-                'email'      => $this->order->donatur_email,
-                'phone'      => $this->order->donatur_phone ?? '',
+                'email' => $this->order->donatur_email,
+                'phone' => $this->order->donatur_phone ?? '',
             ],
             // Tampilkan semua payment method yang tersedia (remove specific channel restrictions)
         ];

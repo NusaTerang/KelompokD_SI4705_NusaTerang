@@ -11,43 +11,21 @@
 @endsection
 
 @push('head')
-<style>
-    input[type=range] {
-        -webkit-appearance: none;
-        width: 100%;
-        background: transparent;
-    }
-    input[type=range]::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 8px;
-        cursor: pointer;
-        background: #ebeeed;
-        border-radius: 9999px;
-    }
-    input[type=range]::-webkit-slider-thumb {
-        height: 24px;
-        width: 24px;
-        border-radius: 9999px;
-        background: #F9D423;
-        cursor: pointer;
-        -webkit-appearance: none;
-        margin-top: -8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        border: 3px solid white;
-    }
-</style>
+<style>[x-cloak]{display:none!important}</style>
 <script src="//unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 @endpush
 
 @section('content')
 @php
-    $currentPercentage = old('persentase', $draft->persentase ?? ($updates->first()?->persentase ?? 0));
-    $currentStatus = old('status_progress', $draft->status_progress ?? 'berjalan');
+    $maxProgress = $maxProgress ?? (int) ($updates->max('persentase') ?? 0);
+    $allowedOptions = array_values(array_filter([25, 50, 75, 100], fn($v) => $v > $maxProgress));
+    $currentStatus = old('status_progress', $draft->status_progress ?? null);
     $statusLabels = [
         'dijadwalkan' => 'Dijadwalkan',
         'berjalan' => 'Berjalan',
         'selesai' => 'Selesai',
     ];
+    $draftPhotoUrls = collect($draft?->foto_paths ?? [])->map(fn($p) => asset('storage/' . $p))->values()->all();
 @endphp
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -76,93 +54,195 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-right">
-                            <span class="block text-2xl font-extrabold text-[#0F4C81]">{{ $currentPercentage }}%</span>
+                            <span class="block text-2xl font-extrabold text-[#0F4C81]">{{ $maxProgress }}%</span>
                             <span class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider leading-none">Selesai</span>
                         </div>
                         <span class="bg-[#F9D423] text-[#0F4C81] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">{{ strtoupper($statusLabels[$currentStatus] ?? 'BERJALAN') }}</span>
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('vendor.proyek.progress.store', $penugasan->id_penugasan) }}" enctype="multipart/form-data" class="p-8 space-y-8" x-data="{ percentage: {{ (int) $currentPercentage }} }">
+                <form
+                    method="POST"
+                    action="{{ route('vendor.proyek.progress.store', $penugasan->id_penugasan) }}"
+                    enctype="multipart/form-data"
+                    class="p-8 space-y-8"
+                    x-data="{
+                        persentaseSelected: {{ (empty($allowedOptions) || old('persentase', $draft?->persentase)) ? 'true' : 'false' }},
+                        deskripsi: {{ json_encode(old('deskripsi', $draft?->deskripsi ?? '')) }},
+                        statusSelected: {{ (old('status_progress') || $draft?->status_progress) ? 'true' : 'false' }},
+                        draftPhotos: {{ json_encode($draftPhotoUrls) }},
+                        newPreviews: [],
+                        attempted: false,
+                        get fotoOk() { return this.draftPhotos.length > 0 || this.newPreviews.length > 0; },
+                        get displayPhotos() { return this.newPreviews.length > 0 ? this.newPreviews : this.draftPhotos; },
+                        get emptySlotList() {
+                            const count = Math.max(0, 3 - this.displayPhotos.length);
+                            return Array.from({ length: count }, (_, i) => i);
+                        },
+                        handleFotoChange(e) {
+                            const files = Array.from(e.target.files).slice(0, 5);
+                            this.newPreviews = files.map(f => URL.createObjectURL(f));
+                        },
+                        trySubmit() {
+                            this.attempted = true;
+                            if (this.persentaseSelected && this.deskripsi.trim() && this.statusSelected && this.fotoOk) {
+                                this.$el.closest('form').submit();
+                            }
+                        }
+                    }"
+                >
                     @csrf
 
-                    <div class="space-y-4">
-                        <label for="persentase" class="block text-xs font-bold text-[#0F4C81] uppercase tracking-widest">Persentase Penyelesaian</label>
-                        <div class="text-center py-4">
-                            <span class="text-6xl font-black text-[#0F4C81] inline-flex items-end">
-                                <span x-text="percentage"></span><span class="text-3xl font-bold text-[#F9D423] mb-2 ml-1">%</span>
-                            </span>
-                        </div>
-                        <div class="relative px-2">
-                            <input id="persentase" name="persentase" class="w-full" max="100" min="0" type="range" x-model="percentage" value="{{ $currentPercentage }}">
-                            <div class="flex justify-between mt-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
-                                <span>0%</span>
-                                <span>25%</span>
-                                <span>50%</span>
-                                <span>75%</span>
-                                <span>100%</span>
+                    {{-- Persentase --}}
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold text-[#0F4C81] uppercase tracking-widest">
+                            Persentase Penyelesaian <span class="text-red-500">*</span>
+                        </label>
+
+                        @if(empty($allowedOptions))
+                            <div class="rounded-xl bg-[#27AE60]/10 border border-[#27AE60]/30 px-5 py-4 text-[#27AE60] font-bold text-sm flex items-center gap-2">
+                                <span class="material-symbols-outlined text-base">check_circle</span>
+                                Progress sudah mencapai 100%. Tidak ada tahapan tersisa.
                             </div>
-                        </div>
+                        @else
+                            <div class="flex flex-wrap gap-3 rounded-xl transition-all" :class="{ 'outline outline-2 outline-red-400 p-3': attempted && !persentaseSelected }">
+                                @foreach($allowedOptions as $option)
+                                    <label class="relative flex cursor-pointer">
+                                        <input class="sr-only peer" name="persentase" type="radio" value="{{ $option }}"
+                                            @checked(old('persentase', $draft?->persentase) == $option)
+                                            @change="persentaseSelected = true">
+                                        <div class="min-w-[80px] text-center px-6 py-4 rounded-xl border-2 border-slate-200 text-on-surface-variant font-bold text-lg transition-all
+                                            peer-checked:border-[#F9D423] peer-checked:bg-[#F9D423]/10 peer-checked:text-[#0F4C81] hover:border-[#F9D423]/50">
+                                            {{ $option }}%
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p x-show="attempted && !persentaseSelected" x-cloak class="text-sm text-red-500 flex items-center gap-1 mt-1">
+                                <span class="material-symbols-outlined text-base">warning</span>
+                                Pilih salah satu persentase penyelesaian.
+                            </p>
+                        @endif
+
                         @error('persentase')
-                            <p class="text-sm text-error mt-2">{{ $message }}</p>
+                            <p class="text-sm text-error mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="space-y-3">
-                        <label for="deskripsi" class="block text-xs font-bold text-[#0F4C81] uppercase tracking-widest">Keterangan Update</label>
-                        <textarea id="deskripsi" name="deskripsi" rows="4" class="w-full bg-surface-container-low border-none rounded-xl p-4 focus:ring-2 focus:ring-[#F9D423] text-on-surface placeholder:text-on-surface-variant/50" placeholder="Deskripsikan perkembangan di lapangan...">{{ old('deskripsi', $draft->deskripsi ?? '') }}</textarea>
+                    {{-- Deskripsi --}}
+                    <div class="space-y-2">
+                        <label for="deskripsi" class="block text-xs font-bold text-[#0F4C81] uppercase tracking-widest">
+                            Keterangan Update <span class="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            id="deskripsi"
+                            name="deskripsi"
+                            rows="4"
+                            x-model="deskripsi"
+                            class="w-full bg-surface-container-low border-none rounded-xl p-4 text-on-surface placeholder:text-on-surface-variant/50 transition-all"
+                            :class="{ 'ring-2 ring-red-400': attempted && !deskripsi.trim(), 'focus:ring-2 focus:ring-[#F9D423]': !(attempted && !deskripsi.trim()) }"
+                            placeholder="Deskripsikan perkembangan di lapangan..."
+                        ></textarea>
+                        <p x-show="attempted && !deskripsi.trim()" x-cloak class="text-sm text-red-500 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-base">warning</span>
+                            Keterangan update wajib diisi.
+                        </p>
                         @error('deskripsi')
-                            <p class="text-sm text-error mt-2">{{ $message }}</p>
+                            <p class="text-sm text-error">{{ $message }}</p>
                         @enderror
                     </div>
 
+                    {{-- Foto --}}
                     <div class="space-y-3">
-                        <label for="fotos" class="block text-xs font-bold text-[#0F4C81] uppercase tracking-widest">Upload Foto Lapangan <span class="text-[10px] font-normal normal-case text-on-surface-variant">(Maks 5)</span></label>
-                        <div class="grid grid-cols-4 gap-4">
+                        <label for="fotos" class="block text-xs font-bold text-[#0F4C81] uppercase tracking-widest">
+                            Upload Foto Lapangan <span class="text-red-500">*</span> <span class="text-[10px] font-normal normal-case text-on-surface-variant">(Maks 5)</span>
+                        </label>
+                        <div class="grid grid-cols-4 gap-4 rounded-xl transition-all" :class="{ 'outline outline-2 outline-red-400 p-2': attempted && !fotoOk }">
                             <label for="fotos" class="aspect-square rounded-xl border-2 border-dashed border-outline-variant flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer group">
                                 <span class="material-symbols-outlined text-3xl mb-1 group-hover:scale-110 transition-transform">add_a_photo</span>
-                                <span class="text-[10px] font-bold">TAMBAH</span>
+                                <span class="text-[10px] font-bold" x-text="newPreviews.length > 0 ? newPreviews.length + ' foto' : 'TAMBAH'"></span>
                             </label>
-                            @foreach(($draft->foto_paths ?? []) as $path)
-                                <div class="relative group aspect-square rounded-xl overflow-hidden">
-                                    <img class="w-full h-full object-cover" src="{{ asset('storage/' . $path) }}" alt="Foto draft progress">
+                            <template x-for="(url, idx) in displayPhotos" :key="idx">
+                                <div class="relative group aspect-square rounded-xl overflow-hidden ring-2 ring-[#F9D423]/40">
+                                    <img class="w-full h-full object-cover" :src="url" alt="Foto preview">
+                                    <div x-show="newPreviews.length > 0" class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                                 </div>
-                            @endforeach
-                            @for($i = count($draft->foto_paths ?? []); $i < 3; $i++)
+                            </template>
+                            <template x-for="i in emptySlotList" :key="'e'+i">
                                 <div class="aspect-square rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-center italic text-[10px] text-on-surface-variant">Kosong</div>
-                            @endfor
+                            </template>
                         </div>
-                        <input id="fotos" name="fotos[]" type="file" multiple accept="image/*" class="sr-only">
+                        <input id="fotos" name="fotos[]" type="file" multiple accept="image/*" class="sr-only"
+                            @change="handleFotoChange($event)">
+                        <p x-show="attempted && !fotoOk" x-cloak class="text-sm text-red-500 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-base">warning</span>
+                            Minimal 1 foto lapangan wajib diunggah.
+                        </p>
                         @error('fotos')
-                            <p class="text-sm text-error mt-2">{{ $message }}</p>
+                            <p class="text-sm text-error">{{ $message }}</p>
                         @enderror
                         @error('fotos.*')
-                            <p class="text-sm text-error mt-2">{{ $message }}</p>
+                            <p class="text-sm text-error">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="space-y-4">
-                        <label class="block text-xs font-bold text-[#0F4C81] uppercase tracking-widest">Status Instalasi</label>
-                        <div class="flex flex-wrap gap-4">
-                            @foreach(['dijadwalkan' => 'Dijadwalkan', 'berjalan' => 'Berjalan', 'selesai' => 'Selesai'] as $value => $label)
-                                <label class="relative flex cursor-pointer group">
-                                    <input class="sr-only peer" name="status_progress" type="radio" value="{{ $value }}" @checked($currentStatus === $value)>
-                                    <div class="px-6 py-3 rounded-xl border-2 border-slate-100 text-on-surface-variant font-bold text-sm peer-checked:border-{{ $value === 'selesai' ? '[#27AE60]' : '[#F9D423]' }} peer-checked:bg-{{ $value === 'selesai' ? '[#27AE60]' : '[#F9D423]' }}/10 peer-checked:text-{{ $value === 'selesai' ? '[#27AE60]' : '[#0F4C81]' }} transition-all">
-                                        {{ $label }}
-                                    </div>
-                                </label>
-                            @endforeach
+                    {{-- Status Instalasi --}}
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold text-[#0F4C81] uppercase tracking-widest">
+                            Status Instalasi <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex flex-wrap gap-4 rounded-xl transition-all" :class="{ 'outline outline-2 outline-red-400 p-3': attempted && !statusSelected }">
+                            <label class="relative flex cursor-pointer group">
+                                <input class="sr-only peer" name="status_progress" type="radio" value="dijadwalkan"
+                                    @checked($currentStatus === 'dijadwalkan')
+                                    @change="statusSelected = true">
+                                <div class="px-6 py-3 rounded-xl border-2 border-slate-200 text-on-surface-variant font-bold text-sm transition-all
+                                    peer-checked:border-[#F9D423] peer-checked:bg-[#F9D423]/10 peer-checked:text-[#0F4C81] hover:border-[#F9D423]/50">
+                                    Dijadwalkan
+                                </div>
+                            </label>
+                            <label class="relative flex cursor-pointer group">
+                                <input class="sr-only peer" name="status_progress" type="radio" value="berjalan"
+                                    @checked($currentStatus === 'berjalan')
+                                    @change="statusSelected = true">
+                                <div class="px-6 py-3 rounded-xl border-2 border-slate-200 text-on-surface-variant font-bold text-sm transition-all
+                                    peer-checked:border-[#F9D423] peer-checked:bg-[#F9D423]/10 peer-checked:text-[#0F4C81] hover:border-[#F9D423]/50">
+                                    Berjalan
+                                </div>
+                            </label>
+                            <label class="relative flex cursor-pointer group">
+                                <input class="sr-only peer" name="status_progress" type="radio" value="selesai"
+                                    @checked($currentStatus === 'selesai')
+                                    @change="statusSelected = true">
+                                <div class="px-6 py-3 rounded-xl border-2 border-slate-200 text-on-surface-variant font-bold text-sm transition-all
+                                    peer-checked:border-[#27AE60] peer-checked:bg-[#27AE60]/10 peer-checked:text-[#27AE60] hover:border-[#27AE60]/50">
+                                    Selesai
+                                </div>
+                            </label>
                         </div>
+                        <p x-show="attempted && !statusSelected" x-cloak class="text-sm text-red-500 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-base">warning</span>
+                            Status instalasi wajib dipilih.
+                        </p>
                         @error('status_progress')
-                            <p class="text-sm text-error mt-2">{{ $message }}</p>
+                            <p class="text-sm text-error">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div class="flex items-center justify-end gap-4 pt-6 border-t border-slate-100">
-                        <button class="px-8 py-3 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all active:scale-95 duration-200" type="submit" name="save_draft" value="1">
+                        <button
+                            class="px-8 py-3 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all active:scale-95 duration-200"
+                            type="submit"
+                            name="save_draft"
+                            value="1"
+                        >
                             Simpan Draft
                         </button>
-                        <button class="bg-[#F9D423] hover:bg-[#e8c404] text-[#0F4C81] px-10 py-3 rounded-xl font-bold shadow-lg shadow-[#F9D423]/20 transition-all active:scale-95 duration-200" type="submit">
+                        <button
+                            class="bg-[#F9D423] hover:bg-[#e8c404] text-[#0F4C81] px-10 py-3 rounded-xl font-bold shadow-lg shadow-[#F9D423]/20 transition-all active:scale-95 duration-200"
+                            type="button"
+                            @click="trySubmit()"
+                        >
                             Kirim Update
                         </button>
                     </div>

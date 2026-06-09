@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\Donasi;
-use App\Models\Proyek;
-use Illuminate\Http\Request;
 use App\Services\Midtrans\CallbackService;
 
 class PaymentCallbackController extends Controller
@@ -17,6 +14,13 @@ class PaymentCallbackController extends Controller
         if ($callback->isSignatureKeyVerified()) {
             $notification = $callback->getNotification();
             $order = $callback->getOrder();
+
+            if (! $order) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Order tidak ditemukan',
+                ], 404);
+            }
 
             if ($callback->isSuccess()) {
                 \Illuminate\Support\Facades\DB::transaction(function () use ($order) {
@@ -57,22 +61,17 @@ class PaymentCallbackController extends Controller
                             if ($proyek->dana_terkumpul >= $proyek->target_dana) {
                                 $proyek->update(['status' => 'eksekusi']);
                             }
-                            // Otherwise, tetap aktif_funding (no need to update)
                         }
                     }
                 });
             }
 
             if ($callback->isExpire()) {
-                Order::where('id', $order->id)->update([
-                    'payment_status' => Order::STATUS_EXPIRED,
-                ]);
+                $order->update(['payment_status' => Order::STATUS_EXPIRED]);
             }
 
             if ($callback->isCancelled()) {
-                Order::where('id', $order->id)->update([
-                    'payment_status' => Order::STATUS_CANCELLED,
-                ]);
+                $order->update(['payment_status' => Order::STATUS_CANCELLED]);
             }
 
             return response()

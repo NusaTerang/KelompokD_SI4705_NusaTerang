@@ -83,7 +83,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($projects as $project)
                     @php
-                        $progress      = $project->target_dana > 0 ? round(($project->dana_terkumpul / $project->target_dana) * 100) : 0;
+                        $rawProgress   = $project->target_dana > 0 ? round(($project->dana_terkumpul / $project->target_dana) * 100) : 0;
+                        $progress      = in_array($project->status, ['eksekusi', 'selesai']) ? max($rawProgress, 100) : $rawProgress;
                         $daysLeft      = $project->estimasi_selesai ? max(0, (int) ceil(now()->diffInDays($project->estimasi_selesai, false))) : 0;
                         $firstFoto = $project->fotos->first();
                         $imageUrl  = $firstFoto

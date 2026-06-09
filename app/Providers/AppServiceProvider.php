@@ -7,6 +7,7 @@ use App\Models\Proyek;
 use App\Models\User;
 use App\Observers\ProyekObserver;
 use App\Observers\UserObserver;
+use Illuminate\Pagination\Paginator;
 
 use Illuminate\Support\Facades\Gate;
 
@@ -35,8 +36,14 @@ class AppServiceProvider extends ServiceProvider
             \App\Events\PaymentConfirmed::class,
             \App\Listeners\UpdateProjectFunding::class
         );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\ProyekDibatalkan::class,
+            \App\Listeners\ProcessRefundDonatur::class
+        );
 
         Proyek::observe(ProyekObserver::class);
         User::observe(UserObserver::class);
+
+        Paginator::defaultView('vendor.pagination.tailwind');
     }
 }

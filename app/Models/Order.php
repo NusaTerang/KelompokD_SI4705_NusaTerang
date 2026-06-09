@@ -67,4 +67,33 @@ class Order extends Model
     {
         return $this->payment_status === self::STATUS_CANCELLED;
     }
+
+    /**
+     * Tandai order sebagai lunas dan catat donasinya. Idempoten: aman dipanggil
+     * berkali-kali (webhook Midtrans maupun pull "Refresh Status") — transisi
+     * dana hanya terjadi sekali.
+     */
+    public function confirmPaid(): void
+    {
+        if ($this->isSuccess()) {
+            return;
+        }
+
+        $this->update(['payment_status' => self::STATUS_SUCCESS]);
+
+        $proyek = $this->proyek;
+        if ($proyek) {
+            Donasi::create([
+                'id_proyek'  => $proyek->id,
+                'id_donatur' => $this->user_id,
+                'nominal'    => $this->total_price,
+                'status'     => 'success',
+            ]);
+
+            // Menambah dana_terkumpul, mengirim notifikasi TargetDanaTercapai saat
+            // target terlampaui, dan (via ProyekObserver) memindah status proyek
+            // aktif_funding -> eksekusi.
+            $proyek->recordFunding($this->total_price);
+        }
+    }
 }

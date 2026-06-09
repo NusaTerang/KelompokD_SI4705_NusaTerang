@@ -21,7 +21,7 @@
             <span class="font-headline font-extrabold tracking-tight text-2xl">NusaTerang</span>
         </a>
 
-        <div class="hidden md:flex items-center gap-8 font-headline font-semibold text-sm">
+        <div class="hidden md:flex items-center gap-8 font-headline font-semibold text-sm absolute left-1/2 -translate-x-1/2">
             @auth
                 @if(Auth::user()->isAdmin())
                     <a href="{{ route('dashboard') }}" class="{{ request()->is('admin*') ? 'text-primary-container font-bold border-b-2 border-primary-container pb-1' : 'text-slate-600 hover:text-primary-container transition-colors' }}">Dashboard Admin</a>
@@ -49,6 +49,14 @@
                 @php($unreadNotifications = Auth::user()->unreadNotifications()->count())
                 <span class="text-sm font-semibold text-secondary">Hi, {{ Auth::user()->nama }}</span>
                 <a href="{{ route('dashboard') }}" class="text-sm font-bold text-secondary hover:text-on-secondary-container transition-colors">Dashboard</a>
+                @if(Auth::user()->isDonatur())
+                    <a href="{{ route('donatur.saldo') }}"
+                       class="inline-flex items-center gap-2 h-9 px-3 rounded-full bg-solar-gold/20 hover:bg-solar-gold/30 transition-colors {{ request()->is('donatur/saldo') ? 'ring-2 ring-solar-gold' : '' }}"
+                       aria-label="Saldo Saya" title="Saldo Saya">
+                        <span class="material-symbols-outlined text-[18px] text-deep-navy">account_balance_wallet</span>
+                        <span class="text-sm font-bold text-deep-navy">Rp {{ number_format(Auth::user()->saldo, 0, ',', '.') }}</span>
+                    </a>
+                @endif
                 <a href="{{ route('notifications.index') }}" class="relative w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors" aria-label="Notifikasi">
                     <span class="material-symbols-outlined text-[18px] text-on-surface-variant">notifications</span>
                     @if($unreadNotifications > 0)

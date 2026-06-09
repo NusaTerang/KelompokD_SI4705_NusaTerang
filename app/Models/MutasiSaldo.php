@@ -9,19 +9,17 @@ class MutasiSaldo extends Model
 {
     protected $table = 'mutasi_saldo';
 
-    protected $fillable = [
-        'id_donatur',
-        'nominal',
-        'tipe',
-        'keterangan',
-    ];
+    protected $fillable = ['id_donatur', 'id_proyek', 'tipe', 'nominal', 'keterangan'];
 
-    protected $casts = [
-        'nominal' => 'float',
-    ];
+    protected $casts = ['nominal' => 'float'];
 
-    public function user(): BelongsTo
+    public function donatur(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_donatur', 'id_donatur');
+    }
+
+    public function proyek(): BelongsTo
+    {
+        return $this->belongsTo(Proyek::class, 'id_proyek');
     }
 }

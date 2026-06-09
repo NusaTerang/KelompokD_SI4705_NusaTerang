@@ -9,16 +9,11 @@ class SaldoDonatur extends Model
 {
     protected $table = 'saldo_donatur';
 
-    protected $fillable = [
-        'id_donatur',
-        'saldo',
-    ];
+    protected $fillable = ['id_donatur', 'saldo'];
 
-    protected $casts = [
-        'saldo' => 'float',
-    ];
+    protected $casts = ['saldo' => 'float'];
 
-    public function user(): BelongsTo
+    public function donatur(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_donatur', 'id_donatur');
     }
