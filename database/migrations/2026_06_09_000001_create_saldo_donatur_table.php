@@ -15,11 +15,12 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('id_donatur')
-                ->references('id_donatur')
-                ->on('users')
-                ->cascadeOnDelete();
+                  ->references('id_donatur')
+                  ->on('users')
+                  ->cascadeOnDelete();
         });
     }
+
 
     public function down(): void
     {
