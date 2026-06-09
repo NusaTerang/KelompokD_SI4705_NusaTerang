@@ -68,20 +68,28 @@
                     class="p-8 space-y-8"
                     x-data="{
                         persentaseSelected: {{ (empty($allowedOptions) || old('persentase', $draft?->persentase)) ? 'true' : 'false' }},
+                        selectedPersentase: {{ old('persentase', $draft?->persentase) ? (int) old('persentase', $draft?->persentase) : 'null' }},
                         deskripsi: {{ json_encode(old('deskripsi', $draft?->deskripsi ?? '')) }},
                         statusSelected: {{ (old('status_progress') || $draft?->status_progress) ? 'true' : 'false' }},
+                        get isHundredPercent() { return this.selectedPersentase === 100; },
                         draftPhotos: {{ json_encode($draftPhotoUrls) }},
                         newPreviews: [],
+                        allFiles: [],
                         attempted: false,
-                        get fotoOk() { return this.draftPhotos.length > 0 || this.newPreviews.length > 0; },
+                        get fotoOk() { return this.draftPhotos.length > 0 || this.allFiles.length > 0; },
                         get displayPhotos() { return this.newPreviews.length > 0 ? this.newPreviews : this.draftPhotos; },
                         get emptySlotList() {
                             const count = Math.max(0, 3 - this.displayPhotos.length);
                             return Array.from({ length: count }, (_, i) => i);
                         },
                         handleFotoChange(e) {
-                            const files = Array.from(e.target.files).slice(0, 5);
-                            this.newPreviews = files.map(f => URL.createObjectURL(f));
+                            const incoming = Array.from(e.target.files);
+                            const merged = [...this.allFiles, ...incoming];
+                            this.allFiles = merged.slice(0, 5);
+                            this.newPreviews = this.allFiles.map(f => URL.createObjectURL(f));
+                            const dt = new DataTransfer();
+                            this.allFiles.forEach(f => dt.items.add(f));
+                            e.target.files = dt.files;
                         },
                         trySubmit() {
                             this.attempted = true;
@@ -110,7 +118,7 @@
                                     <label class="relative flex cursor-pointer">
                                         <input class="sr-only peer" name="persentase" type="radio" value="{{ $option }}"
                                             @checked(old('persentase', $draft?->persentase) == $option)
-                                            @change="persentaseSelected = true">
+                                            @change="persentaseSelected = true; selectedPersentase = parseInt($event.target.value); if (isHundredPercent) { statusSelected = true; }">
                                         <div class="min-w-[80px] text-center px-6 py-4 rounded-xl border-2 border-slate-200 text-on-surface-variant font-bold text-lg transition-all
                                             peer-checked:border-[#F9D423] peer-checked:bg-[#F9D423]/10 peer-checked:text-[#0F4C81] hover:border-[#F9D423]/50">
                                             {{ $option }}%
@@ -192,18 +200,20 @@
                             Status Instalasi <span class="text-red-500">*</span>
                         </label>
                         <div class="flex flex-wrap gap-4 rounded-xl transition-all" :class="{ 'outline outline-2 outline-red-400 p-3': attempted && !statusSelected }">
-                            <label class="relative flex cursor-pointer group">
+                            <label class="relative flex cursor-pointer group" :class="{ 'opacity-40 pointer-events-none': isHundredPercent }">
                                 <input class="sr-only peer" name="status_progress" type="radio" value="dijadwalkan"
                                     @checked($currentStatus === 'dijadwalkan')
+                                    :disabled="isHundredPercent"
                                     @change="statusSelected = true">
                                 <div class="px-6 py-3 rounded-xl border-2 border-slate-200 text-on-surface-variant font-bold text-sm transition-all
                                     peer-checked:border-[#F9D423] peer-checked:bg-[#F9D423]/10 peer-checked:text-[#0F4C81] hover:border-[#F9D423]/50">
                                     Dijadwalkan
                                 </div>
                             </label>
-                            <label class="relative flex cursor-pointer group">
+                            <label class="relative flex cursor-pointer group" :class="{ 'opacity-40 pointer-events-none': isHundredPercent }">
                                 <input class="sr-only peer" name="status_progress" type="radio" value="berjalan"
                                     @checked($currentStatus === 'berjalan')
+                                    :disabled="isHundredPercent"
                                     @change="statusSelected = true">
                                 <div class="px-6 py-3 rounded-xl border-2 border-slate-200 text-on-surface-variant font-bold text-sm transition-all
                                     peer-checked:border-[#F9D423] peer-checked:bg-[#F9D423]/10 peer-checked:text-[#0F4C81] hover:border-[#F9D423]/50">
@@ -215,10 +225,12 @@
                                     @checked($currentStatus === 'selesai')
                                     @change="statusSelected = true">
                                 <div class="px-6 py-3 rounded-xl border-2 border-slate-200 text-on-surface-variant font-bold text-sm transition-all
-                                    peer-checked:border-[#27AE60] peer-checked:bg-[#27AE60]/10 peer-checked:text-[#27AE60] hover:border-[#27AE60]/50">
+                                    peer-checked:border-[#27AE60] peer-checked:bg-[#27AE60]/10 peer-checked:text-[#27AE60] hover:border-[#27AE60]/50"
+                                    :class="{ 'border-[#27AE60] bg-[#27AE60]/10 !text-[#27AE60]': isHundredPercent }">
                                     Selesai
                                 </div>
                             </label>
+                            <input type="hidden" name="status_progress" x-show="false" :value="isHundredPercent ? 'selesai' : ''" :disabled="!isHundredPercent">
                         </div>
                         <p x-show="attempted && !statusSelected" x-cloak class="text-sm text-red-500 flex items-center gap-1">
                             <span class="material-symbols-outlined text-base">warning</span>

@@ -140,6 +140,10 @@ class ProyekController extends Controller
             $fotoPaths = $draft->foto_paths;
         }
 
+        if ((int) ($validated['persentase'] ?? 0) === 100) {
+            $validated['status_progress'] = 'selesai';
+        }
+
         $payload = [
             'id_penugasan' => $penugasan->id_penugasan,
             'persentase' => $validated['persentase'] ?? 0,

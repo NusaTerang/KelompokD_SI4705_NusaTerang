@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Donasi;
 use App\Models\Order;
 use App\Services\Midtrans\CallbackService;
 
