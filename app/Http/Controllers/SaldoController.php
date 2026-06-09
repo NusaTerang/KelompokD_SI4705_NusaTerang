@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\MutasiSaldo;
+use App\Models\Proyek;
+use App\Services\RefundService;
 use App\Services\SaldoService;
 
 class SaldoController extends Controller
 {
-    /**
-     * Halaman saldo donatur — menampilkan saldo aktif & riwayat mutasi.
-     */
     public function index(SaldoService $saldoService)
     {
         /** @var \App\Models\User $user */
@@ -22,5 +21,31 @@ class SaldoController extends Controller
             ->paginate(10);
 
         return view('donatur.saldo.index', compact('saldo', 'mutasiList'));
+    }
+
+    public function refund(Proyek $proyek, RefundService $refunds)
+    {
+        $user = auth()->user();
+
+        try {
+            $total = $refunds->processRefund($user, $proyek);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['refund' => $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Refund Rp ' . number_format($total, 0, ',', '.') . ' berhasil masuk ke saldo kamu.');
+    }
+
+    public function ikhlas(Proyek $proyek, RefundService $refunds)
+    {
+        $user = auth()->user();
+
+        try {
+            $refunds->processIkhlas($user, $proyek);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['refund' => $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Terima kasih, donasimu untuk proyek ini telah diikhlaskan. 🙏');
     }
 }

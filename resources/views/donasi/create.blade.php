@@ -13,6 +13,8 @@
 
         <form method="POST" action="{{ route('donasi.store') }}" id="form-donasi">
             @csrf
+            <input type="hidden" name="proyek_id" value="{{ $proyek->id ?? old('proyek_id') }}">
+            <input type="hidden" name="payment_method" value="{{ request('payment_method') ?? old('payment_method') }}">
 
             {{-- Nama Donatur --}}
             <div class="form-group">
@@ -95,7 +97,7 @@
                         name="total_price"
                         class="form-control"
                         placeholder="Atau masukkan nominal lain..."
-                        value="{{ old('total_price') }}"
+                        value="{{ old('total_price', request('nominal')) }}"
                         min="10000"
                         step="1000"
                         required
@@ -105,6 +107,9 @@
                     <span class="invalid-feedback">⚠ {{ $message }}</span>
                 @enderror
                 <p class="form-hint">Minimum donasi Rp 10.000</p>
+                <p class="form-hint" style="font-weight: 600; color: var(--clr-primary-dk); margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem;">
+                    <span>💰</span> Saldo kamu: Rp {{ number_format(auth()->user()->saldo, 0, ',', '.') }}
+                </p>
             </div>
 
             {{-- Pesan --}}

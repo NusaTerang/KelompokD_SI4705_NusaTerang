@@ -35,17 +35,11 @@ class MutasiSaldo extends Model
         return $this->belongsTo(Proyek::class, 'referensi_proyek_id');
     }
 
-    /**
-     * Cek apakah mutasi ini menambah saldo (credit).
-     */
     public function isCredit(): bool
     {
         return in_array($this->tipe, ['refund', 'topup']);
     }
 
-    /**
-     * Cek apakah mutasi ini mengurangi saldo (debit).
-     */
     public function isDebit(): bool
     {
         return $this->tipe === 'donasi';

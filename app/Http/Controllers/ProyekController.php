@@ -5,10 +5,42 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Proyek;
 use App\Models\Desa;
+use App\Notifications\ProyekDitugaskan;
+use App\Services\NotificationRecipientService;
 use App\Services\PenyediaRecommendationService;
+use Illuminate\Support\Facades\Gate;
 
 class ProyekController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = Proyek::with(['desa', 'fotos'])->where('status', 'aktif_funding');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhereHas('desa', fn ($dq) => $dq->where('nama_desa', 'like', "%{$search}%"));
+            });
+        }
+
+        if ($request->filled('wilayah')) {
+            $query->whereHas('desa', fn ($dq) => $dq->where('provinsi', $request->wilayah));
+        }
+
+        $provinceOptions = Proyek::where('status', 'aktif_funding')
+            ->whereHas('desa')
+            ->join('desa', 'proyeks.desa_id', '=', 'desa.id_desa')
+            ->select('desa.provinsi')
+            ->distinct()
+            ->orderBy('desa.provinsi')
+            ->pluck('desa.provinsi');
+
+        $projects = $query->latest('proyeks.created_at')->paginate(12)->withQueryString();
+
+        return view('proyek.index', compact('projects', 'provinceOptions'));
+    }
+
     public function create()
     {
         $desas = Desa::all();
@@ -37,9 +69,6 @@ class ProyekController extends Controller
             'fotos'             => $requireFoto ? 'required|array|min:1' : 'nullable|array',
             'fotos.*'           => 'image|max:2048',
         ]);
-
-        // Fix logic for checkbox/radio that might not exist in form if unchecked
-        // But for required fields it's fine.
 
         $proyek = Proyek::updateOrCreate(
             ['id' => $request->draft_id],
@@ -100,7 +129,13 @@ class ProyekController extends Controller
 
     public function adminShow($id)
     {
-        $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
+        $proyek = Proyek::with([
+            'desa',
+            'penyedia',
+            'fotos',
+            'penugasan.detail',
+            'penugasan.submittedProgressUpdates',
+        ])->findOrFail($id);
 
         return view('admin.proyek.show', compact('proyek'));
     }
@@ -132,6 +167,7 @@ class ProyekController extends Controller
             'estimasi_mulai'    => 'required|date',
             'estimasi_selesai'  => 'required|date|after_or_equal:estimasi_mulai',
             'penyedia_id'       => 'nullable|exists:penyedia_energis,id',
+            'dana_terpakai'     => 'nullable|numeric|min:0',
             'fotos'             => 'nullable|array',
             'fotos.*'           => 'image|max:2048',
         ]);
@@ -144,6 +180,7 @@ class ProyekController extends Controller
             'estimasi_mulai' => $validated['estimasi_mulai'],
             'estimasi_selesai' => $validated['estimasi_selesai'],
             'penyedia_id' => $validated['penyedia_id'] ?? null,
+            'dana_terpakai' => $validated['dana_terpakai'] ?? $proyek->dana_terpakai,
         ]);
 
         if ($request->hasFile('fotos')) {
@@ -265,10 +302,9 @@ class ProyekController extends Controller
             return back()->withErrors(['error' => 'Proyek belum dapat dipublikasikan. Detail teknis belum lengkap.']);
         }
 
-        // Jika ada jadwal → status terjadwal, jika tidak → aktif langsung
         $newStatus = $request->filled('jadwal_publikasi') ? 'terjadwal' : 'aktif_funding';
         $jadwal = $request->filled('jadwal_publikasi') ? \Carbon\Carbon::parse($request->jadwal_publikasi) : null;
-        
+
         $proyek->update([
             'status' => $newStatus,
             'jadwal_publikasi' => $jadwal,
@@ -304,7 +340,7 @@ class ProyekController extends Controller
         return redirect()->route('proyek.kelola')->with('success', 'Proyek dikembalikan ke penyedia untuk direvisi.');
     }
 
-    public function kirimKePenyedia(Request $request, $id)
+    public function kirimKePenyedia(Request $request, $id, NotificationRecipientService $recipients)
     {
         $proyek = Proyek::findOrFail($id);
 
@@ -314,10 +350,13 @@ class ProyekController extends Controller
 
         $proyek->update(['status' => 'menunggu_konfirmasi_penyedia']);
 
-        \App\Models\PenugasanProyek::firstOrCreate([
+        $penugasan = \App\Models\PenugasanProyek::firstOrCreate([
             'id_proyek'   => $proyek->id,
             'id_penyedia' => $proyek->penyedia_id,
         ]);
+
+        $vendor = $recipients->vendorForProject($proyek);
+        $vendor?->notify(new ProyekDitugaskan($proyek, $penugasan));
 
         return redirect()->route('proyek.kelola')->with('success', 'Proyek berhasil dikirim ke penyedia!');
     }
@@ -341,17 +380,57 @@ class ProyekController extends Controller
 
     public function show($id)
     {
-        $proyek = Proyek::with(['desa', 'penyedia', 'fotos', 'penugasan.detail'])->findOrFail($id);
+        $proyek = Proyek::with([
+            'desa',
+            'penyedia',
+            'fotos',
+            'donasis',
+            'submittedFinalReport',
+            'penugasan.submittedProgressUpdates',
+            'penugasan.detail',
+        ])->findOrFail($id);
+
         $detail = $proyek->penugasan->first()?->detail;
         $costBreakdown = $detail ? $detail->cost_breakdown : null;
-        
-        return view('proyek.show', compact('proyek', 'costBreakdown'));
+
+        $myDonationInfo = $this->buildDonationInfo($proyek);
+
+        return view('proyek.show', compact('proyek', 'costBreakdown', 'myDonationInfo'));
+    }
+
+    /**
+     * Ringkasan donasi & status refund milik donatur yang sedang login untuk proyek ini.
+     */
+    private function buildDonationInfo(Proyek $proyek): ?array
+    {
+        if (! auth()->check() || ! auth()->user()->isDonatur()) {
+            return null;
+        }
+
+        $user = auth()->user();
+        $mine = $proyek->donasis
+            ->where('id_donatur', $user->getKey())
+            ->where('status', 'success');
+
+        if ($mine->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'total_donasi' => (float) $mine->sum('nominal'),
+            'refundable'   => app(\App\Services\RefundService::class)->refundableAmount($user, $proyek),
+            'has_pending'  => $mine->where('refund_status', \App\Models\Donasi::REFUND_NONE)->isNotEmpty(),
+            'eligible'     => $proyek->isRefundEligible(),
+            'ratio'        => $proyek->refundRatio(),
+            'refunded'     => (float) $mine->where('refund_status', \App\Models\Donasi::REFUND_REFUNDED)->sum('refund_amount'),
+            'ikhlas'       => $mine->where('refund_status', \App\Models\Donasi::REFUND_IKHLAS)->isNotEmpty(),
+        ];
     }
 
     public function aktifkanInstalasi(Request $request, $id)
     {
         $proyek = Proyek::findOrFail($id);
-        
+
         if ($proyek->checkAndActivateInstalasi()) {
             return redirect()->back()->with('success', 'Instalasi diaktifkan! Penjadwalan timeline sedang diproses.');
         }

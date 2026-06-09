@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DesaController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PenugasanController;
@@ -12,6 +13,9 @@ use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentCallbackController;
+use App\Http\Controllers\SaldoController;
+use App\Http\Controllers\TopupController;
+use App\Http\Controllers\Admin\UserManagementController;
 
 
 // ─── Public ──────────────────────────────────────────────────────────────────
@@ -35,8 +39,6 @@ Route::get('/', function () {
 
     if (request()->filled('status') && isset($statusMap[request('status')])) {
         $query->where('status', $statusMap[request('status')]);
-    } else {
-        $query->where('status', 'aktif_funding');
     }
 
     $provinceOptions = (clone $query)
@@ -55,12 +57,13 @@ Route::get('/', function () {
     return view('welcome', compact('projects', 'provinceOptions'));
 });
 
+Route::get('/proyek', [ProyekController::class, 'index'])->name('proyek.index');
 Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
 Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('penyedia.daftar');
 Route::get('/penyedia/{id}', [PenyediaController::class, 'show'])->name('penyedia.show');
 Route::get('/api/penyedia/rekomendasi', [PenyediaController::class, 'getRekomendasi'])->name('api.penyedia.rekomendasi');
 
-// ─── Auth (guest only) ────────────────────────────────────────────────────────
+// ─── Auth (guest only) ─────────────────────────────────────────────────────────
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
@@ -75,10 +78,13 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name
 // ─── Donasi (Authenticated) ───────────────────────────────────────────────────
 
 Route::middleware('auth')->prefix('donasi')->name('donasi.')->group(function () {
-    Route::get('/',                      [OrderController::class, 'create'])->name('create');
-    Route::post('/{proyek}',             [OrderController::class, 'store'])->name('store');
-    Route::get('/{order}',               [OrderController::class, 'show'])->name('show');
-    Route::get('/{order}/status',        [OrderController::class, 'status'])->name('status');
+    Route::get('/',                [OrderController::class, 'create'])->name('create');
+    Route::post('/',               [OrderController::class, 'store'])->name('store');
+    Route::get('/{order}',         [OrderController::class, 'show'])->name('show');
+    Route::get('/{order}/status',  [OrderController::class, 'status'])->name('status');
+    Route::post('/{order}/select-method', [OrderController::class, 'selectMethod'])->name('select-method');
+    Route::post('/{order}/reset-method',  [OrderController::class, 'resetMethod'])->name('reset-method');
+    Route::post('/{order}/confirm-saldo', [OrderController::class, 'confirmSaldo'])->name('confirm-saldo');
 });
 
 // ─── Authenticated ────────────────────────────────────────────────────────────
@@ -97,12 +103,23 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profil.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
+
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
 
-    // ─── Saldo Donatur (PBI-31) ──────────────────────────────────────
-    Route::get('/donatur/saldo', [\App\Http\Controllers\SaldoController::class, 'index'])->name('saldo.index');
+    // Saldo & Refund Donatur
+    Route::prefix('donatur')->name('donatur.')->group(function () {
+        Route::get('/saldo', [SaldoController::class, 'index'])->name('saldo');
+        Route::post('/refund/{proyek}', [SaldoController::class, 'refund'])->name('refund');
+        Route::post('/ikhlas/{proyek}', [SaldoController::class, 'ikhlas'])->name('ikhlas');
+
+        // Top Up Saldo (Midtrans QRIS)
+        Route::get('/topup', [TopupController::class, 'create'])->name('topup.create');
+        Route::post('/topup', [TopupController::class, 'store'])->name('topup.store');
+        Route::get('/topup/{topup}', [TopupController::class, 'show'])->name('topup.show');
+        Route::get('/topup/{topup}/status', [TopupController::class, 'status'])->name('topup.status');
+    });
 });
 
 // ─── Vendor (Penyedia Energi) ─────────────────────────────────────────────────
@@ -115,6 +132,9 @@ Route::middleware(['auth', 'penyedia'])->prefix('vendor')->name('vendor.')->grou
     Route::prefix('proyek')->name('proyek.')->controller(VendorProyekController::class)->group(function () {
         Route::get('/',            'index')->name('index');
         Route::get('/{id}',        'show')->name('show');
+        Route::get('/{id}/progress', 'progressShow')->name('progress.show');
+        Route::post('/{id}/progress', 'progressStore')->name('progress.store');
+        Route::post('/{id}/laporan-akhir', 'finalReportStore')->name('final-report.store');
         Route::get('/{id}/expiry-decision', 'expiryDecisionShow')->name('expiry-decision.show');
         Route::put('/{id}/detail', 'saveDetail')->name('detail');
         Route::post('/{id}/expiry-decision', 'expiryDecision')->name('expiry-decision');
@@ -145,7 +165,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::delete('{id}', [DesaController::class, 'destroy'])->name('destroy');
     });
 
-    // Proyek creation wizard
+    // Proyek management
     Route::prefix('proyek')->name('proyek.')->group(function () {
         Route::get('buat', [ProyekController::class, 'create'])->name('create');
         Route::post('buat', [ProyekController::class, 'saveStep1'])->name('save.step1');
@@ -166,7 +186,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::post('{id}/kirim', [ProyekController::class, 'kirimKePenyedia'])->name('kirim');
     });
 
-    // Vendor / Penyedia Energi CRUD
+    // Vendor CRUD
     Route::prefix('vendors')->name('admin.vendors.')->group(function () {
         Route::get('/', [AdminPenyediaController::class, 'index'])->name('index');
         Route::get('/create', [AdminPenyediaController::class, 'create'])->name('create');
@@ -175,9 +195,26 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::put('/{id}', [AdminPenyediaController::class, 'update'])->name('update');
         Route::patch('/{id}/toggle', [AdminPenyediaController::class, 'toggleStatus'])->name('toggleStatus');
     });
+
+
+    // User Management
+    Route::prefix('users')->name('admin.users.')->group(function () {
+
+    Route::get('/', [UserManagementController::class, 'index'])
+        ->name('index');
+
+    Route::get('/{user}', [UserManagementController::class, 'show'])
+        ->name('show');
+
+    Route::put('/{user}/role', [UserManagementController::class, 'updateRole'])
+        ->name('role');
+
+    Route::put('/{user}/status', [UserManagementController::class, 'toggleStatus'])
+        ->name('status');
+    });
 });
 
-// ─── Legacy / misc ────────────────────────────────────────────────────────────
+// ─── Legacy / misc ─────────────────────────────────────────────────────────────
 
 Route::get('/profil-preview', [ProfileController::class, 'edit']);
 

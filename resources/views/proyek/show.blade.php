@@ -17,9 +17,9 @@
         'draft'                          => ['text' => 'DRAFT',              'bg' => 'bg-surface-container',    'color' => 'text-on-surface-variant'],
         'menunggu_konfirmasi_penyedia'   => ['text' => 'MENUNGGU PENYEDIA',  'bg' => 'bg-yellow-100',           'color' => 'text-yellow-800'],
         'menunggu_review_admin'          => ['text' => 'MENUNGGU REVIEW',    'bg' => 'bg-yellow-100',           'color' => 'text-yellow-800'],
-        'aktif_funding'                  => ['text' => 'SEDANG BERJALAN',    'bg' => 'bg-primary-container',    'color' => 'text-on-primary-fixed'],
-        'eksekusi'                       => ['text' => 'DALAM EKSEKUSI',     'bg' => 'bg-secondary-container',  'color' => 'text-on-secondary-fixed'],
-        'selesai'                        => ['text' => 'SELESAI',            'bg' => 'bg-tertiary-container',   'color' => 'text-on-tertiary-fixed'],
+        'aktif_funding'                  => ['text' => 'Menunggu Dana',      'bg' => 'bg-primary-container',    'color' => 'text-on-primary-fixed'],
+        'eksekusi'                       => ['text' => 'Sedang Berjalan',    'bg' => 'bg-secondary-container',  'color' => 'text-on-secondary-fixed'],
+        'selesai'                        => ['text' => 'Selesai',            'bg' => 'bg-tertiary-container',   'color' => 'text-on-tertiary-fixed'],
         'ditolak'                        => ['text' => 'DITOLAK',            'bg' => 'bg-error-container',      'color' => 'text-on-error-container'],
     ];
     $status = $statusMap[$proyek->status] ?? ['text' => strtoupper($proyek->status), 'bg' => 'bg-surface-container', 'color' => 'text-on-surface-variant'];
@@ -64,33 +64,77 @@
 
         {{-- Stats Grid --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+            {{-- Dana Terkumpul --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-primary flex flex-col gap-1">
-                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">TERKUMPUL</p>
-                <p class="text-on-surface text-lg font-bold">Rp {{ number_format($proyek->dana_terkumpul / 1000000, 1) }}jt</p>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
+                    TERKUMPUL
+                </p>
+
+                <p id="stats-funding"
+                class="text-on-surface text-lg font-bold">
+                    Rp {{ number_format($proyek->dana_terkumpul / 1000000, 1) }}jt
+                </p>
             </div>
+
+            {{-- Target --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-outline-variant flex flex-col gap-1">
-                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">TARGET</p>
-                <p class="text-on-surface text-lg font-bold">Rp {{ number_format($proyek->target_dana / 1000000, 1) }}jt</p>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
+                    TARGET
+                </p>
+
+                <p class="text-on-surface text-lg font-bold">
+                    Rp {{ number_format($proyek->target_dana / 1000000, 1) }}jt
+                </p>
             </div>
+
+            {{-- Donatur --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-secondary-container flex flex-col gap-1">
-                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">DONATUR</p>
-                <p class="text-on-surface text-lg font-bold">0</p>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
+                    DONATUR
+                </p>
+
+                <p id="donatur-count"
+                class="text-on-surface text-lg font-bold">
+                    {{ $proyek->donasis?->count() ?? 0 }}
+                </p>
             </div>
+
+            {{-- Sisa Hari --}}
             <div class="bg-surface-container-low p-4 rounded-xl border-l-4 border-tertiary-container flex flex-col gap-1">
-                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">SISA HARI</p>
-                <p class="text-on-surface text-lg font-bold">{{ $daysLeft }} Hari</p>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide">
+                    SISA HARI
+                </p>
+
+                <p class="text-on-surface text-lg font-bold">
+                    {{ $daysLeft }} Hari
+                </p>
             </div>
+
         </div>
 
         {{-- Progress Bar --}}
         <div class="flex flex-col gap-2 w-full">
+
             <div class="flex justify-between items-end">
-                <p class="text-on-surface-variant text-sm font-bold">Kemajuan Pendanaan</p>
-                <p class="text-primary text-2xl font-bold">{{ $progress }}%</p>
+                <p class="text-on-surface-variant text-sm font-bold">
+                    Kemajuan Pendanaan
+                </p>
+
+                <p id="progress-text"
+                class="text-primary text-2xl font-bold">
+                    {{ min($progress, 100) }}%
+                </p>
             </div>
+
             <div class="w-full h-4 bg-surface-container rounded-full overflow-hidden">
-                <div class="h-full solar-gradient rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+
+                <div id="progress-bar"
+                    class="h-full solar-gradient rounded-full transition-all duration-500"
+                    style="width: {{ min($progress, 100) }}%">
+                </div>
+
             </div>
+
         </div>
 
         {{-- About --}}
@@ -161,8 +205,7 @@
                                 <span class="text-on-surface-variant font-bold">Rp {{ formatRupiahShort($item['nominal']) }}</span>
                             </div>
                         @endforeach
-                        
-                        {{-- Platform Fee --}}
+
                         @php
                             $platformFee = $totalVendor * 0.05;
                             $grandTotal = $totalVendor + $platformFee;
@@ -174,8 +217,7 @@
                             </span>
                             <span class="text-on-surface-variant font-bold">Rp {{ formatRupiahShort($platformFee) }}</span>
                         </div>
-                        
-                        {{-- Grand Total --}}
+
                         <div class="flex justify-between items-center p-5 bg-surface-container border-t-2 border-primary/20">
                             <span class="text-on-surface font-bold text-lg">Total Kebutuhan Dana</span>
                             <span class="text-primary font-bold text-xl">Rp {{ formatRupiahShort($grandTotal) }}</span>
@@ -185,12 +227,158 @@
             </div>
         @endif
 
-        {{-- Timeline Placeholder --}}
+        {{-- Progress Tracking & Timeline --}}
+        @php
+            $submittedProgressUpdates = $proyek->penugasan
+                ->flatMap(fn ($penugasan) => $penugasan->submittedProgressUpdates)
+                ->sortByDesc('submitted_at')
+                ->values();
+            $latestProgressUpdate = $submittedProgressUpdates->first();
+            $monitoringProgress = $latestProgressUpdate ? (int) $latestProgressUpdate->persentase : 0;
+            $monitoringProgressWidth = max(0, min($monitoringProgress, 100));
+        @endphp
+
         <div class="flex flex-col gap-6 w-full py-6">
-            <h2 class="text-secondary text-2xl font-headline font-semibold">Update Progress</h2>
-            <div class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
-                <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">update</span>
-                <p class="text-on-surface-variant text-sm">Belum ada update progress untuk proyek ini.</p>
+            <div class="bg-surface-container-low rounded-xl p-5 border border-surface-container flex flex-col gap-3">
+                <div class="flex justify-between items-end gap-4">
+                    <div>
+                        <p class="text-on-surface-variant text-sm font-bold">Progress Pengerjaan</p>
+                        @if($latestProgressUpdate)
+                            <p class="text-xs text-on-surface-variant mt-1">Update terakhir {{ $latestProgressUpdate->submitted_at?->format('d M Y H:i') ?? $latestProgressUpdate->created_at?->format('d M Y H:i') }}</p>
+                        @else
+                            <p class="text-xs text-on-surface-variant mt-1">Belum ada update progres dari vendor.</p>
+                        @endif
+                    </div>
+                    <p class="text-secondary text-2xl font-bold">{{ $monitoringProgress }}%</p>
+                </div>
+                <div class="w-full h-3 bg-surface-container rounded-full overflow-hidden">
+                    <div class="h-full bg-secondary rounded-full" style="width: {{ $monitoringProgressWidth }}%"></div>
+                </div>
+            </div>
+
+            <h2 class="text-secondary text-2xl font-headline font-semibold">Timeline & Progress Updates</h2>
+
+            @if($submittedProgressUpdates->isEmpty())
+                <div class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
+                    <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">update</span>
+                    <p class="text-on-surface-variant text-sm">Vendor belum mengunggah update progres</p>
+                </div>
+            @else
+                <div class="relative flex flex-col gap-8">
+                    @foreach($submittedProgressUpdates as $update)
+                        @php
+                            $submittedAt = $update->submitted_at ?? $update->created_at;
+                            $photoPaths = is_array($update->foto_paths) ? $update->foto_paths : [];
+                            $isDone = $update->status_progress === 'selesai';
+                        @endphp
+                        <article class="grid grid-cols-[72px_24px_1fr] gap-4 items-start">
+                            <div class="text-right pt-1">
+                                <p class="text-sm font-extrabold text-on-surface-variant">{{ $submittedAt?->format('d M') }}</p>
+                                <p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">{{ $submittedAt?->format('Y') }}</p>
+                            </div>
+
+                            <div class="relative flex justify-center h-full min-h-[120px]">
+                                @if(!$loop->last)
+                                    <span class="absolute top-6 bottom-[-32px] w-0.5 bg-surface-container"></span>
+                                @endif
+                                <span class="relative z-10 mt-2 w-4 h-4 rounded-full {{ $isDone ? 'bg-tertiary' : 'bg-primary-container' }} ring-4 {{ $isDone ? 'ring-tertiary/10' : 'ring-primary-container/30' }}"></span>
+                            </div>
+
+                            <div class="bg-surface-container-low rounded-2xl p-5 border {{ $loop->first ? 'border-primary-container shadow-sm' : 'border-surface-container' }}">
+                                <div class="flex items-start justify-between gap-4 mb-3">
+                                    <div>
+                                        <span class="inline-flex px-3 py-1 rounded-full text-xs font-bold {{ $isDone ? 'bg-tertiary-container text-on-tertiary-fixed' : 'bg-secondary-container text-on-secondary-fixed' }}">
+                                            {{ $isDone ? 'Selesai' : 'Sedang Berjalan' }}
+                                        </span>
+                                        <p class="text-xs text-on-surface-variant font-bold uppercase tracking-wide mt-2">
+                                            {{ $submittedAt?->format('d M Y H:i') }}
+                                        </p>
+                                    </div>
+                                    <p class="text-primary text-2xl font-bold">{{ $update->persentase }}%</p>
+                                </div>
+
+                                <p class="text-on-surface-variant leading-relaxed whitespace-pre-line">{{ $update->deskripsi }}</p>
+
+                                @if(!empty($photoPaths))
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                                        @foreach($photoPaths as $path)
+                                            <img src="{{ str_starts_with($path, 'http') ? $path : asset('storage/' . $path) }}" alt="Foto progress" class="h-32 w-full object-cover rounded-lg border border-surface-container">
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            @endif
+
+            @if($proyek->submittedFinalReport)
+                @php
+                    $finalReport = $proyek->submittedFinalReport;
+                    $finalReportPhotos = is_array($finalReport->foto_paths) ? $finalReport->foto_paths : [];
+                @endphp
+                <div class="bg-tertiary-container/30 border border-tertiary/20 rounded-xl p-5 flex flex-col gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-tertiary">task_alt</span>
+                        <h3 class="text-secondary text-xl font-headline font-semibold">Laporan Akhir</h3>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
+                            <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide mb-1">Kapasitas Terpasang</p>
+                            <p class="text-primary text-2xl font-bold">{{ rtrim(rtrim(number_format((float) $finalReport->kapasitas_terpasang, 2, '.', ''), '0'), '.') }} {{ $finalReport->satuan_kapasitas }}</p>
+                        </div>
+                        <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
+                            <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide mb-1">Tanggal Submit</p>
+                            <p class="text-on-surface font-semibold">{{ $finalReport->submitted_at?->format('d M Y H:i') ?? '-' }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
+                        <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide mb-2">Deskripsi Hasil Pekerjaan</p>
+                        <p class="text-on-surface-variant whitespace-pre-line leading-relaxed">{{ $finalReport->deskripsi }}</p>
+                    </div>
+                    @if($finalReport->catatan)
+                        <div class="bg-white/70 rounded-lg p-4 border border-tertiary/10">
+                            <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wide mb-2">Catatan Tambahan</p>
+                            <p class="text-on-surface-variant whitespace-pre-line leading-relaxed">{{ $finalReport->catatan }}</p>
+                        </div>
+                    @endif
+                    @if(!empty($finalReportPhotos))
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            @foreach($finalReportPhotos as $path)
+                                <img src="{{ str_starts_with($path, 'http') ? $path : asset('storage/' . $path) }}" alt="Foto laporan akhir" class="h-32 w-full object-cover rounded-lg border border-tertiary/10">
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endif
+        </div>
+
+        {{-- Aktivitas Donasi Terbaru --}}
+        <div class="flex flex-col gap-6 w-full py-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-secondary text-2xl font-headline font-semibold">Aktivitas Donasi Terbaru</h2>
+                <span class="text-sm text-on-surface-variant">Real-time update</span>
+            </div>
+
+            <div id="activity-feed" class="flex flex-col gap-4">
+                @if(isset($proyek->donasis) && $proyek->donasis->count() > 0)
+                    @foreach($proyek->donasis->take(5) as $donasi)
+                        <div class="bg-surface-container-low p-5 rounded-xl border border-surface-container">
+                            <div class="flex items-center justify-between">
+                                <div class="flex flex-col gap-1">
+                                    <p class="text-on-surface font-semibold">{{ $donasi->donatur->nama ?? 'Donatur' }}</p>
+                                    <p class="text-sm text-on-surface-variant">Berdonasi sebesar <span class="font-bold">Rp {{ number_format($donasi->nominal, 0, ',', '.') }}</span></p>
+                                </div>
+                                <span class="text-xs text-on-surface-variant">{{ $donasi->created_at->diffForHumans() }}</span>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <div id="empty-state" class="flex flex-col items-center justify-center py-12 bg-surface-container-low rounded-xl">
+                        <span class="material-symbols-outlined text-[48px] text-outline-variant mb-3">volunteer_activism</span>
+                        <p class="text-on-surface-variant text-sm">Belum ada donasi pada proyek ini.</p>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -205,10 +393,15 @@
             <div class="flex flex-col gap-2">
                 <div class="flex justify-between items-center">
                     <p class="text-on-surface-variant text-xs font-bold uppercase">TERKUMPUL</p>
-                    <p class="text-tertiary text-2xl font-bold">Rp {{ number_format($proyek->dana_terkumpul, 0, ',', '.') }}</p>
+                    <p id="funding-amount" class="text-tertiary text-2xl font-bold">Rp {{ number_format($proyek->dana_terkumpul, 0, ',', '.') }}</p>
                 </div>
                 <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden my-1">
-                    <div class="h-full solar-gradient rounded-full" style="width: {{ min($progress, 100) }}%"></div>
+
+                    <div id="side-progress-bar"
+                        class="h-full solar-gradient rounded-full transition-all duration-500"
+                        style="width: {{ min($progress, 100) }}%">
+                    </div>
+
                 </div>
                 <div class="flex gap-1 text-xs">
                     <span class="text-on-surface-variant">Dari target</span>
@@ -216,36 +409,89 @@
                 </div>
             </div>
 
+            @if($proyek->status === 'eksekusi')
+                <button disabled class="w-full bg-gray-300 text-gray-600 font-headline font-extrabold text-lg py-4 rounded-xl cursor-not-allowed text-center block">
+                    Pendanaan Tercapai
+                </button>
+            @else
             @auth
-                <form action="{{ route('donasi.store', $proyek->id) }}" method="POST" class="flex flex-col gap-4 w-full">
+                @if($errors->has('payment'))
+                    <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                        ⚠️ {{ $errors->first('payment') }}
+                    </div>
+                @endif
+
+                {{-- Active user balance display --}}
+                @if(auth()->user()->isDonatur())
+                    <div class="text-sm text-on-surface-variant font-medium mb-1 flex items-center gap-1.5 bg-surface-container-low p-3 rounded-xl border border-surface-container">
+                        <span>💰</span> Saldo kamu: <span class="font-bold text-primary">Rp {{ number_format(auth()->user()->saldo, 0, ',', '.') }}</span>
+                    </div>
+                @endif
+
+                <form id="donation-form" action="{{ route('donasi.store') }}" method="POST" class="flex flex-col gap-4 w-full">
                     @csrf
+                    <input type="hidden" name="proyek_id" value="{{ $proyek->id }}">
+                    <input type="hidden" name="donatur_name" value="{{ auth()->user()->name }}">
+                    <input type="hidden" name="donatur_email" value="{{ auth()->user()->email }}">
+                    <input type="hidden" name="donatur_phone" value="{{ auth()->user()->no_telepon ?? '' }}">
+                    <input type="hidden" name="payment_method" value="qris" id="hidden-payment-method">
+
                     <div class="grid grid-cols-2 gap-3 w-full">
-                        <button type="button" onclick="document.getElementById('amount').value=50000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
-                        <button type="button" onclick="document.getElementById('amount').value=100000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
-                        <button type="button" onclick="document.getElementById('amount').value=250000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
-                        <button type="button" onclick="document.getElementById('amount').value=500000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
+                        <button type="button" onclick="document.getElementById('total_price').value=50000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 50k</button>
+                        <button type="button" onclick="document.getElementById('total_price').value=100000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 100k</button>
+                        <button type="button" onclick="document.getElementById('total_price').value=250000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 250k</button>
+                        <button type="button" onclick="document.getElementById('total_price').value=500000" class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold hover:bg-surface-container-low transition-colors">Rp 500k</button>
                     </div>
 
                     <div class="flex flex-col gap-2 w-full">
-                        <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                        <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi</label>
                         <div class="relative w-full">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
-                            <input
-                                type="number"
-                                name="amount"
-                                id="amount"
-                                placeholder="0"
-                                required
-                                min="10000"
-                                class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none"
-                            />
+                            <input id="total_price" name="total_price" type="number" placeholder="0" min="10000"
+                                class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface focus:ring-2 focus:ring-secondary border-none" />
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
+                    {{-- Payment method selector --}}
+                    @if(auth()->user()->isDonatur())
+                    <div class="flex flex-col gap-2 w-full">
+                        <label class="text-on-surface-variant text-sm font-bold">Metode Pembayaran</label>
+                        <div class="flex flex-col gap-2">
+                            <label class="flex items-center gap-2.5 p-3.5 rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container-low transition-colors">
+                                <input type="radio" name="temp_payment_method" value="qris" checked class="text-primary focus:ring-primary" onclick="document.getElementById('hidden-payment-method').value='qris'">
+                                <span class="text-sm font-bold text-on-surface">📱 Bayar dengan QRIS</span>
+                            </label>
+                            @if(auth()->user()->saldo > 0)
+                            <label class="flex items-center gap-2.5 p-3.5 rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container-low transition-colors">
+                                <input type="radio" name="temp_payment_method" value="saldo" class="text-primary focus:ring-primary" onclick="document.getElementById('hidden-payment-method').value='saldo'">
+                                <span class="text-sm font-bold text-on-surface">💰 Bayar dengan Saldo</span>
+                            </label>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+
+                    <button id="donasi-button" type="submit"
+                        class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2">
                         Donasi Sekarang
                     </button>
                 </form>
+
+                <script>
+                document.getElementById('donation-form')?.addEventListener('submit', function(e) {
+                    const selectedMethod = document.querySelector('input[name="temp_payment_method"]:checked')?.value;
+                    if (selectedMethod === 'saldo') {
+                        e.preventDefault();
+                        const nominal = document.getElementById('total_price').value;
+                        if (!nominal || nominal < 10000) {
+                            alert('Nominal donasi minimal Rp 10.000');
+                            return;
+                        }
+                        const proyekId = "{{ $proyek->id }}";
+                        window.location.href = "{{ route('donasi.create') }}?proyek=" + proyekId + "&nominal=" + nominal + "&payment_method=saldo";
+                    }
+                });
+                </script>
             @else
                 <div class="grid grid-cols-2 gap-3 w-full opacity-50 pointer-events-none">
                     <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 50k</button>
@@ -253,32 +499,18 @@
                     <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 250k</button>
                     <button class="py-3 rounded-xl border border-outline-variant text-on-surface font-bold">Rp 500k</button>
                 </div>
-
-            @auth
-                <div class="flex flex-col gap-2 w-full">
-                    <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
-                    <div class="relative w-full">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
-                        <input type="text" placeholder="0" class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface border-none" />
-                    </div>
-                </div>
-
-                <a href="{{ route('donasi.create', ['proyek' => $proyek->id]) }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
-                    Donasi Sekarang
-                </a>
-            @else
                 <div class="flex flex-col gap-2 w-full opacity-50 pointer-events-none">
-                    <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi Lainnya</label>
+                    <label class="text-on-surface-variant text-sm font-bold">Nominal Donasi</label>
                     <div class="relative w-full">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold text-sm">Rp</span>
                         <input type="text" placeholder="0" class="w-full bg-surface-container-low rounded-xl py-4 pl-12 pr-4 outline-none text-right font-bold text-on-surface border-none" disabled />
                     </div>
                 </div>
-
                 <a href="{{ route('login') }}" class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2 text-center block">
                     Login untuk Donasi
                 </a>
             @endauth
+            @endif
 
             <div class="flex items-center gap-6 pt-2 border-t border-surface-container">
                 <div class="flex items-center gap-2">
@@ -292,8 +524,201 @@
             </div>
 
         </div>
+
+        {{-- Panel Refund / Status Donasi Donatur --}}
+        @auth
+        @if(!empty($myDonationInfo))
+            <div class="bg-white rounded-2xl p-6 border border-surface-container shadow-lg flex flex-col gap-4 w-full mt-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">volunteer_activism</span>
+                    <h3 class="text-secondary text-xl font-headline font-semibold">Donasi Anda</h3>
+                </div>
+
+                @if(session('success'))
+                    <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">{{ session('success') }}</div>
+                @endif
+                @if($errors->has('refund'))
+                    <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">⚠️ {{ $errors->first('refund') }}</div>
+                @endif
+
+                <div class="flex justify-between text-sm">
+                    <span class="text-on-surface-variant">Total donasi kamu</span>
+                    <span class="font-bold text-on-surface">Rp {{ number_format($myDonationInfo['total_donasi'], 0, ',', '.') }}</span>
+                </div>
+
+                @if($myDonationInfo['refunded'] > 0)
+                    <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+                        ✅ Rp {{ number_format($myDonationInfo['refunded'], 0, ',', '.') }} telah direfund ke
+                        <a href="{{ route('donatur.saldo') }}" class="underline font-bold">saldo</a> kamu.
+                    </div>
+                @elseif($myDonationInfo['ikhlas'])
+                    <div class="bg-surface-container-low text-on-surface-variant text-sm rounded-xl px-4 py-3">
+                        🙏 Donasimu untuk proyek ini telah kamu ikhlaskan. Terima kasih!
+                    </div>
+                @elseif($myDonationInfo['has_pending'] && $myDonationInfo['eligible'])
+                    @if($myDonationInfo['refundable'] > 0)
+                        <div class="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl px-4 py-3">
+                            Proyek telah berakhir. Berdasarkan dana yang terpakai, kamu dapat menarik kembali
+                            <span class="font-bold">Rp {{ number_format($myDonationInfo['refundable'], 0, ',', '.') }}</span>
+                            ke saldo, atau mengikhlaskannya.
+                        </div>
+                        <form action="{{ route('donatur.refund', $proyek->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full bg-primary-container text-on-primary-fixed font-bold py-3 rounded-xl hover:opacity-90 transition-all">
+                                Refund Rp {{ number_format($myDonationInfo['refundable'], 0, ',', '.') }} ke Saldo
+                            </button>
+                        </form>
+                        <div class="relative group">
+                            <form action="{{ route('donatur.ikhlas', $proyek->id) }}" method="POST"
+                                  onsubmit="return confirm('Ikhlaskan donasi ini? Saldo tidak akan dikembalikan.')">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center justify-center gap-2 border border-outline-variant text-on-surface font-bold py-3 rounded-xl hover:bg-surface-container-low transition-colors">
+                                    Ikhlaskan
+                                    <span class="material-symbols-outlined text-[16px] text-on-surface-variant">info</span>
+                                </button>
+                            </form>
+                            {{-- Tooltip hover --}}
+                            <div class="pointer-events-none absolute bottom-full left-0 right-0 mb-2 z-20 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-150">
+                                <div class="bg-deep-navy text-white text-xs leading-relaxed rounded-xl px-4 py-3 shadow-lg">
+                                    Dengan mengikhlaskan, sisa dana <span class="font-bold">Rp {{ number_format($myDonationInfo['refundable'], 0, ',', '.') }}</span> tidak ditarik ke saldo, melainkan kami salurkan untuk membantu mengembangkan proyek energi desa lain. Terima kasih atas kebaikanmu 🙏
+                                    <span class="absolute left-6 top-full -mt-px border-8 border-transparent border-t-deep-navy"></span>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-surface-container-low text-on-surface-variant text-sm rounded-xl px-4 py-3">
+                            Dana donasimu telah terpakai sepenuhnya untuk proyek ini, sehingga tidak ada yang dapat direfund.
+                        </div>
+                    @endif
+                @elseif($myDonationInfo['has_pending'] && ! $myDonationInfo['eligible'])
+                    <div class="bg-surface-container-low text-on-surface-variant text-sm rounded-xl px-4 py-3">
+                        Proyek masih berjalan. Opsi refund akan tersedia bila proyek berakhir atau dibatalkan.
+                    </div>
+                @endif
+            </div>
+        @endif
+        @endauth
     </div>
 
 </div>
+
+<script>
+
+async function refreshFundingData()
+{
+    try {
+
+        const response = await fetch(
+            '/api/v1/proyek/{{ $proyek->id }}/funding',
+            {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        // Funding
+        document.getElementById('funding-amount').innerText =
+            'Rp ' + Number(data.dana_terkumpul)
+                .toLocaleString('id-ID');
+
+        // Stats Funding
+        document.getElementById('stats-funding').innerText =
+            'Rp ' +
+            (data.dana_terkumpul / 1000000).toFixed(1)
+            + 'jt';
+
+        // Donatur
+        document.getElementById('donatur-count').innerText =
+            data.jumlah_donatur;
+
+        // Progress Text
+        document.getElementById('progress-text').innerText =
+            data.persentase + '%';
+
+        // Main Progress Bar
+        document.getElementById('progress-bar').style.width =
+            data.persentase + '%';
+
+        // Side Progress Bar
+        document.getElementById('side-progress-bar').style.width =
+            data.persentase + '%';
+
+        // Auto Disable Button
+        if (data.status === 'eksekusi') {
+
+            const button = document.getElementById('donasi-button');
+
+            if (button) {
+
+                button.disabled = true;
+
+                button.innerText = 'Pendanaan Tercapai';
+
+                button.classList.remove(
+                    'bg-primary-container'
+                );
+
+                button.classList.add(
+                    'bg-gray-300',
+                    'text-gray-600',
+                    'cursor-not-allowed'
+                );
+            }
+        }
+
+        // Activity Feed
+        const activityFeed =
+            document.getElementById('activity-feed');
+
+        if (data.donasi_terbaru.length > 0) {
+
+            activityFeed.innerHTML = '';
+
+            data.donasi_terbaru.forEach((donasi) => {
+
+                activityFeed.innerHTML += `
+                    <div class="bg-surface-container-low p-5 rounded-xl border border-surface-container">
+
+                        <div class="flex items-center justify-between">
+
+                            <div class="flex flex-col gap-1">
+
+                                <p class="text-on-surface font-semibold">
+                                    ${donasi.user?.name ?? 'Donatur'}
+                                </p>
+
+                                <p class="text-sm text-on-surface-variant">
+                                    Berdonasi sebesar
+                                    <span class="font-bold">
+                                        Rp ${Number(donasi.nominal)
+                                            .toLocaleString('id-ID')}
+                                    </span>
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+            });
+        }
+
+    } catch (error) {
+
+        console.error(
+            'Funding realtime error:',
+            error
+        );
+    }
+}
+
+// Refresh tiap 5 detik
+setInterval(refreshFundingData, 5000);
+
+</script>
 
 @endsection

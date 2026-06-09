@@ -25,7 +25,10 @@ class User extends Authenticatable
         'password',
         'no_telepon',
         'role',
+        'status',
+        'last_login',
         'penyedia_id',
+        'saldo',
     ];
 
     protected $hidden = [
@@ -38,10 +41,21 @@ class User extends Authenticatable
         return $this->hasMany(Donasi::class, 'id_donatur', 'id_donatur');
     }
 
+    public function saldoMutasi(): HasMany
+    {
+        return $this->hasMany(SaldoMutasi::class, 'id_donatur', 'id_donatur');
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->nama;
+    }
+
     protected function casts(): array
     {
         return [
             'password' => 'hashed',
+            'saldo' => 'float',
         ];
     }
 
@@ -94,11 +108,44 @@ class User extends Authenticatable
         return $this->hasMany(MutasiSaldo::class, 'id_donatur', 'id_donatur');
     }
 
-    /**
-     * Accessor: $user->saldo → float
-     */
     public function getSaldoAttribute(): float
     {
         return (float) ($this->saldoDonatur?->saldo ?? 0);
+    }
+
+    public function tambahSaldo(float $nominal, ?string $keterangan = null): void
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($nominal, $keterangan) {
+            $saldoRecord = SaldoDonatur::firstOrCreate(
+                ['id_donatur' => $this->id_donatur],
+                ['saldo' => 0]
+            );
+            $saldoRecord->increment('saldo', $nominal);
+
+            MutasiSaldo::create([
+                'id_donatur' => $this->id_donatur,
+                'nominal' => $nominal,
+                'tipe' => 'masuk',
+                'keterangan' => $keterangan,
+            ]);
+        });
+    }
+
+    public function kurangiSaldo(float $nominal, ?string $keterangan = null): void
+    {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($nominal, $keterangan) {
+            $saldoRecord = SaldoDonatur::firstOrCreate(
+                ['id_donatur' => $this->id_donatur],
+                ['saldo' => 0]
+            );
+            $saldoRecord->decrement('saldo', $nominal);
+
+            MutasiSaldo::create([
+                'id_donatur' => $this->id_donatur,
+                'nominal' => $nominal,
+                'tipe' => 'keluar',
+                'keterangan' => $keterangan,
+            ]);
+        });
     }
 }

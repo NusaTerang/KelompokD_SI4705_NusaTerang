@@ -4,7 +4,12 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Models\Proyek;
+use App\Models\User;
 use App\Observers\ProyekObserver;
+use App\Observers\UserObserver;
+use Illuminate\Pagination\Paginator;
+
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +26,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(\App\Models\Proyek::class, \App\Policies\ProyekPolicy::class);
+
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\DonationSucceeded::class,
+            \App\Listeners\UpdateProjectFunding::class
+        );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\PaymentConfirmed::class,
+            \App\Listeners\UpdateProjectFunding::class
+        );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\ProyekDibatalkan::class,
+            \App\Listeners\ProcessRefundDonatur::class
+        );
+
         Proyek::observe(ProyekObserver::class);
+        User::observe(UserObserver::class);
+
+        Paginator::defaultView('vendor.pagination.tailwind');
     }
 }

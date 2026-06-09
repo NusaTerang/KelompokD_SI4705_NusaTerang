@@ -6,18 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('mutasi_saldo', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_donatur');
-            $table->enum('tipe', ['refund', 'donasi', 'topup']);
+            $table->enum('tipe', ['refund', 'donasi', 'topup', 'masuk', 'keluar']);
             $table->decimal('nominal', 15, 2);
-            $table->decimal('saldo_sebelum', 15, 2);
-            $table->decimal('saldo_sesudah', 15, 2);
+            $table->decimal('saldo_sebelum', 15, 2)->nullable();
+            $table->decimal('saldo_sesudah', 15, 2)->nullable();
             $table->unsignedBigInteger('referensi_proyek_id')->nullable();
             $table->string('keterangan')->nullable();
             $table->timestamps();
@@ -36,9 +33,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('mutasi_saldo');

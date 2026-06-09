@@ -134,6 +134,52 @@
                     </div>
                 @endif
             </section>
+
+            @php
+                $submittedProgressUpdates = $proyek->penugasan
+                    ->flatMap(fn ($penugasan) => $penugasan->submittedProgressUpdates)
+                    ->sortByDesc('submitted_at');
+            @endphp
+
+            <section class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm border border-surface-container">
+                <h3 class="text-lg font-bold text-on-surface mb-6">Monitoring Progress Vendor</h3>
+
+                @if($submittedProgressUpdates->isEmpty())
+                    <div class="rounded-2xl bg-surface-container-low p-8 text-center">
+                        <span class="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2">update</span>
+                        <p class="font-bold text-on-surface">Belum ada update progress</p>
+                        <p class="text-sm text-on-surface-variant mt-1">Vendor belum mengirim update progress untuk proyek ini.</p>
+                    </div>
+                @else
+                    <div class="space-y-4">
+                        @foreach($submittedProgressUpdates as $update)
+                            <article class="rounded-xl border border-surface-container bg-white p-5">
+                                <div class="flex items-start justify-between gap-4 mb-3">
+                                    <div>
+                                        <p class="text-2xl font-extrabold text-secondary">{{ $update->persentase }}%</p>
+                                        <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+                                            {{ $update->submitted_at?->format('d M Y H:i') ?? $update->created_at?->format('d M Y H:i') }}
+                                        </p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $update->status_progress === 'selesai' ? 'bg-tertiary-container text-on-tertiary-fixed' : 'bg-secondary-container text-on-secondary-fixed' }}">
+                                        {{ $update->status_progress === 'selesai' ? 'Selesai' : 'Berjalan' }}
+                                    </span>
+                                </div>
+
+                                <p class="text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">{{ $update->deskripsi }}</p>
+
+                                @if(!empty($update->foto_paths))
+                                    <div class="grid grid-cols-2 gap-3 mt-4">
+                                        @foreach($update->foto_paths as $path)
+                                            <img src="{{ asset('storage/' . $path) }}" alt="Foto progress" class="h-32 w-full rounded-lg object-cover border border-surface-container">
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
         </div>
 
         {{-- Kolom Kanan --}}
