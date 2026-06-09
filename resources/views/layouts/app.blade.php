@@ -44,38 +44,98 @@
             @endauth
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 flex-shrink-0">
             @auth
                 @php($unreadNotifications = Auth::user()->unreadNotifications()->count())
-                <span class="text-sm font-semibold text-secondary">Hi, {{ Auth::user()->nama }}</span>
-                <a href="{{ route('dashboard') }}" class="text-sm font-bold text-secondary hover:text-on-secondary-container transition-colors">Dashboard</a>
-                @if(Auth::user()->isDonatur())
-                    <a href="{{ route('donatur.saldo') }}"
-                       class="inline-flex items-center gap-2 h-9 px-3 rounded-full bg-solar-gold/20 hover:bg-solar-gold/30 transition-colors {{ request()->is('donatur/saldo') ? 'ring-2 ring-solar-gold' : '' }}"
-                       aria-label="Saldo Saya" title="Saldo Saya">
-                        <span class="material-symbols-outlined text-[18px] text-deep-navy">account_balance_wallet</span>
-                        <span class="text-sm font-bold text-deep-navy">Rp {{ number_format(Auth::user()->saldo, 0, ',', '.') }}</span>
-                    </a>
-                @endif
-                <a href="{{ route('notifications.index') }}" class="relative w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors" aria-label="Notifikasi">
+
+                {{-- Notification bell --}}
+                <a href="{{ route('notifications.index') }}" class="relative w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors flex-shrink-0" aria-label="Notifikasi">
                     <span class="material-symbols-outlined text-[18px] text-on-surface-variant">notifications</span>
                     @if($unreadNotifications > 0)
                         <span class="absolute -right-1 -top-1 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</span>
                     @endif
                 </a>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf
-                    <button type="submit" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">logout</span>
+
+                {{-- Profile dropdown --}}
+                <div class="relative" id="nt-profile-menu">
+                    <button onclick="ntToggleProfile(event)" class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center hover:opacity-80 transition-all flex-shrink-0 font-bold text-sm text-on-primary-fixed select-none" aria-label="Menu Profil">
+                        {{ strtoupper(mb_substr(Auth::user()->nama, 0, 1)) }}
                     </button>
-                </form>
+
+                    <div id="nt-profile-dropdown" class="hidden absolute right-0 top-12 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-[100]">
+
+                        {{-- User header --}}
+                        <div class="px-4 py-4 bg-slate-50 border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0 font-bold text-base text-on-primary-fixed">
+                                    {{ strtoupper(mb_substr(Auth::user()->nama, 0, 1)) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-slate-900 truncate">{{ Auth::user()->nama }}</p>
+                                    <p class="text-xs text-slate-500 truncate">{{ Auth::user()->email }}</p>
+                                </div>
+                            </div>
+
+                            @if(Auth::user()->isDonatur())
+                                <a href="{{ route('donatur.saldo') }}" onclick="ntCloseProfile()" class="mt-3 flex items-center justify-between px-3 py-2.5 rounded-xl bg-solar-gold/20 hover:bg-solar-gold/30 transition-colors {{ request()->is('donatur/saldo') ? 'ring-2 ring-solar-gold' : '' }}">
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-[16px] text-deep-navy">account_balance_wallet</span>
+                                        <span class="text-xs font-semibold text-deep-navy">Saldo Saya</span>
+                                    </div>
+                                    <span class="text-sm font-bold text-deep-navy">Rp {{ number_format(Auth::user()->saldo, 0, ',', '.') }}</span>
+                                </a>
+                            @endif
+                        </div>
+
+                        {{-- Menu links --}}
+                        <div class="py-1.5">
+                            <a href="{{ route('profil.edit') }}" onclick="ntCloseProfile()" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors {{ request()->routeIs('profil.*') ? 'bg-slate-50 font-semibold' : '' }}">
+                                <span class="material-symbols-outlined text-[18px] text-slate-400">person</span>
+                                Profil Saya
+                            </a>
+                            @if(Auth::user()->isAdmin() || Auth::user()->isPenyedia())
+                                <a href="{{ route('dashboard') }}" onclick="ntCloseProfile()" class="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                    <span class="material-symbols-outlined text-[18px] text-slate-400">dashboard</span>
+                                    Dashboard
+                                </a>
+                            @endif
+                        </div>
+
+                        {{-- Logout --}}
+                        <div class="border-t border-slate-100 py-1.5">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                                    Keluar
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+
             @else
-                <a href="{{ route('login') }}" class="bg-primary-container text-on-primary-fixed px-6 py-2.5 rounded-lg font-headline font-bold text-sm hover:opacity-90 transition-all active:scale-95">
+                <a href="{{ route('login') }}" class="bg-primary-container text-on-primary-fixed px-6 py-2.5 rounded-lg font-headline font-bold text-sm hover:opacity-90 transition-all active:scale-95 whitespace-nowrap">
                     Mulai Donasi
                 </a>
             @endauth
         </div>
     </nav>
+
+    <script>
+        function ntToggleProfile(e) {
+            e.stopPropagation();
+            document.getElementById('nt-profile-dropdown').classList.toggle('hidden');
+        }
+        function ntCloseProfile() {
+            document.getElementById('nt-profile-dropdown').classList.add('hidden');
+        }
+        document.addEventListener('click', function(e) {
+            var menu = document.getElementById('nt-profile-menu');
+            if (menu && !menu.contains(e.target)) ntCloseProfile();
+        });
+    </script>
 
     <main class="pt-20 flex flex-col w-full">
         @yield('content')
