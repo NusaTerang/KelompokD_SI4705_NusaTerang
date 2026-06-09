@@ -45,11 +45,11 @@ class ProcessRefundDonatur
                     SaldoDonatur::lockForUpdate()->find($saldo->id)->increment('saldo', $nominal);
 
                     MutasiSaldo::create([
-                        'id_donatur' => $idDonatur,
-                        'id_proyek'  => $proyek->id,
-                        'tipe'       => 'refund',
-                        'nominal'    => $nominal,
-                        'keterangan' => "Refund donasi proyek: {$proyek->judul}",
+                        'id_donatur'          => $idDonatur,
+                        'referensi_proyek_id' => $proyek->id,
+                        'tipe'                => 'refund',
+                        'nominal'             => $nominal,
+                        'keterangan'          => "Refund donasi proyek: {$proyek->judul}",
                     ]);
                 });
 
