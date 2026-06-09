@@ -356,7 +356,7 @@ class ProyekController extends Controller
             return redirect()->route('vendor.proyek.show', $id)->with('success', 'Draft tersimpan.');
         }
 
-        return redirect()->route('vendor.proyek.index')->with('success', 'Rincian berhasil dikirim ke Admin untuk ditinjau!');
+        return redirect()->route('vendor.proyek.show', $id)->with('success', 'Rincian berhasil dikirim ke Admin untuk ditinjau!');
     }
 
     public function expiryDecisionShow($id)

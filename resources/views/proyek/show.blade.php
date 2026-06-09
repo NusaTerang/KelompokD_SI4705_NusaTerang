@@ -443,6 +443,21 @@
                         </div>
                     </div>
 
+                    <div class="flex flex-col gap-2 w-full">
+                        <label class="text-on-surface-variant text-sm font-bold">Metode Pembayaran</label>
+                        <label class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container-low has-[:checked]:border-primary has-[:checked]:bg-primary-container/10">
+                            <input type="radio" name="payment_method" value="midtrans" checked class="accent-primary">
+                            <span class="material-symbols-outlined text-[20px] text-on-surface-variant">qr_code_2</span>
+                            <span class="text-sm font-bold text-on-surface">QRIS (Midtrans)</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant cursor-pointer hover:bg-surface-container-low has-[:checked]:border-primary has-[:checked]:bg-primary-container/10">
+                            <input type="radio" name="payment_method" value="saldo" class="accent-primary">
+                            <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance_wallet</span>
+                            <span class="text-sm font-bold text-on-surface">Saldo</span>
+                            <span class="ml-auto text-xs font-bold text-deep-navy">Rp {{ number_format(auth()->user()->saldo, 0, ',', '.') }}</span>
+                        </label>
+                    </div>
+
                     <button id="donasi-button" type="submit"
                         class="w-full bg-primary-container text-on-primary-fixed font-headline font-extrabold text-lg py-4 rounded-xl shadow-md hover:opacity-90 transition-all mt-2">
                         Donasi Sekarang
@@ -480,6 +495,80 @@
             </div>
 
         </div>
+
+        {{-- Panel Refund / Status Donasi Donatur --}}
+        @auth
+        @if(!empty($myDonationInfo))
+            <div class="bg-white rounded-2xl p-6 border border-surface-container shadow-lg flex flex-col gap-4 w-full mt-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">volunteer_activism</span>
+                    <h3 class="text-secondary text-xl font-headline font-semibold">Donasi Anda</h3>
+                </div>
+
+                @if(session('success'))
+                    <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">{{ session('success') }}</div>
+                @endif
+                @if($errors->has('refund'))
+                    <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">⚠️ {{ $errors->first('refund') }}</div>
+                @endif
+
+                <div class="flex justify-between text-sm">
+                    <span class="text-on-surface-variant">Total donasi kamu</span>
+                    <span class="font-bold text-on-surface">Rp {{ number_format($myDonationInfo['total_donasi'], 0, ',', '.') }}</span>
+                </div>
+
+                @if($myDonationInfo['refunded'] > 0)
+                    <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">
+                        ✅ Rp {{ number_format($myDonationInfo['refunded'], 0, ',', '.') }} telah direfund ke
+                        <a href="{{ route('donatur.saldo') }}" class="underline font-bold">saldo</a> kamu.
+                    </div>
+                @elseif($myDonationInfo['ikhlas'])
+                    <div class="bg-surface-container-low text-on-surface-variant text-sm rounded-xl px-4 py-3">
+                        🙏 Donasimu untuk proyek ini telah kamu ikhlaskan. Terima kasih!
+                    </div>
+                @elseif($myDonationInfo['has_pending'] && $myDonationInfo['eligible'])
+                    @if($myDonationInfo['refundable'] > 0)
+                        <div class="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl px-4 py-3">
+                            Proyek telah berakhir. Berdasarkan dana yang terpakai, kamu dapat menarik kembali
+                            <span class="font-bold">Rp {{ number_format($myDonationInfo['refundable'], 0, ',', '.') }}</span>
+                            ke saldo, atau mengikhlaskannya.
+                        </div>
+                        <form action="{{ route('donatur.refund', $proyek->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full bg-primary-container text-on-primary-fixed font-bold py-3 rounded-xl hover:opacity-90 transition-all">
+                                Refund Rp {{ number_format($myDonationInfo['refundable'], 0, ',', '.') }} ke Saldo
+                            </button>
+                        </form>
+                        <div class="relative group">
+                            <form action="{{ route('donatur.ikhlas', $proyek->id) }}" method="POST"
+                                  onsubmit="return confirm('Ikhlaskan donasi ini? Saldo tidak akan dikembalikan.')">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center justify-center gap-2 border border-outline-variant text-on-surface font-bold py-3 rounded-xl hover:bg-surface-container-low transition-colors">
+                                    Ikhlaskan
+                                    <span class="material-symbols-outlined text-[16px] text-on-surface-variant">info</span>
+                                </button>
+                            </form>
+                            {{-- Tooltip hover --}}
+                            <div class="pointer-events-none absolute bottom-full left-0 right-0 mb-2 z-20 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-150">
+                                <div class="bg-deep-navy text-white text-xs leading-relaxed rounded-xl px-4 py-3 shadow-lg">
+                                    Dengan mengikhlaskan, sisa dana <span class="font-bold">Rp {{ number_format($myDonationInfo['refundable'], 0, ',', '.') }}</span> tidak ditarik ke saldo, melainkan kami salurkan untuk membantu mengembangkan proyek energi desa lain. Terima kasih atas kebaikanmu 🙏
+                                    <span class="absolute left-6 top-full -mt-px border-8 border-transparent border-t-deep-navy"></span>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-surface-container-low text-on-surface-variant text-sm rounded-xl px-4 py-3">
+                            Dana donasimu telah terpakai sepenuhnya untuk proyek ini, sehingga tidak ada yang dapat direfund.
+                        </div>
+                    @endif
+                @elseif($myDonationInfo['has_pending'] && ! $myDonationInfo['eligible'])
+                    <div class="bg-surface-container-low text-on-surface-variant text-sm rounded-xl px-4 py-3">
+                        Proyek masih berjalan. Opsi refund akan tersedia bila proyek berakhir atau dibatalkan.
+                    </div>
+                @endif
+            </div>
+        @endif
+        @endauth
     </div>
 
 </div>

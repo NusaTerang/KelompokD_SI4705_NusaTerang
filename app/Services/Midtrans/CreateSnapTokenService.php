@@ -23,11 +23,11 @@ class CreateSnapTokenService extends Midtrans
             ],
             'item_details' => [
                 [
-                    'id' => 'DONASI-' . $this->order->id,
-                    'price' => (int) $this->order->total_price,
+                    'id'       => 'TRX-' . $this->order->id,
+                    'price'    => (int) $this->order->total_price,
                     'quantity' => 1,
-                    'name' => 'Donasi NusaTerang',
-                    'category' => 'Donation',
+                    'name'     => $this->order->snap_item_name ?? 'Donasi NusaTerang',
+                    'category' => 'NusaTerang',
                 ],
             ],
             'customer_details' => [
@@ -35,6 +35,11 @@ class CreateSnapTokenService extends Midtrans
                 'email' => $this->order->donatur_email,
                 'phone' => $this->order->donatur_phone ?? '',
             ],
+            // Batasi ke QRIS saja agar sesuai requirement.
+            // Channel "Other QRIS" di dashboard Midtrans = kode 'other_qris'.
+            // 'qris' (QRIS-via-GoPay) disertakan sebagai cadangan; hanya channel
+            // yang aktif di dashboard yang akan tampil di Snap.
+            'enabled_payments' => ['other_qris', 'qris'],
         ];
 
         return Snap::getSnapToken($params);

@@ -13,6 +13,8 @@ use App\Http\Controllers\Admin\PenyediaController as AdminPenyediaController;
 use App\Http\Controllers\Vendor\ProyekController as VendorProyekController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentCallbackController;
+use App\Http\Controllers\SaldoController;
+use App\Http\Controllers\TopupController;
 use App\Http\Controllers\Admin\UserManagementController;
 
 
@@ -102,6 +104,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+
+    // Saldo & Refund Donatur
+    Route::prefix('donatur')->name('donatur.')->group(function () {
+        Route::get('/saldo', [SaldoController::class, 'index'])->name('saldo');
+        Route::post('/refund/{proyek}', [SaldoController::class, 'refund'])->name('refund');
+        Route::post('/ikhlas/{proyek}', [SaldoController::class, 'ikhlas'])->name('ikhlas');
+
+        // Top Up Saldo (Midtrans QRIS)
+        Route::get('/topup', [TopupController::class, 'create'])->name('topup.create');
+        Route::post('/topup', [TopupController::class, 'store'])->name('topup.store');
+        Route::get('/topup/{topup}', [TopupController::class, 'show'])->name('topup.show');
+        Route::get('/topup/{topup}/status', [TopupController::class, 'status'])->name('topup.status');
+    });
 });
 
 // ─── Vendor (Penyedia Energi) ─────────────────────────────────────────────────
