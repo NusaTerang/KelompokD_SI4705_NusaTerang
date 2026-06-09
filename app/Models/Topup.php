@@ -89,9 +89,10 @@ class Topup extends Model
         $this->update(['payment_status' => self::STATUS_SUCCESS]);
 
         app(SaldoService::class)->credit(
-            $this->user,
+            $this->user->id_donatur,
             (float) $this->amount,
             'topup',
+            null,
             'Top up saldo via QRIS'
         );
     }

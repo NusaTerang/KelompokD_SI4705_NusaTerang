@@ -22,13 +22,11 @@
                         </p>
                         <p class="mt-2 text-xs text-white/60">Saldo hanya dapat digunakan untuk berdonasi di NusaTerang</p>
                     </div>
-                    {{-- Tombol Top Up — untuk PBI-33, sementara disabled --}}
-                    <button disabled
-                            class="flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50"
-                            title="Fitur top up segera hadir">
+                    <a href="{{ route('donatur.topup.create') }}"
+                       class="flex items-center gap-2 rounded-xl bg-white/20 px-5 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/30">
                         <span class="material-symbols-outlined text-[20px]">add_circle</span>
                         Top Up Saldo
-                    </button>
+                    </a>
                 </div>
             </div>
 
