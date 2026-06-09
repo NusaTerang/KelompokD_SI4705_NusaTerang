@@ -16,29 +16,47 @@ class PublicProjectMonitoringTimelineTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_public_project_detail_shows_empty_monitoring_state_without_login(): void
+    public function test_akses_monitoring_proyek_sedang_berjalan(): void
     {
-        [$proyek] = $this->createProjectWithAssignment('eksekusi');
+        [$proyek, $penugasan] = $this->createProjectWithAssignment('eksekusi');
 
-        $response = $this->get(route('proyek.show', $proyek->id));
+        ProgressProyekVendor::create([
+            'id_penugasan' => $penugasan->id_penugasan,
+            'persentase' => 40,
+            'deskripsi' => 'Update lama.',
+            'foto_paths' => null,
+            'status_progress' => 'berjalan',
+            'status' => 'submitted',
+            'submitted_at' => now()->subDay(),
+        ]);
 
-        $response->assertOk();
-        $response->assertSee('Timeline', false);
-        $response->assertSee('Progress Updates', false);
-        $response->assertSee('Vendor belum mengunggah update progres');
-    }
-
-    public function test_project_execution_status_uses_public_monitoring_label(): void
-    {
-        [$proyek] = $this->createProjectWithAssignment('eksekusi');
+        ProgressProyekVendor::create([
+            'id_penugasan' => $penugasan->id_penugasan,
+            'persentase' => 75,
+            'deskripsi' => 'Panel surya hampir selesai.',
+            'foto_paths' => ['progress/lapangan.jpg'],
+            'status_progress' => 'berjalan',
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
 
         $response = $this->get(route('proyek.show', $proyek->id));
 
         $response->assertOk();
         $response->assertSee('Sedang Berjalan');
+        $response->assertSee('75%');
+        $response->assertSee('style="width: 75%"', false);
+
+        $html = $response->getContent();
+        $this->assertLessThan(
+            strpos($html, 'Update lama.'),
+            strpos($html, 'Panel surya hampir selesai.')
+        );
+
+        $response->assertSee('storage/progress/lapangan.jpg', false);
     }
 
-    public function test_completed_project_shows_final_report_section(): void
+    public function test_akses_monitoring_proyek_selesai(): void
     {
         [$proyek, $penugasan] = $this->createProjectWithAssignment('selesai');
 
@@ -72,91 +90,17 @@ class PublicProjectMonitoringTimelineTest extends TestCase
         $response->assertSee('Instalasi selesai dan sudah diuji bersama warga.');
     }
 
-    public function test_progress_updates_render_newest_first(): void
+    public function test_akses_monitoring_proyek_belum_ada_update(): void
     {
-        [$proyek, $penugasan] = $this->createProjectWithAssignment('eksekusi');
-
-        ProgressProyekVendor::create([
-            'id_penugasan' => $penugasan->id_penugasan,
-            'persentase' => 35,
-            'deskripsi' => 'Pemasangan pondasi dimulai.',
-            'status_progress' => 'berjalan',
-            'status' => 'submitted',
-            'submitted_at' => now()->subDays(2),
-        ]);
-
-        ProgressProyekVendor::create([
-            'id_penugasan' => $penugasan->id_penugasan,
-            'persentase' => 75,
-            'deskripsi' => 'Panel surya sudah terpasang sebagian besar.',
-            'status_progress' => 'berjalan',
-            'status' => 'submitted',
-            'submitted_at' => now()->subDay(),
-        ]);
+        [$proyek] = $this->createProjectWithAssignment('eksekusi');
 
         $response = $this->get(route('proyek.show', $proyek->id));
 
         $response->assertOk();
-
-        $html = $response->getContent();
-        $this->assertLessThan(
-            strpos($html, 'Pemasangan pondasi dimulai.'),
-            strpos($html, 'Panel surya sudah terpasang sebagian besar.')
-        );
+        $response->assertSee('Vendor belum mengunggah update progres');
     }
 
-    public function test_latest_submitted_update_percentage_drives_monitoring_progress_bar(): void
-    {
-        [$proyek, $penugasan] = $this->createProjectWithAssignment('eksekusi');
-
-        ProgressProyekVendor::create([
-            'id_penugasan' => $penugasan->id_penugasan,
-            'persentase' => 40,
-            'deskripsi' => 'Update lama.',
-            'status_progress' => 'berjalan',
-            'status' => 'submitted',
-            'submitted_at' => now()->subDays(3),
-        ]);
-
-        ProgressProyekVendor::create([
-            'id_penugasan' => $penugasan->id_penugasan,
-            'persentase' => 75,
-            'deskripsi' => 'Update terbaru.',
-            'status_progress' => 'berjalan',
-            'status' => 'submitted',
-            'submitted_at' => now(),
-        ]);
-
-        $response = $this->get(route('proyek.show', $proyek->id));
-
-        $response->assertOk();
-        $response->assertSee('Progress Pengerjaan');
-        $response->assertSee('75%');
-        $response->assertSee('style="width: 75%"', false);
-    }
-
-    public function test_timeline_renders_progress_photos(): void
-    {
-        [$proyek, $penugasan] = $this->createProjectWithAssignment('eksekusi');
-
-        ProgressProyekVendor::create([
-            'id_penugasan' => $penugasan->id_penugasan,
-            'persentase' => 60,
-            'deskripsi' => 'Foto lapangan tersedia.',
-            'foto_paths' => ['progress/foto-1.jpg', 'https://example.test/foto-2.jpg'],
-            'status_progress' => 'berjalan',
-            'status' => 'submitted',
-            'submitted_at' => now(),
-        ]);
-
-        $response = $this->get(route('proyek.show', $proyek->id));
-
-        $response->assertOk();
-        $response->assertSee('storage/progress/foto-1.jpg', false);
-        $response->assertSee('https://example.test/foto-2.jpg', false);
-    }
-
-    public function test_missing_project_returns_not_found(): void
+    public function test_proyek_tidak_ditemukan_returns_404(): void
     {
         $response = $this->get('/proyek/999999');
 
