@@ -18,7 +18,7 @@ class CreateSnapTokenService extends Midtrans
     {
         $params = [
             'transaction_details' => [
-                'order_id'     => $this->order->number,
+                'order_id' => $this->order->number,
                 'gross_amount' => (int) $this->order->total_price,
             ],
             'item_details' => [
@@ -32,8 +32,8 @@ class CreateSnapTokenService extends Midtrans
             ],
             'customer_details' => [
                 'first_name' => $this->order->donatur_name,
-                'email'      => $this->order->donatur_email,
-                'phone'      => $this->order->donatur_phone ?? '',
+                'email' => $this->order->donatur_email,
+                'phone' => $this->order->donatur_phone ?? '',
             ],
             // Batasi ke QRIS saja agar sesuai requirement.
             // Channel "Other QRIS" di dashboard Midtrans = kode 'other_qris'.

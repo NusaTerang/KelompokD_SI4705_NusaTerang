@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Proyek;
 use App\Observers\ProyekObserver;
+use Illuminate\Pagination\Paginator;
 
 use Illuminate\Support\Facades\Gate;
 
@@ -33,7 +34,13 @@ class AppServiceProvider extends ServiceProvider
             \App\Events\PaymentConfirmed::class,
             \App\Listeners\UpdateProjectFunding::class
         );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\ProyekDibatalkan::class,
+            \App\Listeners\ProcessRefundDonatur::class
+        );
 
         Proyek::observe(ProyekObserver::class);
+
+        Paginator::defaultView('vendor.pagination.tailwind');
     }
 }

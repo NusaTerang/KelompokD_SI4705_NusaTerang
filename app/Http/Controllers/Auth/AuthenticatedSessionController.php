@@ -44,15 +44,23 @@ class AuthenticatedSessionController extends Controller
                 ]);
         }
 
-        // Regenerate session to prevent session fixation attacks
+        // Regenerate session
         $request->session()->regenerate();
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Redirect based on user role
-        return redirect()->intended($this->redirectByRole($user));
+        $user->update([
+        'last_login' => now()
+    ]);
+
+        // Redirect berdasarkan role
+        return redirect()->intended(
+            $this->redirectByRole($user)
+        );
     }
+
+
 
     /**
      * Destroy an authenticated session (Logout).

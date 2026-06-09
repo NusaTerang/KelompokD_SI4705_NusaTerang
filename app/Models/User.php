@@ -24,6 +24,8 @@ class User extends Authenticatable
         'password',
         'no_telepon',
         'role',
+        'status',
+        'last_login',
         'penyedia_id',
         'saldo',
     ];

@@ -82,8 +82,9 @@ class ProyekController extends Controller
         $proyek = $penugasan->proyek;
         $draft = $penugasan->progressDraft;
         $updates = $penugasan->submittedProgressUpdates;
+        $maxProgress = (int) ($updates->max('persentase') ?? 0);
 
-        return view('penyedia.proyek.progress', compact('penugasan', 'proyek', 'draft', 'updates'));
+        return view('penyedia.proyek.progress', compact('penugasan', 'proyek', 'draft', 'updates', 'maxProgress'));
     }
 
     public function progressStore(Request $request, $id, NotificationRecipientService $recipients)
@@ -92,23 +93,37 @@ class ProyekController extends Controller
         $proyek = $penugasan->proyek;
         $isDraft = $request->boolean('save_draft');
 
+        $maxProgress = (int) ($penugasan->submittedProgressUpdates->max('persentase') ?? 0);
+        $allowedValues = array_values(array_filter([25, 50, 75, 100], fn ($v) => $v > $maxProgress));
+
+        if (! $isDraft && empty($allowedValues)) {
+            return redirect()->route('vendor.proyek.progress.show', $penugasan->id_penugasan)
+                ->withErrors(['persentase' => 'Progress sudah 100%. Tidak ada tahapan progress tersisa.']);
+        }
+
+        $allowedValuesStr = implode(',', $allowedValues ?: [25, 50, 75, 100]);
+
+        $draft = $penugasan->progressDraft;
+        $hasDraftPhotos = ! empty($draft?->foto_paths);
+
         $rules = [
-            'persentase' => $isDraft ? 'nullable|integer|min:0|max:100' : 'required|integer|min:0|max:100',
+            'persentase' => $isDraft ? 'nullable|integer|in:' . $allowedValuesStr : 'required|integer|in:' . $allowedValuesStr,
             'deskripsi' => $isDraft ? 'nullable|string|max:2000' : 'required|string|max:2000',
             'status_progress' => $isDraft ? 'nullable|in:dijadwalkan,berjalan,selesai' : 'required|in:dijadwalkan,berjalan,selesai',
-            'fotos' => 'nullable|array|max:5',
+            'fotos' => $isDraft ? 'nullable|array|max:5' : ($hasDraftPhotos ? 'nullable|array|max:5' : 'required|array|min:1|max:5'),
             'fotos.*' => 'image|max:2048',
         ];
 
         $messages = [
-            'persentase.required' => 'Persentase progress wajib diisi.',
+            'persentase.required' => 'Persentase progress wajib dipilih.',
             'persentase.integer' => 'Persentase progress harus berupa angka.',
-            'persentase.min' => 'Persentase progress minimal 0.',
-            'persentase.max' => 'Persentase progress maksimal 100.',
+            'persentase.in' => 'Pilih tahapan progress yang tersedia.',
             'deskripsi.required' => 'Keterangan update wajib diisi.',
             'deskripsi.max' => 'Keterangan update maksimal 2000 karakter.',
             'status_progress.required' => 'Status instalasi wajib dipilih.',
             'status_progress.in' => 'Status instalasi tidak valid.',
+            'fotos.required' => 'Minimal 1 foto lapangan wajib diunggah.',
+            'fotos.min' => 'Minimal 1 foto lapangan wajib diunggah.',
             'fotos.max' => 'Maksimal 5 foto progress.',
             'fotos.*.image' => 'File progress harus berupa gambar.',
             'fotos.*.max' => 'Ukuran setiap foto maksimal 2MB.',
@@ -121,6 +136,8 @@ class ProyekController extends Controller
             foreach ($request->file('fotos') as $foto) {
                 $fotoPaths[] = $foto->store('progress_proyek_fotos', 'public');
             }
+        } elseif (! $isDraft && $hasDraftPhotos) {
+            $fotoPaths = $draft->foto_paths;
         }
 
         $payload = [
@@ -153,9 +170,9 @@ class ProyekController extends Controller
             ->where('status', 'draft')
             ->delete();
 
-        $proyek->update([
-            'status' => 'eksekusi',
-        ]);
+        if ($proyek->dana_terkumpul >= $proyek->target_dana && $proyek->target_dana > 0) {
+            $proyek->update(['status' => 'eksekusi']);
+        }
 
         $recipients->adminsAndDonorsForProject($proyek)
             ->each(fn ($recipient) => $recipient->notify(new ProgressProyekDikirim($proyek)));

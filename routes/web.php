@@ -15,6 +15,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\SaldoController;
 use App\Http\Controllers\TopupController;
+use App\Http\Controllers\Admin\UserManagementController;
 
 
 // ─── Public ──────────────────────────────────────────────────────────────────
@@ -38,8 +39,6 @@ Route::get('/', function () {
 
     if (request()->filled('status') && isset($statusMap[request('status')])) {
         $query->where('status', $statusMap[request('status')]);
-    } else {
-        $query->where('status', 'aktif_funding');
     }
 
     $provinceOptions = (clone $query)
@@ -192,6 +191,23 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         Route::get('/{id}/edit', [AdminPenyediaController::class, 'edit'])->name('edit');
         Route::put('/{id}', [AdminPenyediaController::class, 'update'])->name('update');
         Route::patch('/{id}/toggle', [AdminPenyediaController::class, 'toggleStatus'])->name('toggleStatus');
+    });
+
+
+    // User Management
+    Route::prefix('users')->name('admin.users.')->group(function () {
+
+    Route::get('/', [UserManagementController::class, 'index'])
+        ->name('index');
+
+    Route::get('/{user}', [UserManagementController::class, 'show'])
+        ->name('show');
+
+    Route::put('/{user}/role', [UserManagementController::class, 'updateRole'])
+        ->name('role');
+
+    Route::put('/{user}/status', [UserManagementController::class, 'toggleStatus'])
+        ->name('status');
     });
 });
 
