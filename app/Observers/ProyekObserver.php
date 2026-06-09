@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\ProyekDibatalkan;
 use App\Models\Proyek;
 
 class ProyekObserver
@@ -10,6 +11,10 @@ class ProyekObserver
     {
         if ($proyek->isDirty('dana_terkumpul')) {
             $proyek->checkAndActivateInstalasi();
+        }
+
+        if ($proyek->wasChanged('status') && $proyek->status === 'refund') {
+            event(new ProyekDibatalkan($proyek));
         }
     }
 }

@@ -34,6 +34,10 @@ class AppServiceProvider extends ServiceProvider
             \App\Events\PaymentConfirmed::class,
             \App\Listeners\UpdateProjectFunding::class
         );
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\ProyekDibatalkan::class,
+            \App\Listeners\ProcessRefundDonatur::class
+        );
 
         Proyek::observe(ProyekObserver::class);
 

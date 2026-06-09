@@ -25,6 +25,7 @@
         'berjalan' => 'Berjalan',
         'selesai' => 'Selesai',
     ];
+    $draftPhotoUrls = collect($draft?->foto_paths ?? [])->map(fn($p) => asset('storage/' . $p))->values()->all();
 @endphp
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -69,14 +70,23 @@
                         persentaseSelected: {{ (empty($allowedOptions) || old('persentase', $draft?->persentase)) ? 'true' : 'false' }},
                         deskripsi: {{ json_encode(old('deskripsi', $draft?->deskripsi ?? '')) }},
                         statusSelected: {{ (old('status_progress') || $draft?->status_progress) ? 'true' : 'false' }},
-                        fotoCount: 0,
-                        hasDraftPhotos: {{ (!empty($draft?->foto_paths)) ? 'true' : 'false' }},
+                        draftPhotos: {{ json_encode($draftPhotoUrls) }},
+                        newPreviews: [],
                         attempted: false,
-                        get fotoOk() { return this.hasDraftPhotos || this.fotoCount > 0; },
+                        get fotoOk() { return this.draftPhotos.length > 0 || this.newPreviews.length > 0; },
+                        get displayPhotos() { return this.newPreviews.length > 0 ? this.newPreviews : this.draftPhotos; },
+                        get emptySlotList() {
+                            const count = Math.max(0, 3 - this.displayPhotos.length);
+                            return Array.from({ length: count }, (_, i) => i);
+                        },
+                        handleFotoChange(e) {
+                            const files = Array.from(e.target.files).slice(0, 5);
+                            this.newPreviews = files.map(f => URL.createObjectURL(f));
+                        },
                         trySubmit() {
                             this.attempted = true;
                             if (this.persentaseSelected && this.deskripsi.trim() && this.statusSelected && this.fotoOk) {
-                                this.$el.submit();
+                                this.$el.closest('form').submit();
                             }
                         }
                     }"
@@ -150,19 +160,20 @@
                         <div class="grid grid-cols-4 gap-4 rounded-xl transition-all" :class="{ 'outline outline-2 outline-red-400 p-2': attempted && !fotoOk }">
                             <label for="fotos" class="aspect-square rounded-xl border-2 border-dashed border-outline-variant flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer group">
                                 <span class="material-symbols-outlined text-3xl mb-1 group-hover:scale-110 transition-transform">add_a_photo</span>
-                                <span class="text-[10px] font-bold">TAMBAH</span>
+                                <span class="text-[10px] font-bold" x-text="newPreviews.length > 0 ? newPreviews.length + ' foto' : 'TAMBAH'"></span>
                             </label>
-                            @foreach(($draft->foto_paths ?? []) as $path)
-                                <div class="relative group aspect-square rounded-xl overflow-hidden">
-                                    <img class="w-full h-full object-cover" src="{{ asset('storage/' . $path) }}" alt="Foto draft progress">
+                            <template x-for="(url, idx) in displayPhotos" :key="idx">
+                                <div class="relative group aspect-square rounded-xl overflow-hidden ring-2 ring-[#F9D423]/40">
+                                    <img class="w-full h-full object-cover" :src="url" alt="Foto preview">
+                                    <div x-show="newPreviews.length > 0" class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                                 </div>
-                            @endforeach
-                            @for($i = count($draft->foto_paths ?? []); $i < 3; $i++)
+                            </template>
+                            <template x-for="i in emptySlotList" :key="'e'+i">
                                 <div class="aspect-square rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-center italic text-[10px] text-on-surface-variant">Kosong</div>
-                            @endfor
+                            </template>
                         </div>
                         <input id="fotos" name="fotos[]" type="file" multiple accept="image/*" class="sr-only"
-                            @change="fotoCount = $event.target.files.length">
+                            @change="handleFotoChange($event)">
                         <p x-show="attempted && !fotoOk" x-cloak class="text-sm text-red-500 flex items-center gap-1">
                             <span class="material-symbols-outlined text-base">warning</span>
                             Minimal 1 foto lapangan wajib diunggah.
