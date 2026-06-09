@@ -8,25 +8,29 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('saldo_donatur', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id_donatur')->unique();
-            $table->decimal('saldo', 15, 2)->default(0.00);
-            $table->timestamps();
+        if (!Schema::hasTable('saldo_donatur')) {
+            Schema::create('saldo_donatur', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('id_donatur')->unique();
+                $table->decimal('saldo', 15, 2)->default(0.00);
+                $table->timestamps();
 
-            $table->foreign('id_donatur')->references('id_donatur')->on('users')->cascadeOnDelete();
-        });
+                $table->foreign('id_donatur')->references('id_donatur')->on('users')->cascadeOnDelete();
+            });
+        }
 
-        Schema::create('mutasi_saldo', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('id_donatur');
-            $table->decimal('nominal', 15, 2);
-            $table->enum('tipe', ['masuk', 'keluar']);
-            $table->string('keterangan')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('mutasi_saldo')) {
+            Schema::create('mutasi_saldo', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('id_donatur');
+                $table->decimal('nominal', 15, 2);
+                $table->enum('tipe', ['masuk', 'keluar']);
+                $table->string('keterangan')->nullable();
+                $table->timestamps();
 
-            $table->foreign('id_donatur')->references('id_donatur')->on('users')->cascadeOnDelete();
-        });
+                $table->foreign('id_donatur')->references('id_donatur')->on('users')->cascadeOnDelete();
+            });
+        }
     }
 
     public function down(): void
