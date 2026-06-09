@@ -43,7 +43,9 @@
         @if(config('midtrans.is_production'))
             <script src="https://app.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
         @else
-            <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+            <script src="https://app.midtrans.com/snap/snap.js"
+            data-client-key="{{ config('midtrans.client_key') }}">
+</script>
         @endif
         
         <script>

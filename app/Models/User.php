@@ -24,7 +24,10 @@ class User extends Authenticatable
         'password',
         'no_telepon',
         'role',
+        'status',
+        'last_login',
         'penyedia_id',
+        'saldo',
     ];
 
     protected $hidden = [
@@ -37,6 +40,11 @@ class User extends Authenticatable
         return $this->hasMany(Donasi::class, 'id_donatur', 'id_donatur');
     }
 
+    public function saldoMutasi(): HasMany
+    {
+        return $this->hasMany(SaldoMutasi::class, 'id_donatur', 'id_donatur');
+    }
+
     public function getNameAttribute(): ?string
     {
         return $this->nama;
@@ -46,6 +54,7 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'saldo' => 'float',
         ];
     }
 

@@ -167,6 +167,7 @@ class ProyekController extends Controller
             'estimasi_mulai'    => 'required|date',
             'estimasi_selesai'  => 'required|date|after_or_equal:estimasi_mulai',
             'penyedia_id'       => 'nullable|exists:penyedia_energis,id',
+            'dana_terpakai'     => 'nullable|numeric|min:0',
             'fotos'             => 'nullable|array',
             'fotos.*'           => 'image|max:2048',
         ]);
@@ -179,6 +180,7 @@ class ProyekController extends Controller
             'estimasi_mulai' => $validated['estimasi_mulai'],
             'estimasi_selesai' => $validated['estimasi_selesai'],
             'penyedia_id' => $validated['penyedia_id'] ?? null,
+            'dana_terpakai' => $validated['dana_terpakai'] ?? $proyek->dana_terpakai,
         ]);
 
         if ($request->hasFile('fotos')) {
@@ -391,7 +393,38 @@ class ProyekController extends Controller
         $detail = $proyek->penugasan->first()?->detail;
         $costBreakdown = $detail ? $detail->cost_breakdown : null;
 
-        return view('proyek.show', compact('proyek', 'costBreakdown'));
+        $myDonationInfo = $this->buildDonationInfo($proyek);
+
+        return view('proyek.show', compact('proyek', 'costBreakdown', 'myDonationInfo'));
+    }
+
+    /**
+     * Ringkasan donasi & status refund milik donatur yang sedang login untuk proyek ini.
+     */
+    private function buildDonationInfo(Proyek $proyek): ?array
+    {
+        if (! auth()->check() || ! auth()->user()->isDonatur()) {
+            return null;
+        }
+
+        $user = auth()->user();
+        $mine = $proyek->donasis
+            ->where('id_donatur', $user->getKey())
+            ->where('status', 'success');
+
+        if ($mine->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'total_donasi' => (float) $mine->sum('nominal'),
+            'refundable'   => app(\App\Services\RefundService::class)->refundableAmount($user, $proyek),
+            'has_pending'  => $mine->where('refund_status', \App\Models\Donasi::REFUND_NONE)->isNotEmpty(),
+            'eligible'     => $proyek->isRefundEligible(),
+            'ratio'        => $proyek->refundRatio(),
+            'refunded'     => (float) $mine->where('refund_status', \App\Models\Donasi::REFUND_REFUNDED)->sum('refund_amount'),
+            'ikhlas'       => $mine->where('refund_status', \App\Models\Donasi::REFUND_IKHLAS)->isNotEmpty(),
+        ];
     }
 
     public function aktifkanInstalasi(Request $request, $id)
