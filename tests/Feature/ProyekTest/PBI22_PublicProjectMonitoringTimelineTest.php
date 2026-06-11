@@ -40,7 +40,7 @@ class PBI22_PublicProjectMonitoringTimelineTest extends TestCase
             'submitted_at' => now(),
         ]);
 
-        $response = $this->get(route('proyek.show', $proyek->id));
+        $response = $this->get("/projects/{$proyek->id}/monitoring");
 
         $response->assertOk();
         $response->assertSee('Sedang Berjalan');
@@ -82,10 +82,12 @@ class PBI22_PublicProjectMonitoringTimelineTest extends TestCase
             'submitted_at' => now(),
         ]);
 
-        $response = $this->get(route('proyek.show', $proyek->id));
+        $response = $this->get("/projects/{$proyek->id}/monitoring");
 
         $response->assertOk();
         $response->assertSee('Selesai');
+        $response->assertSee('100%');
+        $response->assertSee('style="width: 100%"', false);
         $response->assertSee('Laporan Akhir');
         $response->assertSee('Instalasi selesai dan sudah diuji bersama warga.');
     }
@@ -94,7 +96,7 @@ class PBI22_PublicProjectMonitoringTimelineTest extends TestCase
     {
         [$proyek] = $this->createProjectWithAssignment('eksekusi');
 
-        $response = $this->get(route('proyek.show', $proyek->id));
+        $response = $this->get("/projects/{$proyek->id}/monitoring");
 
         $response->assertOk();
         $response->assertSee('Vendor belum mengunggah update progres');
@@ -102,7 +104,7 @@ class PBI22_PublicProjectMonitoringTimelineTest extends TestCase
 
     public function test_proyek_tidak_ditemukan_returns_404(): void
     {
-        $response = $this->get('/proyek/999999');
+        $response = $this->get('/projects/999999/monitoring');
 
         $response->assertNotFound();
     }

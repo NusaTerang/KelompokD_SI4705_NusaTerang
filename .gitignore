@@ -14,9 +14,12 @@
 /.zed
 /auth.json
 /node_modules
+/database/e2e.sqlite
+/playwright-report
 /public/build
 /public/hot
 /public/storage
+/test-results
 /bootstrap/cache
 /storage/*.key
 /storage/pail
