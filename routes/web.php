@@ -60,6 +60,7 @@ Route::get('/', function () {
 
 Route::get('/proyek', [ProyekController::class, 'index'])->name('proyek.index');
 Route::get('/proyek/{id}', [ProyekController::class, 'show'])->name('proyek.show');
+Route::get('/projects/{id}/monitoring', [ProyekController::class, 'show'])->name('projects.monitoring');
 Route::get('/penyedia/daftar', [PenyediaController::class, 'index'])->name('penyedia.daftar');
 Route::get('/penyedia/{id}', [PenyediaController::class, 'show'])->name('penyedia.show');
 Route::get('/api/penyedia/rekomendasi', [PenyediaController::class, 'getRekomendasi'])->name('api.penyedia.rekomendasi');
