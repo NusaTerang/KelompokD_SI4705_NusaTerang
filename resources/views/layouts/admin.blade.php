@@ -19,6 +19,7 @@
                            request()->routeIs('proyek.review') ||
                            request()->routeIs('proyek.kelola');
         $vendorOpen      = request()->routeIs('admin.vendors.*');
+        $userOpen = request()->routeIs('admin.users.*');
         $notificationOpen = request()->routeIs('notifications.*');
         $unreadNotifications = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
     @endphp
@@ -88,6 +89,36 @@
                     </span>
                     Donasi
                 </a>
+                <a href="{{ route('admin.users.index') }}"
+                    class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium
+                    {{ $userOpen ? 'bg-nt-navy-light text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }}">
+
+                        @if($userOpen)
+                            <span class="absolute left-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-r bg-nt-accent"></span>
+                        @endif
+
+                        <span class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/10">
+
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="1.5">
+
+                                <path stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M17 20h5V18a4 4 0 00-4-4h-1m-4 6H4v-2a4 4 0 014-4h5m0-4a4 4 0 100-8 4 4 0 000 8z"/>
+
+                            </svg>
+
+                        </span>
+
+                        <span class="flex-1">
+                            Manajemen Pengguna
+                        </span>
+
+                    </a>
                 <a href="{{ route('notifications.index') }}" class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {{ $notificationOpen ? 'bg-nt-navy-light text-white' : 'text-white/80 hover:bg-white/10 hover:text-white' }}">
                     @if($notificationOpen)
                         <span class="absolute left-0 top-1/2 h-9 w-1 -translate-y-1/2 rounded-r bg-nt-accent" aria-hidden="true"></span>

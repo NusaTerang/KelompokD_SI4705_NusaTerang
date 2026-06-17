@@ -17,6 +17,8 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $primaryKey = 'id_donatur';
+    public $incrementing = true;
+    protected $keyType = 'int';
     public const UPDATED_AT = null;
 
     protected $fillable = [

@@ -33,25 +33,25 @@ class Donasi extends Model
 
     public function isRefundable(): bool
     {
-        return $this->status === 'success' && $this->refund_status === self::REFUND_NONE;
+        return $this->status === 'success'
+            && $this->refund_status === self::REFUND_NONE;
     }
 
+    // Relasi ke User (Donatur)
     public function donatur(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_donatur', 'id_donatur');
     }
 
-    /**
-     * Alias dari donatur(). Sebagian kode (mis. API funding) merujuk relasi
-     * ini dengan nama "user".
-     */
+    // Alias
     public function user(): BelongsTo
     {
         return $this->donatur();
     }
 
+    // Relasi ke Proyek
     public function proyek(): BelongsTo
     {
-        return $this->belongsTo(Proyek::class, 'id_proyek');
+        return $this->belongsTo(Proyek::class, 'id_proyek', 'id');
     }
 }

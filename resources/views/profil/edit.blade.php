@@ -51,7 +51,6 @@ $bannerUrl = 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=
 
 <div class="mx-auto max-w-[1200px] px-4 py-8">
 
-```
 @if (session('success'))
     <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
         {{ session('success') }}
@@ -131,29 +130,33 @@ $bannerUrl = 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=
         </div>
 
         <!-- IMPACT -->
-        <div class="rounded-2xl bg-[#0D4A8B] p-6 text-white shadow">
+            <div
+                class="rounded-2xl p-8 shadow-lg"
+                style="background: linear-gradient(135deg, #1D4E89, #255D98, #2F6FB0); color: white;">>
 
-            <p class="text-xs opacity-80">
-                Total Dampak Anda
-            </p>
+                <p class="text-lg font-semibold">
+                    Total Dampak Anda
+                </p>
 
-            <h2 class="mt-3 text-4xl font-bold text-yellow-300">
-                1,240
-            </h2>
+                <div class="mt-4 flex items-center gap-4">
+                    <h2 class="text-[72px] leading-none font-extrabold text-[#FFD230]">
+                        1,240
+                    </h2>
 
-            <p class="text-sm">
-                kWh Tereneralisasi
-            </p>
+                    <span class="text-[24px] font-medium text-white/90">
+                        kWh Tergenerasi
+                    </span>
+                </div>
 
-            <p class="mt-2 text-xs text-white/70">
-                Kontribusi Anda telah membantu menerangi 12 rumah.
-            </p>
+                <p class="mt-5 text-lg text-white/70">
+                    Kontribusi Anda telah membantu menerangi 12 rumah di Desa Sukamaju.
+                </p>
 
-            <div class="mt-5 h-2 rounded-full bg-white/20">
-                <div class="h-2 w-2/3 rounded-full bg-yellow-400"></div>
+                <div class="mt-8 h-3 rounded-full bg-white/15 overflow-hidden">
+                    <div class="h-full w-3/4 rounded-full" style="background:#FFD230;"></div>
+                </div>
+
             </div>
-
-        </div>
 
     </div>
 
@@ -174,51 +177,64 @@ $bannerUrl = 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=
 
             </div>
 
-            <div class="space-y-5">
+                <div class="space-y-5">
 
-                <div class="flex justify-between border-b pb-4">
-                    <div>
-                        <h3 class="font-medium">PLTS Desa Sukamaju</h3>
-                        <p class="text-sm text-slate-500">1 Oktober 2023</p>
-                    </div>
+                    @forelse($riwayatDonasi as $donasi)
 
-                    <div class="text-right">
-                        <p class="font-semibold">Rp 2.500.000</p>
-                        <span class="rounded bg-green-100 px-2 py-1 text-xs text-green-700">
-                            SUKSES
-                        </span>
-                    </div>
+                        <div class="flex justify-between border-b pb-4">
+
+                            <div>
+                                <h3 class="font-medium">
+                                    {{ $donasi->proyek->judul ?? 'Proyek Tidak Diketahui' }}
+                                </h3>
+
+                                <p class="text-sm text-slate-500">
+                                    {{ $donasi->created_at->format('d M Y') }}
+                                </p>
+                            </div>
+
+                            <div class="text-right">
+
+                                <p class="font-semibold">
+                                    Rp {{ number_format($donasi->nominal, 0, ',', '.') }}
+                                </p>
+
+                                @if($donasi->status === 'success')
+                                    <span class="rounded bg-green-100 px-2 py-1 text-xs text-green-700">
+                                        SUKSES
+                                    </span>
+                                @elseif($donasi->status === 'pending')
+                                    <span class="rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
+                                        PENDING
+                                    </span>
+                                @else
+                                    <span class="rounded bg-red-100 px-2 py-1 text-xs text-red-700">
+                                        {{ strtoupper($donasi->status) }}
+                                    </span>
+                                @endif
+
+                                <div class="mt-2">
+                                    <a href="{{ route('profil.donasi.detail', $donasi->id_donasi) }}"
+                                        class="text-xs text-blue-600 hover:underline">
+                                        Lihat Detail
+                                    </a>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    @empty
+
+                        <div class="py-8 text-center text-slate-500">
+                            Belum ada riwayat donasi.
+                        </div>
+
+                    @endforelse
                 </div>
-
-                <div class="flex justify-between border-b pb-4">
-                    <div>
-                        <h3 class="font-medium">Mikrohidro Sungai Barito</h3>
-                        <p class="text-sm text-slate-500">28 September 2023</p>
-                    </div>
-
-                    <div class="text-right">
-                        <p class="font-semibold">Rp 5.000.000</p>
-                        <span class="rounded bg-green-100 px-2 py-1 text-xs text-green-700">
-                            SUKSES
-                        </span>
-                    </div>
-                </div>
-
-                <div class="flex justify-between">
-                    <div>
-                        <h3 class="font-medium">Kincir Angin Pesisir Selatan</h3>
-                        <p class="text-sm text-slate-500">10 September 2023</p>
-                    </div>
-
-                    <div class="text-right">
-                        <p class="font-semibold">Rp 1.200.000</p>
-                        <span class="rounded bg-yellow-100 px-2 py-1 text-xs text-yellow-700">
-                            PENDING
-                        </span>
-                    </div>
-                </div>
-
             </div>
+        </div>
+    </div>
 
         </div>
 
