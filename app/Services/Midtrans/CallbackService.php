@@ -22,6 +22,10 @@ class CallbackService extends Midtrans
 
 	public function isSignatureKeyVerified()
 	{
+		if (! $this->order) {
+			return false;
+		}
+
 		return ($this->_createLocalSignatureKey() == $this->notification->signature_key);
 	}
 
@@ -58,7 +62,7 @@ class CallbackService extends Midtrans
 	{
 		$orderId = $this->order->number;
 		$statusCode = $this->notification->status_code;
-		$grossAmount = $this->order->total_price;
+		$grossAmount = $this->notification->gross_amount ?? $this->order->total_price;
 		$serverKey = $this->serverKey;
 		$input = $orderId . $statusCode . $grossAmount . $serverKey;
 		$signature = openssl_digest($input, 'sha512');
@@ -68,7 +72,10 @@ class CallbackService extends Midtrans
 
 	protected function _handleNotification()
 	{
-		$notification = new Notification();
+		$payload = request()->all();
+		$notification = ! empty($payload)
+			? (object) $payload
+			: new Notification();
 
 		$orderNumber = $notification->order_id;
 		$order = Order::where('number', $orderNumber)->first();

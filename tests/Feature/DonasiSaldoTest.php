@@ -11,9 +11,11 @@ use App\Models\Proyek;
 use App\Models\User;
 use App\Models\SaldoDonatur;
 use App\Models\MutasiSaldo;
+use App\Notifications\TargetDanaTercapai;
 use App\Services\Midtrans\CreateSnapTokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class DonasiSaldoTest extends TestCase
@@ -281,6 +283,47 @@ class DonasiSaldoTest extends TestCase
         ]);
     }
 
+    public function test_confirm_paid_combination_deducts_saldo_once_and_keeps_target_notification(): void
+    {
+        Notification::fake();
+        [$user, $proyek] = $this->setupProyekAndUser('donatur', 20000);
+        $proyek->update(['target_dana' => 50000]);
+
+        $order = Order::create([
+            'user_id' => $user->id_donatur,
+            'proyek_id' => $proyek->id,
+            'number' => 'NT-KOMBI200',
+            'total_price' => 50000,
+            'donatur_name' => $user->name,
+            'donatur_email' => $user->email,
+            'payment_status' => Order::STATUS_PENDING,
+            'payment_method' => 'kombinasi',
+            'amount_saldo' => 20000,
+            'amount_qris' => 30000,
+        ]);
+
+        $order->confirmPaid();
+        $order->confirmPaid();
+
+        $order->refresh();
+        $user->refresh();
+        $proyek->refresh();
+
+        $this->assertEquals(Order::STATUS_SUCCESS, $order->payment_status);
+        $this->assertEquals(0, $user->saldo);
+        $this->assertEquals(50000, $proyek->dana_terkumpul);
+
+        $this->assertDatabaseCount('donasi', 1);
+        $this->assertDatabaseCount('mutasi_saldo', 1);
+        $this->assertDatabaseHas('mutasi_saldo', [
+            'id_donatur' => $user->id_donatur,
+            'nominal' => 20000,
+            'tipe' => 'keluar',
+            'keterangan' => 'Pembayaran kombinasi donasi proyek: ' . $proyek->judul,
+        ]);
+        Notification::assertSentTo($user, TargetDanaTercapai::class);
+    }
+
     public function test_automatic_refunds_on_vendor_project_cancellation(): void
     {
         [$user, $proyek] = $this->setupProyekAndUser('donatur', 0);
@@ -361,5 +404,30 @@ class DonasiSaldoTest extends TestCase
         $response->assertSee('Metode Pembayaran');
         $response->assertSee('Bayar dengan QRIS');
         $response->assertSee('Bayar dengan Saldo');
+    }
+
+    public function test_proyek_show_qris_submission_preselects_qris_payment(): void
+    {
+        [$user, $proyek] = $this->setupProyekAndUser('donatur', 100000);
+
+        $response = $this->actingAs($user)
+            ->from(route('proyek.show', $proyek->id))
+            ->post(route('donasi.store'), [
+                'proyek_id' => $proyek->id,
+                'donatur_name' => $user->name,
+                'donatur_email' => $user->email,
+                'donatur_phone' => '081234567890',
+                'total_price' => 50000,
+                'payment_method' => 'qris',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $order = Order::firstOrFail();
+
+        $response->assertRedirect(route('donasi.show', $order));
+        $this->assertSame('qris', $order->payment_method);
+        $this->assertEquals(0, $order->amount_saldo);
+        $this->assertEquals(50000, $order->amount_qris);
     }
 }

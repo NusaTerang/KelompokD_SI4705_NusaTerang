@@ -6,6 +6,7 @@ use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Order extends Model
 {
@@ -75,25 +76,53 @@ class Order extends Model
      */
     public function confirmPaid(): void
     {
-        if ($this->isSuccess()) {
-            return;
-        }
+        DB::transaction(function () {
+            $order = self::query()
+                ->whereKey($this->getKey())
+                ->lockForUpdate()
+                ->first();
 
-        $this->update(['payment_status' => self::STATUS_SUCCESS]);
+            if (! $order || $order->isSuccess()) {
+                return;
+            }
 
-        $proyek = $this->proyek;
-        if ($proyek) {
-            Donasi::create([
-                'id_proyek'  => $proyek->id,
-                'id_donatur' => $this->user_id,
-                'nominal'    => $this->total_price,
-                'status'     => 'success',
-            ]);
+            $proyek = $order->proyek;
+            if (! $proyek) {
+                return;
+            }
 
-            // Menambah dana_terkumpul, mengirim notifikasi TargetDanaTercapai saat
-            // target terlampaui, dan (via ProyekObserver) memindah status proyek
-            // aktif_funding -> eksekusi.
-            $proyek->recordFunding($this->total_price);
-        }
+            $donatur = $order->user;
+            if ($donatur && $order->payment_method === 'saldo') {
+                $donatur->kurangiSaldo(
+                    (float) ($order->amount_saldo ?: $order->total_price),
+                    "Donasi saldo untuk proyek: {$proyek->judul}"
+                );
+            } elseif ($donatur && $order->payment_method === 'kombinasi' && $order->amount_saldo > 0) {
+                $donatur->kurangiSaldo(
+                    (float) $order->amount_saldo,
+                    "Pembayaran kombinasi donasi proyek: {$proyek->judul}"
+                );
+            }
+
+            $order->update(['payment_status' => self::STATUS_SUCCESS]);
+
+            Donasi::updateOrCreate(
+                [
+                    'id_proyek' => $proyek->id,
+                    'id_donatur' => $order->user_id,
+                    'created_at' => $order->created_at ?? now(),
+                ],
+                [
+                    'nominal' => $order->total_price,
+                    'status' => 'success',
+                ]
+            );
+
+            // Menambah dana_terkumpul dan mengirim notifikasi TargetDanaTercapai
+            // saat target terlampaui.
+            $proyek->recordFunding($order->total_price);
+        });
+
+        $this->refresh();
     }
 }

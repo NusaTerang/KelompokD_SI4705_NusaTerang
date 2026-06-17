@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Donasi;
 use App\Models\Order;
 use App\Services\Midtrans\CallbackService;
 
@@ -24,47 +23,7 @@ class PaymentCallbackController extends Controller
             }
 
             if ($callback->isSuccess()) {
-                \Illuminate\Support\Facades\DB::transaction(function () use ($order) {
-                    $orderRecord = Order::find($order->id);
-                    if ($orderRecord) {
-                        $orderRecord->update([
-                            'payment_status' => Order::STATUS_SUCCESS,
-                        ]);
-
-                        // Deduct balance if combination payment
-                        if ($orderRecord->payment_method === 'kombinasi') {
-                            $donatur = $orderRecord->user;
-                            if ($donatur) {
-                                $donatur->kurangiSaldo($orderRecord->amount_saldo, "Pembayaran kombinasi donasi proyek: {$orderRecord->proyek->judul}");
-                            }
-                        }
-
-                        // Update Proyek and create successful Donasi record
-                        $proyek = $orderRecord->proyek;
-                        if ($proyek) {
-                            Donasi::updateOrCreate(
-                                [
-                                    'id_proyek' => $proyek->id,
-                                    'id_donatur' => $orderRecord->user_id,
-                                    'created_at' => $orderRecord->created_at ?? now(),
-                                ],
-                                [
-                                    'nominal' => $orderRecord->total_price,
-                                    'status' => 'success',
-                                ]
-                            );
-
-                            // Increment the project's collected funding
-                            $proyek->increment('dana_terkumpul', $orderRecord->total_price);
-                            $proyek->refresh();
-
-                            // Transition project status: only change to eksekusi when target reached
-                            if ($proyek->dana_terkumpul >= $proyek->target_dana) {
-                                $proyek->update(['status' => 'eksekusi']);
-                            }
-                        }
-                    }
-                });
+                $order->confirmPaid();
             }
 
             if ($callback->isExpire()) {

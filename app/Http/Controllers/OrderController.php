@@ -8,7 +8,6 @@ use App\Services\Midtrans\CheckStatusService;
 use App\Services\Midtrans\CreateSnapTokenService;
 use App\Services\SaldoService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -29,7 +28,7 @@ class OrderController extends Controller
             'donatur_phone'  => 'nullable|string|max:20',
             'total_price'    => 'required|integer|min:10000|max:100000000',
             'pesan'          => 'nullable|string|max:500',
-            'payment_method' => 'nullable|in:midtrans,saldo',
+            'payment_method' => 'nullable|in:midtrans,qris,saldo',
         ], [
             'proyek_id.required'     => 'Proyek tidak valid.',
             'donatur_name.required'  => 'Nama donatur wajib diisi.',
@@ -39,7 +38,10 @@ class OrderController extends Controller
         ]);
 
         $user = auth()->user();
-        $method = $validated['payment_method'] ?? 'midtrans';
+        $method = $validated['payment_method'] ?? null;
+        if ($method === 'midtrans') {
+            $method = 'qris';
+        }
 
         // Validasi saldo sebelum membuat order agar tidak perlu rollback.
         if ($method === 'saldo' && $user->saldo < $validated['total_price']) {
@@ -48,7 +50,27 @@ class OrderController extends Controller
             ]);
         }
 
-        $order = Order::create([
+        $paymentFields = [
+            'payment_method' => null,
+            'amount_saldo' => 0,
+            'amount_qris' => 0,
+        ];
+
+        if ($method === 'qris') {
+            $paymentFields = [
+                'payment_method' => 'qris',
+                'amount_saldo' => 0,
+                'amount_qris' => $validated['total_price'],
+            ];
+        } elseif ($method === 'saldo') {
+            $paymentFields = [
+                'payment_method' => 'saldo',
+                'amount_saldo' => $validated['total_price'],
+                'amount_qris' => 0,
+            ];
+        }
+
+        $order = Order::create(array_merge([
             'user_id'        => auth()->id(),
             'proyek_id'      => $validated['proyek_id'],
             'number'         => 'NT-' . strtoupper(Str::random(10)),
@@ -58,7 +80,7 @@ class OrderController extends Controller
             'donatur_phone'  => $validated['donatur_phone'] ?? null,
             'pesan'          => $validated['pesan'] ?? null,
             'payment_status' => Order::STATUS_PENDING,
-        ]);
+        ], $paymentFields));
 
         return redirect()->route('donasi.show', $order);
     }
@@ -168,38 +190,7 @@ class OrderController extends Controller
         }
 
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($order, $user, $proyek) {
-                // Deduct balance
-                $user->kurangiSaldo($order->total_price, "Donasi saldo untuk proyek: {$proyek->judul}");
-
-                // Update order status
-                $order->update([
-                    'payment_status' => Order::STATUS_SUCCESS,
-                ]);
-
-                // Create success Donasi record
-                \App\Models\Donasi::updateOrCreate(
-                    [
-                        'id_proyek' => $proyek->id,
-                        'id_donatur' => $order->user_id,
-                        'created_at' => $order->created_at ?? now(),
-                    ],
-                    [
-                        'nominal' => $order->total_price,
-                        'status' => 'success',
-                    ]
-                );
-
-                // Increment the project's collected funding
-                $proyek->increment('dana_terkumpul', $order->total_price);
-                $proyek->refresh();
-
-                // Transition status: only change to eksekusi when target reached
-                if ($proyek->dana_terkumpul >= $proyek->target_dana) {
-                    $proyek->update(['status' => 'eksekusi']);
-                }
-                // Otherwise, tetap aktif_funding (no need to update)
-            });
+            $order->confirmPaid();
         } catch (\Exception $e) {
             return back()->withErrors(['payment' => 'Terjadi kesalahan saat memproses pembayaran saldo: ' . $e->getMessage()]);
         }
