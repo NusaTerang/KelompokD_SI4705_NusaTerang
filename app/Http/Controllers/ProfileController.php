@@ -10,14 +10,22 @@ class ProfileController extends Controller
 {
     public function edit()
     {
-        $user = auth()->user();
+        $user = auth()->user() ?? (object) [
+            'id_donatur' => null,
+            'nama' => 'Preview User',
+            'email' => 'preview@example.com',
+            'no_telepon' => '081234567890',
+            'created_at' => now(),
+        ];
 
         $bergabung = $user->created_at->format('d M Y');
 
-        $riwayatDonasi = Donasi::with('proyek')
-            ->where('id_donatur', $user->id_donatur)
-            ->orderByDesc('created_at')
-            ->get();
+        $riwayatDonasi = $user->id_donatur
+            ? Donasi::with('proyek')
+                ->where('id_donatur', $user->id_donatur)
+                ->orderByDesc('created_at')
+                ->get()
+            : collect();
 
         return view('profil.edit', compact(
             'user',

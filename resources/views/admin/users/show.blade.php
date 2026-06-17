@@ -395,104 +395,82 @@
     </div>
 
     {{-- Modal Ubah Role --}}
-<div
-    id="roleModal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50">
+    <div
+        id="roleModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50">
 
-    <div class="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+        <div class="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
 
-        {{-- Header --}}
-        <div class="flex items-center justify-between rounded-t-2xl bg-[#0B3B75] px-6 py-4">
             <form action="{{ route('admin.users.role', $user) }}" method="POST">
-
                 @csrf
                 @method('PUT')
-                <h2 class="text-xl font-bold text-white">
-                    Ubah Role Pengguna
-                </h2>
 
-                <button
-                    type="button"
-                    onclick="closeRoleModal()"
-                    class="text-2xl text-white hover:text-gray-300">
+                {{-- Header --}}
+                <div class="flex items-center justify-between rounded-t-2xl bg-[#0B3B75] px-6 py-4">
+                    <h2 class="text-xl font-bold text-white">
+                        Ubah Role Pengguna
+                    </h2>
 
-                    ×
-
-                </button>
-
-            </div>
+                    <button
+                        type="button"
+                        onclick="closeRoleModal()"
+                        class="text-2xl text-white hover:text-gray-300">
+                        ×
+                    </button>
+                </div>
 
                 <div class="space-y-6 p-6">
 
                     {{-- Nama --}}
                     <div>
-
                         <label class="mb-2 block font-medium text-slate-700">
-
                             Nama Pengguna
-
                         </label>
 
                         <input
                             readonly
                             value="{{ $user->nama }}"
                             class="w-full rounded-lg border bg-slate-100 px-4 py-3">
-
                     </div>
 
                     {{-- Email --}}
                     <div>
-
                         <label class="mb-2 block font-medium text-slate-700">
-
                             Email
-
                         </label>
 
                         <input
                             readonly
                             value="{{ $user->email }}"
                             class="w-full rounded-lg border bg-slate-100 px-4 py-3">
-
                     </div>
 
                     {{-- Role sekarang --}}
                     <div>
-
                         <label class="mb-2 block font-medium text-slate-700">
-
                             Role Saat Ini
-
                         </label>
 
                         <span class="inline-flex rounded-full bg-green-100 px-4 py-2 font-semibold text-green-700">
-
                             {{ strtoupper($user->role) }}
-
                         </span>
-
                     </div>
 
                     {{-- Pilihan --}}
                     <div>
-
                         <h3 class="mb-4 font-semibold text-slate-800">
-
                             Pilih Role Baru
-
                         </h3>
 
                         <div class="space-y-4">
 
                             <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 hover:bg-slate-50">
-
                                 <input type="radio"
                                     name="role"
                                     value="admin"
-                                    {{ $user->role=='admin' ? 'checked' : '' }}>
+                                    {{ $user->role == 'admin' ? 'checked' : '' }}>
 
                                 <div>
-
                                     <p class="font-semibold">
                                         Admin
                                     </p>
@@ -500,20 +478,16 @@
                                     <p class="text-sm text-slate-500">
                                         Memiliki akses penuh ke seluruh sistem.
                                     </p>
-
                                 </div>
-
                             </label>
 
                             <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 hover:bg-slate-50">
-
                                 <input type="radio"
                                     name="role"
                                     value="penyedia"
-                                    {{ $user->role=='penyedia' ? 'checked' : '' }}>
+                                    {{ $user->role == 'penyedia' ? 'checked' : '' }}>
 
                                 <div>
-
                                     <p class="font-semibold">
                                         Penyedia
                                     </p>
@@ -521,20 +495,16 @@
                                     <p class="text-sm text-slate-500">
                                         Mengelola proyek energi dan progres proyek.
                                     </p>
-
                                 </div>
-
                             </label>
 
                             <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 hover:bg-slate-50">
-
                                 <input type="radio"
                                     name="role"
                                     value="donatur"
-                                    {{ $user->role=='donatur' ? 'checked' : '' }}>
+                                    {{ $user->role == 'donatur' ? 'checked' : '' }}>
 
                                 <div>
-
                                     <p class="font-semibold">
                                         Donatur
                                     </p>
@@ -542,100 +512,84 @@
                                     <p class="text-sm text-slate-500">
                                         Melakukan donasi dan memantau perkembangan proyek.
                                     </p>
-
                                 </div>
-
                             </label>
 
                         </div>
-
                     </div>
 
                 </div>
 
                 {{-- Footer --}}
                 <div class="flex justify-end gap-3 border-t px-6 py-4">
-
                     <button
                         type="button"
                         onclick="closeRoleModal()"
                         class="rounded-xl border border-slate-300 px-6 py-2 hover:bg-slate-100">
-
                         Batal
-
                     </button>
 
                     <button
                         type="submit"
                         class="rounded-xl bg-yellow-400 px-6 py-2 font-semibold hover:bg-yellow-500">
-
                         Simpan Perubahan
-
                     </button>
+                </div>
             </form>
 
-            </div>
+        </div>
 
     </div>
 
-</div>
-{{-- Modal Nonaktifkan --}}
-<div
-    id="statusModal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+    {{-- Modal Nonaktifkan --}}
+    <div
+        id="statusModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
 
-    <div class="w-full max-w-md overflow-visible rounded-2xl bg-white shadow-2xl">
+        <div class="w-full max-w-md overflow-visible rounded-2xl bg-white shadow-2xl">
 
-        <div class="flex flex-col p-8 text-center">
+            <div class="flex flex-col p-8 text-center">
 
-            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-3xl">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-3xl">
+                    ⚠️
+                </div>
 
-                ⚠️
+                <h2 class="mt-5 text-2xl font-bold">
+                    Nonaktifkan Akun?
+                </h2>
 
-            </div>
+                <p class="mt-3 text-slate-500">
+                    Pengguna <strong>{{ $user->nama }}</strong> tidak dapat mengakses sistem sampai diaktifkan kembali.
+                </p>
 
-            <h2 class="mt-5 text-2xl font-bold">
+                <form
+                    action="{{ route('admin.users.status', $user) }}"
+                    method="POST"
+                    class="mt-8">
+                    @csrf
+                    @method('PUT')
 
-                Nonaktifkan Akun?
+                    <div class="flex justify-center gap-4">
+                        <button
+                            type="button"
+                            onclick="closeStatusModal()"
+                            class="rounded-xl border border-slate-300 px-6 py-2">
+                            Batal
+                        </button>
 
-            </h2>
-
-            <p class="mt-3 text-slate-500">
-
-                Pengguna <strong>{{ $user->nama }}</strong> tidak dapat mengakses sistem sampai diaktifkan kembali.
-
-            </p>
-
-            <form
-                action="{{ route('admin.users.status', $user) }}"
-                method="POST"
-                class="mt-8">
-
-            @csrf
-            @method('PUT')
-
-            <div class="flex justify-center gap-4">
-
-                <button
-                    type="button"
-                    onclick="closeStatusModal()"
-                    class="rounded-xl border border-slate-300 px-6 py-2">
-                    Batal
-                </button>
-
-                <button
-                    type="submit"
-                    class="rounded-xl bg-red-600 px-6 py-2 text-white">
-                    Ya, Nonaktifkan
-                </button>
+                        <button
+                            type="submit"
+                            class="rounded-xl bg-red-600 px-6 py-2 text-white">
+                            Ya, Nonaktifkan
+                        </button>
+                    </div>
+                </form>
 
             </div>
 
-        </form>
+        </div>
 
     </div>
-
-</div>
 
 @push('scripts')
 <script>
