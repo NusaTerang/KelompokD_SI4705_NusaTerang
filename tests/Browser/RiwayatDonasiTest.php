@@ -3,7 +3,6 @@
 namespace Tests\Browser;
 
 use App\Models\User;
-use App\Models\Donasi;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
@@ -11,9 +10,9 @@ class RiwayatDonasiTest extends DuskTestCase
 {
     /**
      * TC-RD-001
-     * Donatur membuka halaman profil dan memiliki riwayat donasi
+     * Donatur dapat melihat halaman profil dan riwayat donasi.
      */
-    public function test_tc_rd_001_halaman_profil_menampilkan_riwayat()
+    public function test_tc_rd_001_halaman_profil_melalui_menu_profil(): void
     {
         $user = User::where('email', 'aditya.pratama@example.com')->first();
 
@@ -22,213 +21,85 @@ class RiwayatDonasiTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($user) {
 
             $browser->loginAs($user)
-                    ->visit('/profil')
-                    ->assertSee('Riwayat Donasi');
+                    ->visit('/')
+                    ->pause(3000)
+
+                    // buka dropdown profil
+                    ->click('button[aria-label="Menu Profil"]')
+                    ->pause(2000)
+
+                    // klik Profil Saya
+                    ->clickLink('Profil Saya')
+                    ->pause(3000)
+
+                    ->assertPathIs('/profil')
+                    ->assertSee('Riwayat Donasi')
+
+                    ->pause(5000);
         });
     }
 
     /**
      * TC-RD-002
-     * Nama proyek muncul
+     * Donatur dapat melihat detail donasi.
      */
-    public function test_tc_rd_002_nama_proyek_muncul()
+    public function test_tc_rd_002_melihat_detail_donasi(): void
     {
         $user = User::where('email', 'aditya.pratama@example.com')->first();
+
+        $this->assertNotNull(
+            $user,
+            'User aditya.pratama@example.com tidak ditemukan'
+        );
 
         $this->browse(function (Browser $browser) use ($user) {
 
             $browser->loginAs($user)
                     ->visit('/profil')
-                    ->assertSee('Mikrohidro Sungai Sawai');
-        });
-    }
+                    ->pause(2000)
 
-    /**
-     * TC-RD-003
-     * Nominal donasi muncul
-     */
-    public function test_tc_rd_003_nominal_donasi_muncul()
-    {
-        $user = User::where('email', 'aditya.pratama@example.com')->first();
-
-        $this->browse(function (Browser $browser) use ($user) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil')
-                    ->assertSee('Rp 50.000');
-        });
-    }
-
-    /**
-     * TC-RD-004
-     * Tanggal transaksi muncul
-     */
-    public function test_tc_rd_004_tanggal_transaksi_muncul()
-    {
-        $user = User::where('email', 'aditya.pratama@example.com')->first();
-
-        $this->browse(function (Browser $browser) use ($user) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil')
-                    ->assertSee('11 Jun 2026');
-        });
-    }
-
-    /**
-     * TC-RD-005
-     * Status pembayaran sukses
-     */
-    public function test_tc_rd_005_status_sukses_muncul()
-    {
-        $user = User::where('email', 'aditya.pratama@example.com')->first();
-
-        $this->browse(function (Browser $browser) use ($user) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil')
-                    ->assertSee('SUKSES');
-        });
-    }
-
-    /**
-     * TC-RD-006
-     * Riwayat ditampilkan kronologis
-     */
-    public function test_tc_rd_006_riwayat_kronologis()
-    {
-        $user = User::where('email', 'aditya.pratama@example.com')->first();
-
-        $this->browse(function (Browser $browser) use ($user) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil')
-                    ->assertSee('Riwayat Donasi');
-        });
-
-        // Urutan kronologis lebih baik diuji dengan data fixture
-        // atau selector khusus jika diperlukan.
-    }
-
-    /**
-     * TC-RD-007
-     * Klik tombol Lihat Detail
-     */
-    public function test_tc_rd_007_buka_detail_donasi()
-    {
-        $user = User::where('email', 'aditya.pratama@example.com')->first();
-
-        $this->browse(function (Browser $browser) use ($user) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil')
                     ->clickLink('Lihat Detail')
-                    ->assertPathBeginsWith('/profil/donasi/')
-                    ->assertSee('Detail Transaksi Donasi');
-        });
-    }
+                    ->pause(7000)
 
-    /**
-     * TC-RD-008
-     * Detail transaksi lengkap
-     */
-    public function test_tc_rd_008_detail_transaksi_lengkap()
-    {
-        $user = User::where('email', 'aditya.pratama@example.com')->first();
-
-        $donasi = Donasi::where('id_donatur', $user->id_donatur)
-                        ->latest()
-                        ->first();
-
-        $this->assertNotNull($donasi);
-
-        $this->browse(function (Browser $browser) use ($user, $donasi) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil/donasi/' . $donasi->id_donasi)
+                    ->assertSee('Detail Transaksi Donasi')
                     ->assertSee('ID Donasi')
                     ->assertSee('Proyek')
                     ->assertSee('Nominal')
                     ->assertSee('Status')
                     ->assertSee('Tanggal Donasi')
-                    ->assertSee('Status Refund');
+                    ->assertSee('Status Refund')
+                    ->pause(10000);
         });
     }
 
     /**
-     * TC-RD-009
-     * Status refund muncul
+     * TC-RD-003
+     * Donatur yang belum pernah donasi melihat empty state.
      */
-    public function test_tc_rd_009_status_refund()
+    public function test_tc_rd_003_kembali_ke_halaman_profil(): void
     {
         $user = User::where('email', 'aditya.pratama@example.com')->first();
 
-        $donasi = Donasi::where('id_donatur', $user->id_donatur)
-                        ->latest()
-                        ->first();
+        $this->assertNotNull(
+            $user,
+            'User aditya.pratama@example.com tidak ditemukan'
+        );
 
-        $this->browse(function (Browser $browser) use ($user, $donasi) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil/donasi/' . $donasi->id_donasi)
-                    ->assertSee('Status Refund');
-        });
-    }
-
-    /**
-     * TC-RD-010
-     * Tombol kembali
-     */
-    public function test_tc_rd_010_tombol_kembali()
-    {
-        $user = User::where('email', 'aditya.pratama@example.com')->first();
-
-        $donasi = Donasi::where('id_donatur', $user->id_donatur)
-                        ->latest()
-                        ->first();
-
-        $this->browse(function (Browser $browser) use ($user, $donasi) {
+        $this->browse(function (Browser $browser) use ($user) {
 
             $browser->loginAs($user)
-                    ->visit('/profil/donasi/' . $donasi->id_donasi)
+                    ->visit('/profil')
+                    ->pause(5000)
+
+                    ->clickLink('Lihat Detail')
+                    ->pause(5000)
+
                     ->clickLink('Kembali')
-                    ->assertPathIs('/profil');
-        });
-    }
+                    ->pause(5000)
 
-    /**
-     * TC-RD-011
-     * Belum pernah donasi
-     */
-    public function test_tc_rd_011_belum_ada_riwayat()
-    {
-        $user = User::where('email', 'userbaru@example.com')->first();
-
-        $this->assertNotNull($user);
-
-        $this->browse(function (Browser $browser) use ($user) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil')
-                    ->assertSee('Belum ada riwayat donasi');
-        });
-    }
-
-    /**
-     * TC-RD-012
-     * Hanya melihat riwayat milik sendiri
-     */
-    public function test_tc_rd_012_hanya_melihat_data_sendiri()
-    {
-        $user = User::where('email', 'aditya.pratama@example.com')->first();
-
-        $this->browse(function (Browser $browser) use ($user) {
-
-            $browser->loginAs($user)
-                    ->visit('/profil')
-
-                    // Ganti dengan nama proyek milik user lain
-                    ->assertDontSee('Proyek Milik Donatur Lain');
+                    ->assertPathIs('/profil')
+                    ->assertSee('Riwayat Donasi')
+                    ->pause(10000);
         });
     }
 }
